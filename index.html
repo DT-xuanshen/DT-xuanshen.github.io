@@ -4,36 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DT联盟</title>
-<!-- 引入Firebase SDK，实现匿名自动同步，无需用户手动登录 -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script>
-  // Firebase真实配置（已创建真实项目，可正常使用匿名同步）
-  const firebaseConfig = {
-    apiKey: "AIzaSyD8Z7x9X7Z7x7X7Z7x7X7Z7x7X7Z7x7",
-    authDomain: "dt-union-final.firebaseapp.com",
-    databaseURL: "https://dt-union-final-default-rtdb.firebaseio.com",
-    projectId: "dt-union-final",
-    storageBucket: "dt-union-final.appspot.com",
-    messagingSenderId: "1234567890",
-    appId: "1:1234567890:web:abc123def456ghi789"
-  };
-  
-  // 初始化Firebase
-  let auth = null;
-  let db = null;
-  let user = null;
-  let syncReady = false; // 同步是否就绪
-  let danmuTimer = null; // 弹幕定时器，防止重复启动
-  try {
-    firebase.initializeApp(firebaseConfig);
-    auth = firebase.auth();
-    db = firebase.database();
-  } catch(e) {
-    console.warn('Firebase初始化失败，无法同步数据', e);
-  }
-</script>
 <style>
     * {
         margin: 0;
@@ -387,7 +357,7 @@
         padding: 20px;
         margin-bottom: 15px;
         box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-        transition: transform 0.3s ease, box-shadow: 0.3s ease;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     .section:hover {
         transform: translateY(-3px);
@@ -1096,7 +1066,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // ========== 所有本地交互代码，优先执行，不等待Firebase ==========
+        // ========== 所有本地交互代码，优先执行，不等待同步 ==========
         const menuBtn = document.getElementById('menuBtn');
         const sidebar = document.getElementById('sidebar');
         const joinCoopBtn = document.getElementById('joinCoopBtn');
@@ -1326,17 +1296,10 @@
 
         // 占卜次数统计
         let incrementFortuneCount = null;
-        // 先初始化本地降级的函数，占卜功能本地也可以用，只是不能同步
+        // 先初始化本地的函数，同步没就绪的时候，占卜会提示失败
         incrementFortuneCount = function() {
-            // 降级到本地存储
-            let totalCount = parseInt(localStorage.getItem('dt_total_fortune_count')) || 0;
-            totalCount += 1;
-            localStorage.setItem('dt_total_fortune_count', totalCount.toString());
-            fortuneCountEl.textContent = `【总占卜次数：${totalCount}次】`;
+            alert('占卜失败，当前无法连接到同步服务器，请稍后再试！');
         };
-        // 初始化本地的计数显示
-        let localCount = parseInt(localStorage.getItem('dt_total_fortune_count')) || 0;
-        fortuneCountEl.textContent = `【总占卜次数：${localCount}次】`;
 
         // 绑定占卜按钮点击事件
         fortuneBtn.addEventListener('click', async () => {
@@ -1367,6 +1330,7 @@
         const messageContainer = document.getElementById('messageContainer');
         
         let messages = [];
+        let danmuTimer = null; // 弹幕定时器，防止重复启动
         
         // 切换留言板显示/隐藏
         penBtn.addEventListener('click', function() {
@@ -1462,83 +1426,131 @@
             }
         });
 
-        // ========== 后台初始化Firebase同步，不阻塞本地功能 ==========
+        // ========== 后台初始化同步，使用jsonbin公共存储，解决Firebase的问题 ==========
+        const BIN_ID = '660d7f89acf3ae5991d7f3b2';
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+        
         (async function() {
             try {
-                if (!auth || !db) {
-                    throw new Error('Firebase未初始化');
+                // 先拉取初始数据
+                let response = await fetch(API_URL);
+                if (!response.ok) {
+                    throw new Error('拉取数据失败');
+                }
+                let data = await response.json();
+                let record = data.record;
+                
+                // 更新本地数据
+                messages = record.messages || [];
+                fortuneCountEl.textContent = `【总占卜次数：${record.fortune_count || 0}次】`;
+                
+                // 如果留言板是打开的，更新弹幕
+                if (messageBoard.classList.contains('show')) {
+                    startDanmuAnimation();
                 }
                 
-                // 匿名登录，后台执行
-                user = await auth.signInAnonymously();
-                console.log('匿名登录成功，用户:', user.user.uid);
-                syncReady = true; // 标记同步就绪
-
-                // ========== 占卜次数统计功能（实时同步） ==========
-                const FORTUNE_KEY = 'fortune_count';
+                // 标记同步就绪
+                syncReady = true;
                 
-                // 实时监听占卜次数变化，自动更新显示
-                db.ref(FORTUNE_KEY).on('value', (snapshot) => {
-                    const count = snapshot.val() || 0;
-                    fortuneCountEl.textContent = `【总占卜次数：${count}次】`;
-                });
+                // 定时拉取更新，实现准实时同步
+                setInterval(async () => {
+                    try {
+                        let res = await fetch(API_URL);
+                        if (!res.ok) return;
+                        let d = await res.json();
+                        let r = d.record;
+                        
+                        // 检查是否有更新
+                        if (r.fortune_count !== undefined) {
+                            fortuneCountEl.textContent = `【总占卜次数：${r.fortune_count}次】`;
+                        }
+                        if (JSON.stringify(r.messages) !== JSON.stringify(messages)) {
+                            messages = r.messages || [];
+                            if (messageBoard.classList.contains('show')) {
+                                startDanmuAnimation();
+                            }
+                        }
+                    } catch(e) {
+                        console.warn('同步更新失败', e);
+                    }
+                }, 3000); // 每3秒拉取一次，实现准实时同步
                 
-                // 原子递增占卜次数，保证并发安全
+                // 更新占卜次数的函数
                 incrementFortuneCount = async function() {
-                    if (!user) {
-                        // 降级到本地存储
-                        let totalCount = parseInt(localStorage.getItem('dt_total_fortune_count')) || 0;
-                        totalCount += 1;
-                        localStorage.setItem('dt_total_fortune_count', totalCount.toString());
-                        fortuneCountEl.textContent = `【总占卜次数：${totalCount}次】`;
-                        return;
+                    try {
+                        // 先拉取最新数据
+                        let res = await fetch(API_URL);
+                        let d = await res.json();
+                        let r = d.record;
+                        let newCount = (r.fortune_count || 0) + 1;
+                        
+                        // 更新数据
+                        let updateData = {
+                            fortune_count: newCount,
+                            messages: messages
+                        };
+                        
+                        await fetch(API_URL, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Bin-Private': 'false'
+                            },
+                            body: JSON.stringify(updateData)
+                        });
+                        
+                        // 更新本地显示
+                        fortuneCountEl.textContent = `【总占卜次数：${newCount}次】`;
+                    } catch(e) {
+                        console.error('更新占卜次数失败', e);
+                        // 失败的话，本地也不更新，保证数据一致
+                        alert('占卜失败，网络异常，请稍后再试！');
                     }
-                    
-                    // 使用事务原子递增，避免并发错误
-                    await db.ref(FORTUNE_KEY).transaction((currentCount) => {
-                        return (currentCount || 0) + 1;
-                    });
                 };
-
-                // ========== 留言板功能（实时同步） ==========
-                const MESSAGES_KEY = 'messages';
                 
-                // 实时监听留言变化，自动更新
-                db.ref(MESSAGES_KEY).on('value', (snapshot) => {
-                    const newMessages = snapshot.val() || [];
-                    messages = newMessages;
-                    
-                    // 如果留言板是打开的，更新弹幕
-                    if (messageBoard.classList.contains('show')) {
-                        startDanmuAnimation();
-                    }
-                });
-                
-                // 发送留言
+                // 发送留言的函数
                 sendMessage = async function(text) {
-                    if (!syncReady || !user) {
-                        // 同步没就绪，提示失败
+                    if (!syncReady) {
                         alert('留言失败，当前无法连接到同步服务器，请稍后再试！');
                         return;
                     }
                     
                     try {
-                        // 更新云端留言
-                        const newMessages = [...messages, text];
+                        // 先拉取最新数据
+                        let res = await fetch(API_URL);
+                        let d = await res.json();
+                        let r = d.record;
+                        
+                        let newMessages = [...(r.messages || []), text];
                         // 限制最多100条留言
                         if (newMessages.length > 100) newMessages.shift();
-                        await db.ref(MESSAGES_KEY).set(newMessages);
                         
+                        // 更新数据
+                        let updateData = {
+                            fortune_count: r.fortune_count || 0,
+                            messages: newMessages
+                        };
+                        
+                        await fetch(API_URL, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Bin-Private': 'false'
+                            },
+                            body: JSON.stringify(updateData)
+                        });
+                        
+                        // 更新本地
+                        messages = newMessages;
                         createDanmu(text);
                     } catch(e) {
-                        alert('留言失败，网络异常，请稍后再试！');
                         console.error('留言失败', e);
+                        alert('留言失败，网络异常，请稍后再试！');
                     }
                 };
-
-            } catch (e) {
-                console.warn('Firebase同步初始化失败，无法同步数据', e);
-                // 同步失败，保持发送失败的提示
+                
+            } catch(e) {
+                console.warn('同步初始化失败', e);
                 syncReady = false;
             }
         })();
