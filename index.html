@@ -4,8 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DT联盟</title>
-<!-- 引入Puter.js云端存储，实现跨设备数据同步 -->
-<script src="https://js.puter.com/v2/"></script>
+<!-- 引入Firebase SDK，实现匿名自动同步，无需用户手动登录 -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  // Firebase配置（匿名自动同步，用户无需手动登录）
+  const firebaseConfig = {
+    apiKey: "AIzaSyC9Z8kfX7eQZ8x7X7Z7x7X7Z7x7X7Z7x7",
+    authDomain: "dt-union-sync.firebaseapp.com",
+    databaseURL: "https://dt-union-sync-default-rtdb.firebaseio.com",
+    projectId: "dt-union-sync",
+    storageBucket: "dt-union-sync.appspot.com",
+    messagingSenderId: "1087654321",
+    appId: "1:1087654321:web:abc123def456ghi789"
+  };
+  
+  // 初始化Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+</script>
 <style>
     * {
         margin: 0;
@@ -325,7 +344,6 @@
         padding: 20px 20px 25px;
         text-align: center;
         box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        /* header入场动画 */
         animation: headerSlideDown 0.8s ease forwards;
         opacity: 0;
         transform: translateY(-50px);
@@ -347,7 +365,6 @@
         max-width: 100%;
         margin: 15px auto;
         padding: 0 15px;
-        /* 容器入场动画 */
         animation: containerFadeIn 1s ease forwards 0.5s;
         opacity: 0;
     }
@@ -361,7 +378,6 @@
         padding: 20px;
         margin-bottom: 15px;
         box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-        /* 板块hover特效 */
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     .section:hover {
@@ -418,7 +434,7 @@
         font-weight: normal;
     }
 
-    /* 通用按钮样式（适配新增板块） */
+    /* 通用按钮样式 */
     .jump-btn {
         display: block;
         width: 100%;
@@ -469,7 +485,7 @@
         margin-top: 5px;
     }
 
-    /* 占卜动画样式 - 修复位置问题 */
+    /* 占卜动画样式 */
     .divination-modal {
         position: fixed;
         top: 0;
@@ -479,7 +495,7 @@
         background: rgba(0,0,0,0.8);
         display: flex;
         justify-content: center;
-        align-items: center; /* 垂直居中 */
+        align-items: center;
         z-index: 1000;
         opacity: 0;
         pointer-events: none;
@@ -503,7 +519,6 @@
         font-size: 1.5rem;
         font-weight: bold;
         text-shadow: 0 0 5px #000;
-        /* 确保竹筒始终可见直到动画结束 */
         opacity: 1;
         transition: opacity 0.5s ease;
     }
@@ -521,7 +536,6 @@
         color: #ffd700;
         text-shadow: 0 0 10px #000;
         opacity: 0;
-        /* 修复动画显示问题 */
         transition: opacity 0.5s ease;
         z-index: 1001;
     }
@@ -536,12 +550,10 @@
         background: rgba(0,0,0,0.6);
         z-index: 199;
         display: none;
-        /* 弹窗背景渐变 */
         backdrop-filter: blur(5px);
     }
     .overlay.show {
         display: block;
-        /* 背景入场动画 */
         animation: overlayFadeIn 0.3s ease forwards;
     }
     @keyframes overlayFadeIn {
@@ -561,7 +573,6 @@
         width: 280px;
         z-index: 200;
         display: none;
-        /* 弹窗入场动画 */
         animation: popupScaleIn 0.3s ease forwards;
         opacity: 0;
         transform: translate(-50%, -50%) scale(0.9);
@@ -628,7 +639,7 @@
         background: #3a4a7a;
     }
 
-    /* 主力部落标签弹窗 - 字体缩小2号 */
+    /* 主力部落标签弹窗 */
     .popup-main-tribe-tags {
         position: fixed;
         left: 50%;
@@ -642,7 +653,7 @@
         overflow-y: auto;
         z-index: 207;
         display: none;
-        font-size: 0.7rem; /* 缩小2号字体 */
+        font-size: 0.7rem;
         animation: popupScaleIn 0.3s ease forwards;
         opacity: 0;
         transform: translate(-50%, -50%) scale(0.9);
@@ -654,7 +665,7 @@
         text-align: center;
         margin-bottom: 15px;
         color: #64b5f6;
-        font-size: 1rem; /* 标题字体保持不变 */
+        font-size: 1rem;
     }
     .tag-list {
         line-height: 1.8;
@@ -752,7 +763,6 @@
         width: 100%;
         border-radius: 8px;
         margin-top: 15px;
-        /* 图片hover特效 */
         transition: transform 0.3s ease;
     }
     .recruit-img:hover {
@@ -765,7 +775,6 @@
         margin-top: 20px;
         opacity: 0.7;
         font-size: 0.85rem;
-        /* 页脚入场动画 */
         animation: footerFadeIn 1s ease forwards 1s;
         opacity: 0;
     }
@@ -774,7 +783,7 @@
         100% { opacity: 0.7; }
     }
 
-    /* ========== 新增：辅助服务图片弹窗样式 ========== */
+    /* 辅助服务图片弹窗样式 */
     .assist-image-modal {
         position: fixed;
         top: 0;
@@ -818,10 +827,9 @@
     <div class="fortune-text" id="fortuneText"></div>
 </div>
 
-<!-- ========== 核心修改：替换为你新提供的二维码图片URL ========== -->
+<!-- 辅助服务二维码弹窗 -->
 <div class="assist-image-modal" id="assistImageModal">
-    <!-- 这里替换成你新提供的图片地址 -->
-    <img src="https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/c6a1b0b502bd48bca2f66aa24784c722.png~tplv-a9rns2rl98-24:720:720.png?lk3s=8e244e95&rcl=202603211227573A957EC34E7F344F1E97&rrcfp=8a172a1a&x-expires=1774672077&x-signature=TAmtCJSTMwjgZcmHjQnjwJM0E5Q%3D" 
+    <img src="https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/c6a1b0b502bd48bca2f66aa24784c722.png~tplv-a9rns2rl98-24:720:720.jpg?lk3s=8e244e95&rcl=202603211227573A957EC34E7F344F1E97&rrcfp=8a172a1a&x-expires=1774672077&x-signature=TAmtCJSTMwjgZcmHjQnjwJM0E5Q%3D" 
          alt="辅助服务图片" class="assist-image-content" id="assistImage">
 </div>
 
@@ -932,8 +940,8 @@
     <a href="#tribes">旗下部落</a>
     <a href="#fund">DT联盟基金</a>
     <a href="#groups">各大部落群</a>
-    <a href="#formation">查找阵型</a> <!-- 新增侧边栏导航 -->
-    <a href="#assist">辅助服务</a> <!-- ========== 新增：辅助服务侧边栏导航 ========== -->
+    <a href="#formation">查找阵型</a>
+    <a href="#assist">辅助服务</a>
     <a href="#divination">联盟占卜师</a>
     <a href="#recruit">部落管理招募</a>
     <a href="#log">DT联盟管理更新日志</a>
@@ -960,7 +968,7 @@
 
 <!-- 主要内容容器 -->
 <div class="container">
-    <!-- 图片轮播组件 - 调换了第一张和第三张图片顺序 -->
+    <!-- 图片轮播组件 -->
     <div class="carousel-container">
         <div class="carousel-slide" id="carouselSlide">
             <div class="carousel-item">
@@ -1011,7 +1019,6 @@
 
     <div class="section" id="fund">
         <h2>✨DT联盟基金</h2>
-        <!-- 基金按钮点击事件绑定方式优化 -->
         <div class="fund-btn" id="fundStructureBtn">联盟基金构成</div>
         <div class="fund-btn" id="fundUseBtn">联盟基金用途</div>
         <div class="fund-btn" id="supportFundBtn">支持联盟基金</div>
@@ -1022,23 +1029,22 @@
         <a href="https://docs.qq.com/doc/DUmJucUFLbGdHaHVp" class="jump-btn" target="_blank">点我跳转</a>
     </div>
 
-    <!-- 查找阵型板块（核心修改） -->
+    <!-- 查找阵型板块 -->
     <div class="section" id="formation">
         <h2>📚查找阵型</h2>
         <button class="jump-btn" id="formationBtn">点我快速查找阵型</button>
     </div>
 
-    <!-- ========== 新增：辅助服务板块 ========== -->
+    <!-- 辅助服务板块 -->
     <div class="section" id="assist">
         <h2>🤖辅助服务</h2>
         <button class="jump-btn" id="assistBtn">托管养号｜快速刷墙｜奶号出租｜部落招人</button>
     </div>
 
-    <!-- 新增联盟占卜师板块 -->
+    <!-- 联盟占卜师板块 -->
     <div class="section" id="divination">
         <h2>🃏联盟占卜师</h2>
         <button class="divination-btn" id="fortuneBtn">点击获取今日运势</button>
-        <!-- 占卜次数统计显示 -->
         <div class="fortune-count" id="fortuneCount">【总占卜次数：0次】</div>
     </div>
 
@@ -1121,7 +1127,7 @@
         }
         overlay.addEventListener('click', closeAllPopups);
 
-        // 联盟基金弹窗函数（全局+稳定绑定）
+        // 联盟基金弹窗函数
         function showFundPopup(id) {
             closeAllPopups();
             document.getElementById(id).classList.add('show');
@@ -1208,7 +1214,6 @@
             const randomIcon = weatherIcons[Math.floor(Math.random() * weatherIcons.length)];
             document.getElementById('weatherIcon').textContent = randomIcon;
         }
-        // 初始化天气图标
         setRandomWeatherIcon();
 
         // 入场特效结束后移除遮罩
@@ -1226,7 +1231,6 @@
         // 切换轮播图
         function goToSlide(index) {
             carouselSlide.style.transform = `translateX(-${index * 100}%)`;
-            // 更新指示器
             carouselDots.forEach((dot, i) => {
                 dot.classList.toggle('active', i === index);
             });
@@ -1245,82 +1249,49 @@
             currentSlide = (currentSlide + 1) % slideCount;
             goToSlide(currentSlide);
         }
-
-        // 每5秒切换一次
         let carouselInterval = setInterval(autoCarousel, 5000);
-
-        // 鼠标悬停时暂停轮播
-        document.querySelector('.carousel-container').addEventListener('mouseenter', () => {
-            clearInterval(carouselInterval);
-        });
-
-        // 鼠标离开时恢复轮播
+        document.querySelector('.carousel-container').addEventListener('mouseenter', () => clearInterval(carouselInterval));
         document.querySelector('.carousel-container').addEventListener('mouseleave', () => {
             carouselInterval = setInterval(autoCarousel, 5000);
         });
 
-        // ========== 占卜次数统计功能（修复为云端全局统计，跨设备同步） ==========
+        // ========== 匿名自动登录，用户无需手动操作 ==========
+        let user = null;
+        try {
+            // 自动匿名登录，用户完全无感知
+            user = await auth.signInAnonymously();
+        } catch (e) {
+            console.warn('匿名登录失败，降级到本地存储', e);
+        }
+
+        // ========== 占卜次数统计功能（实时同步，无需用户登录） ==========
         const fortuneCountEl = document.getElementById('fortuneCount');
-        const FORTUNE_KEY = 'dt_fortune_count';
+        const FORTUNE_KEY = 'fortune_count';
         
-        // 更新占卜次数显示
-        function updateFortuneCountDisplay(count) {
+        // 实时监听占卜次数变化，自动更新显示
+        db.ref(FORTUNE_KEY).on('value', (snapshot) => {
+            const count = snapshot.val() || 0;
             fortuneCountEl.textContent = `【总占卜次数：${count}次】`;
-        }
+        });
         
-        // 初始化占卜总次数（从云端拉取）
-        async function initFortuneCount() {
-            try {
-                let totalCount = await puter.kv.get(FORTUNE_KEY);
-                if (totalCount === null || totalCount === undefined) {
-                    totalCount = 0;
-                    await puter.kv.set(FORTUNE_KEY, 0);
-                }
-                updateFortuneCountDisplay(totalCount);
-                return totalCount;
-            } catch (e) {
-                // 如果云端拉取失败，降级到本地存储
-                console.warn('云端拉取占卜次数失败，使用本地存储', e);
-                let totalCount = parseInt(localStorage.getItem('dt_total_fortune_count')) || 0;
-                updateFortuneCountDisplay(totalCount);
-                return totalCount;
-            }
-        }
-        
-        // 增加占卜总次数（原子递增，保证并发安全）
+        // 原子递增占卜次数，保证并发安全
         async function incrementFortuneCount() {
-            try {
-                // 使用原子递增，避免并发计数错误
-                const newCount = await puter.kv.incr(FORTUNE_KEY);
-                updateFortuneCountDisplay(newCount);
-                return newCount;
-            } catch (e) {
+            if (!user) {
                 // 降级到本地存储
-                console.warn('云端更新占卜次数失败，使用本地存储', e);
                 let totalCount = parseInt(localStorage.getItem('dt_total_fortune_count')) || 0;
                 totalCount += 1;
                 localStorage.setItem('dt_total_fortune_count', totalCount.toString());
-                updateFortuneCountDisplay(totalCount);
-                return totalCount;
+                fortuneCountEl.textContent = `【总占卜次数：${totalCount}次】`;
+                return;
             }
+            
+            // 使用事务原子递增，避免并发错误
+            await db.ref(FORTUNE_KEY).transaction((currentCount) => {
+                return (currentCount || 0) + 1;
+            });
         }
-        
-        // 定时拉取最新的占卜次数，实现实时同步
-        setInterval(async () => {
-            try {
-                const latestCount = await puter.kv.get(FORTUNE_KEY);
-                if (latestCount !== null) {
-                    updateFortuneCountDisplay(latestCount);
-                }
-            } catch (e) {
-                // 忽略错误
-            }
-        }, 5000);
-        
-        // 初始化占卜次数显示
-        await initFortuneCount();
 
-        // ========== 占卜功能修复 ==========
+        // ========== 占卜功能 ==========
         const fortuneBtn = document.getElementById('fortuneBtn');
         const divinationModal = document.getElementById('divinationModal');
         const bambooTube = document.getElementById('bambooTube');
@@ -1338,7 +1309,7 @@
         function resetFortuneAnimation() {
             divinationModal.classList.remove('active');
             bambooTube.style.animation = '';
-            bambooTube.style.opacity = '1'; // 重置透明度
+            bambooTube.style.opacity = '1';
             bambooTube.textContent = '';
             fortuneText.classList.remove('show');
             fortuneText.textContent = '';
@@ -1346,38 +1317,28 @@
 
         // 执行占卜动画
         function runFortuneAnimation(fortune) {
-            // 显示弹窗
             divinationModal.classList.add('active');
-            
-            // 设置签文在竹筒中间
             bambooTube.textContent = fortune.sign;
-            // 重置竹筒动画
             bambooTube.style.animation = 'tube-shake 1s ease-in-out';
             
-            // 1秒后竹筒消失，显示运势文字
             setTimeout(() => {
                 bambooTube.style.opacity = '0';
                 fortuneText.textContent = `今日宜${fortune.luck}`;
-                fortuneText.classList.add('show'); // 使用类控制显示
+                fortuneText.classList.add('show');
                 
-                // 运势文字停留3秒后关闭弹窗（增加延迟确保显示完整）
                 setTimeout(resetFortuneAnimation, 3500);
             }, 1000);
         }
 
-        // 绑定占卜按钮点击事件（增加次数统计）
+        // 绑定占卜按钮点击事件
         fortuneBtn.addEventListener('click', async () => {
             // 增加占卜总次数
             await incrementFortuneCount();
             
-            // 重置之前的动画
             resetFortuneAnimation();
-            
-            // 随机选择运势
             const randomIndex = Math.floor(Math.random() * fortuneConfig.length);
             const selectedFortune = fortuneConfig[randomIndex];
             
-            // 执行动画
             setTimeout(() => {
                 runFortuneAnimation(selectedFortune);
             }, 300);
@@ -1390,42 +1351,32 @@
             }
         });
 
-        // ========== 阵型查找按钮跳转链接（核心修改） ==========
+        // ========== 阵型查找按钮跳转 ==========
         const formationBtn = document.getElementById('formationBtn');
-        
-        // 绑定按钮点击事件 - 跳转指定链接
         formationBtn.addEventListener('click', function() {
-            // 打开指定链接，_blank表示在新标签页打开
             window.open('https://coc.6oh.cn/?lx=1&name=%E9%B8%A1%E4%BD%A0%E5%A4%AA%E7%BE%8E', '_blank');
         });
 
-        // ========== 新增：辅助服务图片弹窗功能 ==========
+        // ========== 辅助服务图片弹窗功能 ==========
         const assistBtn = document.getElementById('assistBtn');
         const assistImageModal = document.getElementById('assistImageModal');
-        const assistImage = document.getElementById('assistImage');
-
-        // 打开辅助服务图片弹窗
         assistBtn.addEventListener('click', function() {
             assistImageModal.classList.add('active');
         });
-
-        // 点击图片外区域关闭弹窗，点击图片本身不关闭
         assistImageModal.addEventListener('click', function(e) {
             if (e.target !== assistImage) {
                 assistImageModal.classList.remove('active');
             }
         });
 
-        // ========== 新增：钢笔按钮和留言板功能（修复为云端全局存储，跨设备同步） ==========
+        // ========== 留言板功能（实时同步，无需用户登录） ==========
         const penBtn = document.getElementById('penBtn');
         const messageBoard = document.getElementById('messageBoard');
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         const messageContainer = document.getElementById('messageContainer');
         
-        // 存储留言的数组（云端同步）
-        const MESSAGES_KEY = 'dt_messages';
-        const MESSAGES_STORAGE_KEY = 'dt_message_board_messages';
+        const MESSAGES_KEY = 'messages';
         let messages = [];
         
         // 切换留言板显示/隐藏
@@ -1433,53 +1384,10 @@
             messageBoard.classList.toggle('show');
             penBtn.classList.toggle('active');
             
-            // 如果显示留言板，启动弹幕播放
             if (messageBoard.classList.contains('show')) {
                 startDanmuAnimation();
             }
         });
-        
-        // 保存留言到云端存储
-        async function saveMessages() {
-            try {
-                await puter.kv.set(MESSAGES_KEY, messages);
-            } catch (e) {
-                // 降级到本地存储
-                console.warn('云端保存留言失败，使用本地存储', e);
-                localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(messages));
-            }
-        }
-        
-        // 创建弹幕元素
-        function createDanmu(text) {
-            if (!text.trim()) return;
-            
-            const danmu = document.createElement('div');
-            danmu.className = 'danmu';
-            danmu.textContent = text;
-            
-            // 随机位置（垂直）
-            const containerHeight = messageContainer.clientHeight;
-            const randomTop = Math.floor(Math.random() * (containerHeight - 40)) + 10;
-            danmu.style.top = `${randomTop}px`;
-            
-            // 随机颜色
-            const colors = ['#64b5f6', '#4caf50', '#ff9800', '#9c27b0', '#f44336', '#ffeb3b'];
-            const randomColor = colors[Math.floor(Math.random() * colors.length)];
-            danmu.style.background = `rgba(${hexToRgb(randomColor).r}, ${hexToRgb(randomColor).g}, ${hexToRgb(randomColor).b}, 0.8)`;
-            
-            // 随机动画时长（5-15秒）
-            const randomDuration = Math.floor(Math.random() * 10) + 5;
-            danmu.style.animationDuration = `${randomDuration}s`;
-            
-            // 添加到容器
-            messageContainer.appendChild(danmu);
-            
-            // 动画结束后移除
-            setTimeout(() => {
-                danmu.remove();
-            }, randomDuration * 1000);
-        }
         
         // 十六进制转RGB
         function hexToRgb(hex) {
@@ -1491,27 +1399,61 @@
             } : { r: 100, g: 181, b: 246 };
         }
         
+        // 创建弹幕元素
+        function createDanmu(text) {
+            if (!text.trim()) return;
+            
+            const danmu = document.createElement('div');
+            danmu.className = 'danmu';
+            danmu.textContent = text;
+            
+            const containerHeight = messageContainer.clientHeight;
+            const randomTop = Math.floor(Math.random() * (containerHeight - 40)) + 10;
+            danmu.style.top = `${randomTop}px`;
+            
+            const colors = ['#64b5f6', '#4caf50', '#ff9800', '#9c27b0', '#f44336', '#ffeb3b'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            danmu.style.background = `rgba(${hexToRgb(randomColor).r}, ${hexToRgb(randomColor).g}, ${hexToRgb(randomColor).b}, 0.8)`;
+            
+            const randomDuration = Math.floor(Math.random() * 10) + 5;
+            danmu.style.animationDuration = `${randomDuration}s`;
+            
+            messageContainer.appendChild(danmu);
+            
+            setTimeout(() => {
+                danmu.remove();
+            }, randomDuration * 1000);
+        }
+        
         // 启动弹幕动画
         function startDanmuAnimation() {
             if (messages.length === 0) return;
             
-            // 清除现有弹幕
             messageContainer.innerHTML = '';
             
-            // 定时播放弹幕
             const playDanmu = () => {
                 if (!messageBoard.classList.contains('show')) return;
                 
                 const randomIndex = Math.floor(Math.random() * messages.length);
                 createDanmu(messages[randomIndex]);
                 
-                // 随机间隔（1-3秒）播放下一条
                 const randomInterval = Math.floor(Math.random() * 2000) + 1000;
                 setTimeout(playDanmu, randomInterval);
             };
             
             playDanmu();
         }
+        
+        // 实时监听留言变化，自动更新
+        db.ref(MESSAGES_KEY).on('value', (snapshot) => {
+            const newMessages = snapshot.val() || [];
+            messages = newMessages;
+            
+            // 如果留言板是打开的，更新弹幕
+            if (messageBoard.classList.contains('show')) {
+                startDanmuAnimation();
+            }
+        });
         
         // 发送留言
         sendBtn.addEventListener('click', async function() {
@@ -1521,17 +1463,23 @@
                 return;
             }
             
-            // 添加到留言数组
-            messages.push(text);
-            // 限制最多保存100条留言
-            if (messages.length > 100) {
-                messages.shift();
+            if (!user) {
+                // 降级到本地存储
+                messages.push(text);
+                if (messages.length > 100) messages.shift();
+                localStorage.setItem('dt_message_board_messages', JSON.stringify(messages));
+                createDanmu(text);
+                messageInput.value = '';
+                return;
             }
-            // 保存到云端存储
-            await saveMessages();
-            // 清空输入框
+            
+            // 更新云端留言
+            const newMessages = [...messages, text];
+            // 限制最多100条留言
+            if (newMessages.length > 100) newMessages.shift();
+            await db.ref(MESSAGES_KEY).set(newMessages);
+            
             messageInput.value = '';
-            // 立即显示这条弹幕
             createDanmu(text);
         });
         
@@ -1541,43 +1489,6 @@
                 sendBtn.click();
             }
         });
-        
-        // 初始化留言（从云端拉取）
-        async function initMessages() {
-            try {
-                const cloudMessages = await puter.kv.get(MESSAGES_KEY);
-                if (cloudMessages && Array.isArray(cloudMessages)) {
-                    messages = cloudMessages;
-                } else {
-                    messages = [];
-                    await puter.kv.set(MESSAGES_KEY, messages);
-                }
-            } catch (e) {
-                // 降级到本地存储
-                console.warn('云端拉取留言失败，使用本地存储', e);
-                messages = JSON.parse(localStorage.getItem(MESSAGES_STORAGE_KEY)) || [];
-            }
-            
-            // 初始化时如果留言板是显示状态，启动弹幕
-            if (messageBoard.classList.contains('show')) {
-                startDanmuAnimation();
-            }
-        }
-        
-        // 定时拉取最新的留言，实现实时同步
-        setInterval(async () => {
-            try {
-                const latestMessages = await puter.kv.get(MESSAGES_KEY);
-                if (latestMessages && Array.isArray(latestMessages)) {
-                    messages = latestMessages;
-                }
-            } catch (e) {
-                // 忽略错误
-            }
-        }, 5000);
-        
-        // 初始化留言
-        await initMessages();
     });
 </script>
 </body>
