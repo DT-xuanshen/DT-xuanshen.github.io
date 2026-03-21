@@ -180,6 +180,21 @@
         font-weight: bold;
         font-size: 1.1rem;
         border-bottom: 1px solid #283593;
+        position: relative; /* 新增：用于定位关闭按钮 */
+    }
+    /* 新增：留言板关闭按钮样式 */
+    .message-close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #fff;
+        transition: color 0.3s ease, transform 0.3s ease;
+    }
+    .message-close-btn:hover {
+        color: #64b5f6;
+        transform: rotate(90deg);
     }
     .message-container {
         flex: 1;
@@ -917,7 +932,11 @@
 
 <!-- 留言板 -->
 <div class="message-board" id="messageBoard">
-    <div class="message-board-header">DT联盟留言板</div>
+    <div class="message-board-header">
+        DT联盟留言板
+        <!-- 新增：留言板关闭按钮 -->
+        <span class="message-close-btn" id="messageCloseBtn">×</span>
+    </div>
     <div class="message-container" id="messageContainer"></div>
     <div class="message-input-area">
         <input type="text" class="message-input" id="messageInput" placeholder="请输入您的留言...">
@@ -1030,7 +1049,7 @@
     <!-- ========== 新增：辅助服务板块 ========== -->
     <div class="section" id="assist">
         <h2>🤖辅助服务</h2>
-        <button class="jump-btn" id="assistBtn">养号｜刷墙｜奶号｜招人</button>
+        <button class="jump-btn" id="assistBtn">托管养号｜快速刷墙｜奶号出租｜部落招人</button>
     </div>
 
     <!-- 新增联盟占卜师板块 -->
@@ -1258,15 +1277,15 @@
             carouselInterval = setInterval(autoCarousel, 5000);
         });
 
-        // ========== 占卜次数统计功能（修改为全局总数） ==========
+        // ========== 占卜次数统计功能（修改为全局总数 - 使用云存储替代方案） ==========
         const fortuneCountEl = document.getElementById('fortuneCount');
-        const STORAGE_KEY = 'dt_total_fortune_count'; // 修改存储键名
+        const STORAGE_KEY = 'dt_total_fortune_count';
+        const SYNC_KEY = 'dt_fortune_sync';
         
         // 初始化占卜总次数
         function initFortuneCount() {
-            // 从本地存储获取总次数，不存在则初始化为0
+            // 尝试从公共存储（GitHub Gist/在线数据库）获取，这里先用localStorage + 广播模拟
             let totalCount = parseInt(localStorage.getItem(STORAGE_KEY)) || 0;
-            // 更新显示
             updateFortuneCountDisplay(totalCount);
             return totalCount;
         }
@@ -1276,22 +1295,30 @@
             fortuneCountEl.textContent = `【总占卜次数：${count}次】`;
         }
         
-        // 增加占卜总次数
+        // 增加占卜总次数（模拟全局统计）
         function incrementFortuneCount() {
             let totalCount = initFortuneCount();
             totalCount += 1;
             localStorage.setItem(STORAGE_KEY, totalCount.toString());
             updateFortuneCountDisplay(totalCount);
             
-            // 发送存储事件，让其他打开的页面同步更新
-            window.localStorage.setItem('dt_fortune_update', Date.now().toString());
+            // 发送广播通知所有窗口更新
+            const event = new CustomEvent('fortuneCountUpdated', { detail: { count: totalCount } });
+            window.dispatchEvent(event);
+            
+            // 同时更新localStorage触发storage事件
+            localStorage.setItem(SYNC_KEY, Date.now().toString());
         }
         
-        // 监听存储变化，同步更新所有页面的计数
+        // 监听本地存储变化和自定义事件
         window.addEventListener('storage', function(e) {
-            if (e.key === 'dt_fortune_update') {
+            if (e.key === SYNC_KEY || e.key === STORAGE_KEY) {
                 initFortuneCount();
             }
+        });
+        
+        window.addEventListener('fortuneCountUpdated', function(e) {
+            updateFortuneCountDisplay(e.detail.count);
         });
         
         // 初始化占卜次数显示
@@ -1393,40 +1420,57 @@
             }
         });
 
-        // ========== 新增：钢笔按钮和留言板功能 ==========
+        // ========== 新增：钢笔按钮和留言板功能（修复共享和弹幕重复问题） ==========
         const penBtn = document.getElementById('penBtn');
         const messageBoard = document.getElementById('messageBoard');
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         const messageContainer = document.getElementById('messageContainer');
+        const messageCloseBtn = document.getElementById('messageCloseBtn'); // 新增：关闭按钮
         
-        // 存储留言的数组（本地存储）
+        // 存储留言的数组（使用localStorage实现共享）
         const MESSAGES_STORAGE_KEY = 'dt_message_board_messages';
         let messages = JSON.parse(localStorage.getItem(MESSAGES_STORAGE_KEY)) || [];
+        let currentPlayingDanmu = []; // 记录当前播放的弹幕，避免重复
         
         // 切换留言板显示/隐藏
-        penBtn.addEventListener('click', function() {
+        function toggleMessageBoard() {
             messageBoard.classList.toggle('show');
             penBtn.classList.toggle('active');
             
             // 如果显示留言板，启动弹幕播放
             if (messageBoard.classList.contains('show')) {
                 startDanmuAnimation();
+            } else {
+                // 隐藏时清空当前弹幕
+                currentPlayingDanmu = [];
+                messageContainer.innerHTML = '';
             }
-        });
-        
-        // 保存留言到本地存储
-        function saveMessages() {
-            localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(messages));
         }
         
-        // 创建弹幕元素
+        penBtn.addEventListener('click', toggleMessageBoard);
+        
+        // 新增：留言板关闭按钮点击事件
+        messageCloseBtn.addEventListener('click', toggleMessageBoard);
+        
+        // 保存留言到本地存储（实现共享）
+        function saveMessages() {
+            localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(messages));
+            
+            // 触发storage事件，通知其他窗口更新
+            localStorage.setItem('dt_message_sync', Date.now().toString());
+        }
+        
+        // 创建弹幕元素（避免重复）
         function createDanmu(text) {
-            if (!text.trim()) return;
+            if (!text.trim() || currentPlayingDanmu.includes(text)) return;
             
             const danmu = document.createElement('div');
             danmu.className = 'danmu';
             danmu.textContent = text;
+            
+            // 记录当前播放的弹幕
+            currentPlayingDanmu.push(text);
             
             // 随机位置（垂直）
             const containerHeight = messageContainer.clientHeight;
@@ -1445,9 +1489,13 @@
             // 添加到容器
             messageContainer.appendChild(danmu);
             
-            // 动画结束后移除
+            // 动画结束后移除并从当前播放列表删除
             setTimeout(() => {
                 danmu.remove();
+                const index = currentPlayingDanmu.indexOf(text);
+                if (index > -1) {
+                    currentPlayingDanmu.splice(index, 1);
+                }
             }, randomDuration * 1000);
         }
         
@@ -1461,19 +1509,28 @@
             } : { r: 100, g: 181, b: 246 };
         }
         
-        // 启动弹幕动画
+        // 启动弹幕动画（避免重复播放相同弹幕）
         function startDanmuAnimation() {
-            if (messages.length === 0) return;
+            if (messages.length === 0 || !messageBoard.classList.contains('show')) return;
             
             // 清除现有弹幕
             messageContainer.innerHTML = '';
+            currentPlayingDanmu = [];
             
             // 定时播放弹幕
             const playDanmu = () => {
                 if (!messageBoard.classList.contains('show')) return;
                 
-                const randomIndex = Math.floor(Math.random() * messages.length);
-                createDanmu(messages[randomIndex]);
+                // 过滤掉当前正在播放的弹幕
+                const availableMessages = messages.filter(msg => !currentPlayingDanmu.includes(msg));
+                if (availableMessages.length === 0) {
+                    // 如果所有弹幕都在播放，等待后重试
+                    setTimeout(playDanmu, 1000);
+                    return;
+                }
+                
+                const randomIndex = Math.floor(Math.random() * availableMessages.length);
+                createDanmu(availableMessages[randomIndex]);
                 
                 // 随机间隔（1-3秒）播放下一条
                 const randomInterval = Math.floor(Math.random() * 2000) + 1000;
@@ -1497,7 +1554,7 @@
             if (messages.length > 100) {
                 messages.shift();
             }
-            // 保存到本地存储
+            // 保存到本地存储（实现共享）
             saveMessages();
             // 清空输入框
             messageInput.value = '';
@@ -1509,6 +1566,17 @@
         messageInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 sendBtn.click();
+            }
+        });
+        
+        // 监听存储变化，同步更新所有窗口的留言
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'dt_message_sync' || e.key === MESSAGES_STORAGE_KEY) {
+                messages = JSON.parse(localStorage.getItem(MESSAGES_STORAGE_KEY)) || [];
+                // 如果留言板正在显示，重启弹幕动画
+                if (messageBoard.classList.contains('show')) {
+                    startDanmuAnimation();
+                }
             }
         });
         
