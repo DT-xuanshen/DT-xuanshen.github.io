@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DT联盟</title>
+<!-- 引入微信JS-SDK（核心依赖） -->
+<script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
 <style>
     * {
         margin: 0;
@@ -771,6 +773,7 @@
     <a href="#tribes">旗下部落</a>
     <a href="#fund">DT联盟基金</a>
     <a href="#groups">各大部落群</a>
+    <a href="#formation">查找阵型</a> <!-- 新增侧边栏导航 -->
     <a href="#divination">联盟占卜师</a>
     <a href="#recruit">部落管理招募</a>
     <a href="#log">DT联盟管理更新日志</a>
@@ -857,6 +860,12 @@
     <div class="section" id="groups">
         <h2>✨各大部落群</h2>
         <a href="https://docs.qq.com/doc/DUmJucUFLbGdHaHVp" class="jump-btn" target="_blank">点我跳转</a>
+    </div>
+
+    <!-- 新增查找阵型板块（核心修改） -->
+    <div class="section" id="formation">
+        <h2>📚查找阵型</h2>
+        <button class="jump-btn" id="formationBtn">点我快速查找阵型</button>
     </div>
 
     <!-- 新增联盟占卜师板块 -->
@@ -1201,6 +1210,38 @@
                 resetFortuneAnimation();
             }
         });
+
+        // ========== 微信小程序跳转功能（全新配置） ==========
+        const formationBtn = document.getElementById('formationBtn');
+        
+        // 检测是否在微信环境
+        function isWeChatEnv() {
+            return /MicroMessenger/i.test(navigator.userAgent);
+        }
+
+        // 小程序跳转核心函数
+        function jumpToMiniProgram() {
+            if (isWeChatEnv()) {
+                // 微信环境下跳转小程序
+                wx.miniProgram.navigateTo({
+                    appId: 'wxb01eb2dd539123d0', // 你的小程序APPID
+                    path: 'pages/index/index',   // 小程序跳转路径
+                    success: function(res) {
+                        console.log('跳转小程序成功', res);
+                    },
+                    fail: function(err) {
+                        console.error('跳转小程序失败', err);
+                        alert('跳转失败，请手动打开小程序！\n小程序APPID：wxb01eb2dd539123d0');
+                    }
+                });
+            } else {
+                // 非微信环境提示
+                alert('请在微信中打开此页面，点击按钮即可跳转至阵型查找小程序！\n小程序APPID：wxb01eb2dd539123d0');
+            }
+        }
+
+        // 绑定阵型查找按钮点击事件
+        formationBtn.addEventListener('click', jumpToMiniProgram);
     });
 </script>
 </body>
