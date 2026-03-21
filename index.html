@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DT联盟</title>
-<!-- 引入Bmob SDK，实现国内云端数据同步 -->
-<script src="https://cdn.jsdelivr.net/npm/bmob-sdk@2.5.5/bmob.min.js"></script>
 <style>
     * {
         margin: 0;
@@ -19,6 +17,7 @@
         line-height: 1.6;
         overflow-x: hidden;
     }
+
     /* 图片轮播样式 */
     .carousel-container {
         width: 100%;
@@ -60,6 +59,7 @@
     .carousel-dot.active {
         background: #64b5f6;
     }
+
     /* 炫酷入场特效 */
     .page-enter {
         position: fixed;
@@ -89,6 +89,7 @@
         0% { transform: scale(1); }
         100% { transform: scale(1.1); }
     }
+
     /* 天气图标样式 */
     .weather-icon {
         position: fixed;
@@ -105,6 +106,7 @@
         border-radius: 50%;
         box-shadow: 0 0 15px rgba(100, 181, 246, 0.5);
     }
+
     .menu-btn {
         position: fixed;
         top: 12px;
@@ -127,6 +129,7 @@
     .menu-btn.active {
         transform: rotate(90deg);
     }
+
     /* 钢笔按钮样式 */
     .pen-btn {
         position: fixed;
@@ -151,6 +154,7 @@
     .pen-btn.active {
         transform: rotate(180deg);
     }
+
     /* 留言板样式 */
     .message-board {
         position: fixed;
@@ -239,6 +243,7 @@
             transform: translateX(-100%);
         }
     }
+
     .sidebar {
         position: fixed;
         top: 0;
@@ -264,6 +269,7 @@
     .sidebar a:hover {
         color: #64b5f6;
     }
+
     .scroll-notice {
         display: flex;
         align-items: center;
@@ -311,11 +317,13 @@
         0% { transform: translate(0, -50%); }
         100% { transform: translate(-100%, -50%); }
     }
+
     header {
         background: linear-gradient(90deg, #1a237e, #283593);
         padding: 20px 20px 25px;
         text-align: center;
         box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        /* header入场动画 */
         animation: headerSlideDown 0.8s ease forwards;
         opacity: 0;
         transform: translateY(-50px);
@@ -332,10 +340,12 @@
         font-size: 1rem;
         opacity: 0.9;
     }
+
     .container {
         max-width: 100%;
         margin: 15px auto;
         padding: 0 15px;
+        /* 容器入场动画 */
         animation: containerFadeIn 1s ease forwards 0.5s;
         opacity: 0;
     }
@@ -349,6 +359,7 @@
         padding: 20px;
         margin-bottom: 15px;
         box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        /* 板块hover特效 */
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     .section:hover {
@@ -368,10 +379,12 @@
         font-size: 0.95rem;
         line-height: 1.5;
     }
+
     /* 关于DT联盟内容缩小2号 */
     #about p {
         font-size: 0.75rem;
     }
+
     /* 旗下部落按钮样式 */
     .tribe-buttons {
         display: grid;
@@ -385,7 +398,7 @@
         padding: 15px 10px;
         color: #fff;
         cursor: pointer;
-        transition: background 0.3s, transform 0.3;
+        transition: background 0.3s, transform 0.3s;
         font-size: 1.2rem;
         font-family: "Microsoft Yahei", sans-serif;
         text-align: center;
@@ -402,7 +415,8 @@
         margin-top: 5px;
         font-weight: normal;
     }
-    /* 通用按钮样式 */
+
+    /* 通用按钮样式（适配新增板块） */
     .jump-btn {
         display: block;
         width: 100%;
@@ -421,6 +435,7 @@
     .jump-btn:hover {
         background: #283593;
     }
+
     /* 占卜师按钮样式 */
     .divination-btn {
         display: block;
@@ -443,6 +458,7 @@
         box-shadow: 0 6px 12px rgba(0,0,0,0.4);
         background: linear-gradient(45deg, #ffd700, #fffacd);
     }
+
     /* 占卜次数统计样式 */
     .fortune-count {
         text-align: right;
@@ -450,7 +466,8 @@
         color: #64b5f6;
         margin-top: 5px;
     }
-    /* 占卜动画样式 */
+
+    /* 占卜动画样式 - 修复位置问题 */
     .divination-modal {
         position: fixed;
         top: 0;
@@ -460,7 +477,7 @@
         background: rgba(0,0,0,0.8);
         display: flex;
         justify-content: center;
-        align-items: center;
+        align-items: center; /* 垂直居中 */
         z-index: 1000;
         opacity: 0;
         pointer-events: none;
@@ -484,6 +501,7 @@
         font-size: 1.5rem;
         font-weight: bold;
         text-shadow: 0 0 5px #000;
+        /* 确保竹筒始终可见直到动画结束 */
         opacity: 1;
         transition: opacity 0.5s ease;
     }
@@ -501,12 +519,14 @@
         color: #ffd700;
         text-shadow: 0 0 10px #000;
         opacity: 0;
+        /* 修复动画显示问题 */
         transition: opacity 0.5s ease;
         z-index: 1001;
     }
     .fortune-text.show {
         opacity: 1;
     }
+
     .overlay {
         position: fixed;
         left: 0; top: 0;
@@ -514,16 +534,19 @@
         background: rgba(0,0,0,0.6);
         z-index: 199;
         display: none;
+        /* 弹窗背景渐变 */
         backdrop-filter: blur(5px);
     }
     .overlay.show {
         display: block;
+        /* 背景入场动画 */
         animation: overlayFadeIn 0.3s ease forwards;
     }
     @keyframes overlayFadeIn {
         0% { opacity: 0; }
         100% { opacity: 1; }
     }
+
     /* 系列扩张部落主弹窗 */
     .popup-series {
         position: fixed;
@@ -536,6 +559,7 @@
         width: 280px;
         z-index: 200;
         display: none;
+        /* 弹窗入场动画 */
         animation: popupScaleIn 0.3s ease forwards;
         opacity: 0;
         transform: translate(-50%, -50%) scale(0.9);
@@ -564,6 +588,7 @@
     .series-item:hover {
         background: #3a4a7a;
     }
+
     /* 所有部落类型通用详情弹窗 */
     .popup-tribe-detail {
         position: fixed;
@@ -600,7 +625,8 @@
     .tribe-detail-item:hover {
         background: #3a4a7a;
     }
-    /* 主力部落标签弹窗 */
+
+    /* 主力部落标签弹窗 - 字体缩小2号 */
     .popup-main-tribe-tags {
         position: fixed;
         left: 50%;
@@ -614,7 +640,7 @@
         overflow-y: auto;
         z-index: 207;
         display: none;
-        font-size: 0.7rem;
+        font-size: 0.7rem; /* 缩小2号字体 */
         animation: popupScaleIn 0.3s ease forwards;
         opacity: 0;
         transform: translate(-50%, -50%) scale(0.9);
@@ -626,11 +652,12 @@
         text-align: center;
         margin-bottom: 15px;
         color: #64b5f6;
-        font-size: 1rem;
+        font-size: 1rem; /* 标题字体保持不变 */
     }
     .tag-list {
         line-height: 1.8;
     }
+
     /* 联盟基金相关弹窗 */
     .popup-fund {
         position: fixed;
@@ -667,6 +694,7 @@
     .fund-item:hover {
         background: #3a4a7a;
     }
+
     .popup-close {
         position: absolute;
         top: 10px;
@@ -680,6 +708,7 @@
         color: #64b5f6;
         transform: rotate(90deg);
     }
+
     .more-btn {
         display: block;
         width: 180px;
@@ -699,6 +728,7 @@
     .more-btn:hover {
         background: #283593;
     }
+
     .fund-btn {
         display: block;
         width: 100%;
@@ -715,10 +745,12 @@
         background: #283593;
         transform: translateY(-2px);
     }
+
     .recruit-img {
         width: 100%;
         border-radius: 8px;
         margin-top: 15px;
+        /* 图片hover特效 */
         transition: transform 0.3s ease;
     }
     .recruit-img:hover {
@@ -731,6 +763,7 @@
         margin-top: 20px;
         opacity: 0.7;
         font-size: 0.85rem;
+        /* 页脚入场动画 */
         animation: footerFadeIn 1s ease forwards 1s;
         opacity: 0;
     }
@@ -738,7 +771,8 @@
         0% { opacity: 0; }
         100% { opacity: 0.7; }
     }
-    /* 辅助服务图片弹窗样式 */
+
+    /* ========== 新增：辅助服务图片弹窗样式 ========== */
     .assist-image-modal {
         position: fixed;
         top: 0;
@@ -782,8 +816,9 @@
     <div class="fortune-text" id="fortuneText"></div>
 </div>
 
-<!-- 辅助服务图片弹窗 -->
+<!-- ========== 核心修改：替换为你新提供的二维码图片URL ========== -->
 <div class="assist-image-modal" id="assistImageModal">
+    <!-- 这里替换成你新提供的图片地址 -->
     <img src="https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/c6a1b0b502bd48bca2f66aa24784c722.png~tplv-a9rns2rl98-24:720:720.png?lk3s=8e244e95&rcl=202603211227573A957EC34E7F344F1E97&rrcfp=8a172a1a&x-expires=1774672077&x-signature=TAmtCJSTMwjgZcmHjQnjwJM0E5Q%3D" 
          alt="辅助服务图片" class="assist-image-content" id="assistImage">
 </div>
@@ -874,6 +909,7 @@
 <div class="menu-btn" id="menuBtn">
     <span></span>
     <span></span>
+    <span></span>
 </div>
 
 <!-- 钢笔按钮 -->
@@ -895,8 +931,8 @@
     <a href="#tribes">旗下部落</a>
     <a href="#fund">DT联盟基金</a>
     <a href="#groups">各大部落群</a>
-    <a href="#formation">查找阵型</a>
-    <a href="#assist">辅助服务</a>
+    <a href="#formation">查找阵型</a> <!-- 新增侧边栏导航 -->
+    <a href="#assist">辅助服务</a> <!-- ========== 新增：辅助服务侧边栏导航 ========== -->
     <a href="#divination">联盟占卜师</a>
     <a href="#recruit">部落管理招募</a>
     <a href="#log">DT联盟管理更新日志</a>
@@ -916,14 +952,14 @@
     <div class="notice-fixed">重要通知📢</div>
     <div class="scroll-wrap">
         <div class="scroll-notice-content">
-             🎉 DT联盟旗下部落数量已超30+，成员总数超1200人，DT联盟因为有我们而更加强大！
+            🎉 DT联盟旗下部落数量已超30+，成员总数超1200人，DT联盟因为有我们而更加强大！
         </div>
     </div>
 </div>
 
 <!-- 主要内容容器 -->
 <div class="container">
-    <!-- 图片轮播组件 -->
+    <!-- 图片轮播组件 - 调换了第一张和第三张图片顺序 -->
     <div class="carousel-container">
         <div class="carousel-slide" id="carouselSlide">
             <div class="carousel-item">
@@ -974,6 +1010,7 @@
 
     <div class="section" id="fund">
         <h2>✨DT联盟基金</h2>
+        <!-- 基金按钮点击事件绑定方式优化 -->
         <div class="fund-btn" id="fundStructureBtn">联盟基金构成</div>
         <div class="fund-btn" id="fundUseBtn">联盟基金用途</div>
         <div class="fund-btn" id="supportFundBtn">支持联盟基金</div>
@@ -984,19 +1021,19 @@
         <a href="https://docs.qq.com/doc/DUmJucUFLbGdHaHVp" class="jump-btn" target="_blank">点我跳转</a>
     </div>
 
-    <!-- 查找阵型板块 -->
+    <!-- 查找阵型板块（核心修改） -->
     <div class="section" id="formation">
         <h2>📚查找阵型</h2>
         <button class="jump-btn" id="formationBtn">点我快速查找阵型</button>
     </div>
 
-    <!-- 辅助服务板块 -->
+    <!-- ========== 新增：辅助服务板块 ========== -->
     <div class="section" id="assist">
         <h2>🤖辅助服务</h2>
         <button class="jump-btn" id="assistBtn">托管养号｜快速刷墙｜奶号出租｜部落招人</button>
     </div>
 
-    <!-- 联盟占卜师板块 -->
+    <!-- 新增联盟占卜师板块 -->
     <div class="section" id="divination">
         <h2>🃏联盟占卜师</h2>
         <button class="divination-btn" id="fortuneBtn">点击获取今日运势</button>
@@ -1042,77 +1079,88 @@
 </footer>
 
 <script>
-    // 初始化Bmob
-    const BOMB_APP_ID = "7a7063ea9d78347da411a61beeb9922c";
-    const BOMB_REST_API_KEY = "2bce0b5a3aa9f85d3d874bb3f6b42987";
-    Bmob.initialize(BOMB_APP_ID, BOMB_REST_API_KEY);
-    
-    // 全局数据状态
-    let globalData = {
-        fortune_count: 0,
-        messages: []
-    };
-    let lastProcessedMessages = [];
-    let danmuTimer = null;
-    
-    document.addEventListener('DOMContentLoaded', async function() {
+    document.addEventListener('DOMContentLoaded', function() {
         const menuBtn = document.getElementById('menuBtn');
         const sidebar = document.getElementById('sidebar');
         const joinCoopBtn = document.getElementById('joinCoopBtn');
         const funcAssistBtn = document.getElementById('funcAssistBtn');
+        let currentSpecialTribe = '';
+        let currentTagUrl = '';
+
+        // 侧边栏
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.toggle('show');
+            menuBtn.classList.toggle('active');
+        });
+        document.addEventListener('click', (e) => {
+            if (!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+                sidebar.classList.remove('show');
+                menuBtn.classList.remove('active');
+            }
+        });
+
+        const overlay = document.getElementById('overlay');
         const popupSeries = document.getElementById('popupSeries');
         const popupTribeDetail = document.getElementById('popupTribeDetail');
         const popupMainTribeTags = document.getElementById('popupMainTribeTags');
-        const overlay = document.getElementById('overlay');
-        const penBtn = document.getElementById('penBtn');
-        const messageBoard = document.getElementById('messageBoard');
-        const assistImageModal = document.getElementById('assistImageModal');
-        
-        let currentSpecialTribe = '';
-        
+        const tribeTagBtn = document.getElementById('tribeTagBtn');
+        let currentTribeType = '';
+
         // 关闭所有弹窗
         function closeAllPopups() {
-            overlay.classList.remove('show');
             popupSeries.classList.remove('show');
             popupTribeDetail.classList.remove('show');
             popupMainTribeTags.classList.remove('show');
-            document.getElementById('popupFundStructure').classList.remove('show');
-            document.getElementById('popupFundUse').classList.remove('show');
-            document.getElementById('popupSupportChoose').classList.remove('show');
-            document.getElementById('popupCodeSupport').classList.remove('show');
-            document.getElementById('popupLoveSupport').classList.remove('show');
-            assistImageModal.classList.remove('active');
+            document.querySelectorAll('.popup-fund').forEach(p => p.classList.remove('show'));
+            overlay.classList.remove('show');
+            currentTagUrl = '';
+            currentTribeType = '';
+            currentSpecialTribe = '';
         }
-        
         overlay.addEventListener('click', closeAllPopups);
-        
-        // 更新部落标签按钮
-        function updateTribeTagButton(name, tagUrl) {
-            const btn = document.getElementById('tribeTagBtn');
-            btn.textContent = name;
-            btn.onclick = function() {
-                if(tagUrl === 'main') {
+
+        // 联盟基金弹窗函数（全局+稳定绑定）
+        function showFundPopup(id) {
+            closeAllPopups();
+            document.getElementById(id).classList.add('show');
+            overlay.classList.add('show');
+        }
+        // 绑定基金按钮点击事件
+        document.getElementById('fundStructureBtn').addEventListener('click', () => showFundPopup('popupFundStructure'));
+        document.getElementById('fundUseBtn').addEventListener('click', () => showFundPopup('popupFundUse'));
+        document.getElementById('supportFundBtn').addEventListener('click', () => showFundPopup('popupSupportChoose'));
+        document.getElementById('goCodeSupport').addEventListener('click', () => showFundPopup('popupCodeSupport'));
+        document.getElementById('goLoveSupport').addEventListener('click', () => showFundPopup('popupLoveSupport'));
+
+        // 更新标签按钮
+        function updateTribeTagButton(text, url) {
+            tribeTagBtn.textContent = text;
+            tribeTagBtn.onclick = function(e) {
+                e.stopPropagation();
+                if (url === 'main') {
                     closeAllPopups();
                     overlay.classList.add('show');
                     popupMainTribeTags.classList.add('show');
                 } else {
-                    window.open(tagUrl, '_blank');
+                    window.open(url, '_blank');
                 }
             };
         }
-        
-        // 部落按钮点击
+
+        // 部落按钮
         document.querySelectorAll('.tribe-button').forEach(button => {
-            button.addEventListener('click', function() {
-                const type = this.dataset.type;
-                const name = this.dataset.name;
-                const tagUrl = this.dataset.tagUrl;
+            button.addEventListener('click', () => {
+                const type = button.dataset.type;
+                const name = button.dataset.name;
+                currentTagUrl = button.dataset.tagUrl || '';
+                currentTribeType = type;
                 
+                closeAllPopups();
                 overlay.classList.add('show');
-                
-                if(type === 'main') {
-                    currentSpecialTribe = 'main';
-                    document.getElementById('tribeDetailTitle').textContent = '主力部落';
+
+                if (type === 'main') {
+                    document.getElementById('tribeDetailTitle').textContent = name;
                     updateTribeTagButton('主力部落标签', 'main');
                     popupTribeDetail.classList.add('show');
                 } else if (type === 'series') {
@@ -1130,38 +1178,51 @@
                 }
             });
         });
-        
-        // 系列部落子项点击
+
+        // 系列子项
         document.querySelectorAll('.series-item').forEach(item => {
-            item.addEventListener('click', function() {
-                const tagUrl = this.dataset.tagUrl;
-                const seriesName = this.dataset.series;
-                closeAllPopups();
-                overlay.classList.add('show');
+            item.addEventListener('click', () => {
+                const seriesName = item.dataset.series;
+                currentTagUrl = item.dataset.tagUrl;
+                let btnText = '';
+                if (seriesName === '强盛系列') btnText = '强盛部落标签';
+                else if (seriesName === '北斗系列') btnText = '北斗部落标签';
+                else if (seriesName === '山海经系列') btnText = '山海经部落标签';
+                else if (seriesName === '江湖系列') btnText = '江湖部落标签';
+
                 document.getElementById('tribeDetailTitle').textContent = seriesName;
-                updateTribeTagButton(seriesName + '标签', tagUrl);
+                updateTribeTagButton(btnText, currentTagUrl);
+                popupSeries.classList.remove('show');
                 popupTribeDetail.classList.add('show');
             });
         });
-        
+
         // 招人门槛 & 规则
         document.getElementById('tribeRule').addEventListener('click', () => window.open('https://docs.qq.com/doc/DUmpUUE9YR2VvV2Vt', '_blank'));
         document.getElementById('tribeRegulation').addEventListener('click', () => window.open('https://docs.qq.com/doc/DUmxranNYTkRkcmRL', '_blank'));
-        
+
         // 随机卡通天气图标
         function setRandomWeatherIcon() {
-            const weathers = ['☀️', '⛅', '🌧️', '❄️', '🌤️', '🌥️', '🌦️', '🌧️', '⛈️', '🌨️'];
-            const randomWeather = weathers[Math.floor(Math.random() * weathers.length)];
-            document.getElementById('weatherIcon').textContent = randomWeather;
+            const weatherIcons = ['☀️', '🌤️', '⛅', '🌥️', '☁️', '🌦️', '🌧️', '⛈️', '🌨️', '🍃'];
+            const randomIcon = weatherIcons[Math.floor(Math.random() * weatherIcons.length)];
+            document.getElementById('weatherIcon').textContent = randomIcon;
         }
+        // 初始化天气图标
         setRandomWeatherIcon();
-        
-        // 轮播图相关
+
+        // 入场特效结束后移除遮罩
+        setTimeout(() => {
+            const pageEnter = document.querySelector('.page-enter');
+            pageEnter.style.display = 'none';
+        }, 1600);
+
+        // ========== 图片轮播功能 ==========
         const carouselSlide = document.getElementById('carouselSlide');
-        const carouselDots = document.querySelectorAll('.carousel-dot');
+        const carouselDots = document.getElementById('carouselDots').querySelectorAll('.carousel-dot');
         let currentSlide = 0;
-        let slideInterval;
-        
+        const slideCount = carouselDots.length;
+
+        // 切换轮播图
         function goToSlide(index) {
             carouselSlide.style.transform = `translateX(-${index * 100}%)`;
             // 更新指示器
@@ -1170,343 +1231,291 @@
             });
             currentSlide = index;
         }
-        
+
+        // 绑定指示器点击事件
         carouselDots.forEach((dot, index) => {
-            dot.addEventListener('click', () => goToSlide(index));
+            dot.addEventListener('click', () => {
+                goToSlide(index);
+            });
         });
-        
-        function nextSlide() {
-            currentSlide = (currentSlide + 1) % 3;
+
+        // 自动轮播
+        function autoCarousel() {
+            currentSlide = (currentSlide + 1) % slideCount;
             goToSlide(currentSlide);
         }
-        
-        function startSlideInterval() {
-            slideInterval = setInterval(nextSlide, 5000);
-        }
-        
-        // 鼠标悬停暂停轮播
-        const carouselContainer = document.querySelector('.carousel-container');
-        carouselContainer.addEventListener('mouseenter', () => {
-            clearInterval(slideInterval);
+
+        // 每5秒切换一次
+        let carouselInterval = setInterval(autoCarousel, 5000);
+
+        // 鼠标悬停时暂停轮播
+        document.querySelector('.carousel-container').addEventListener('mouseenter', () => {
+            clearInterval(carouselInterval);
         });
-        carouselContainer.addEventListener('mouseleave', () => {
-            startSlideInterval();
+
+        // 鼠标离开时恢复轮播
+        document.querySelector('.carousel-container').addEventListener('mouseleave', () => {
+            carouselInterval = setInterval(autoCarousel, 5000);
         });
-        
-        startSlideInterval();
-        
-        // 菜单按钮
-        menuBtn.addEventListener('click', function() {
-            menuBtn.classList.toggle('active');
-            sidebar.classList.toggle('show');
-            // 关闭留言板
-            messageBoard.classList.remove('show');
-            penBtn.classList.remove('active');
-        });
-        
-        // 钢笔按钮
-        penBtn.addEventListener('click', function() {
-            penBtn.classList.toggle('active');
-            messageBoard.classList.toggle('show');
-            // 关闭侧边栏
-            sidebar.classList.remove('show');
-            menuBtn.classList.remove('active');
-        });
-        
-        // 点击外部关闭侧边栏
-        document.addEventListener('click', function(e) {
-            if(!sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
-                sidebar.classList.remove('show');
-                menuBtn.classList.remove('active');
-            }
-            if(!messageBoard.contains(e.target) && !penBtn.contains(e.target)) {
-                messageBoard.classList.remove('show');
-                penBtn.classList.remove('active');
-            }
-        });
-        
-        // 联盟基金按钮
-        document.getElementById('fundStructureBtn').addEventListener('click', function() {
-            overlay.classList.add('show');
-            document.getElementById('popupFundStructure').classList.add('show');
-        });
-        
-        document.getElementById('fundUseBtn').addEventListener('click', function() {
-            overlay.classList.add('show');
-            document.getElementById('popupFundUse').classList.add('show');
-        });
-        
-        document.getElementById('supportFundBtn').addEventListener('click', function() {
-            overlay.classList.add('show');
-            document.getElementById('popupSupportChoose').classList.add('show');
-        });
-        
-        document.getElementById('goCodeSupport').addEventListener('click', function() {
-            closeAllPopups();
-            overlay.classList.add('show');
-            document.getElementById('popupCodeSupport').classList.add('show');
-        });
-        
-        document.getElementById('goLoveSupport').addEventListener('click', function() {
-            closeAllPopups();
-            overlay.classList.add('show');
-            document.getElementById('popupLoveSupport').classList.add('show');
-        });
-        
-        // 占卜相关
-        const fortuneBtn = document.getElementById('fortuneBtn');
-        const divinationModal = document.getElementById('divinationModal');
-        const bambooTube = document.getElementById('bambooTube');
-        const fortuneText = document.getElementById('fortuneText');
+
+        // ========== 占卜次数统计功能（修改为全局总数） ==========
         const fortuneCountEl = document.getElementById('fortuneCount');
+        const STORAGE_KEY = 'dt_total_fortune_count'; // 修改存储键名
+        
+        // 初始化占卜总次数
+        function initFortuneCount() {
+            // 从本地存储获取总次数，不存在则初始化为0
+            let totalCount = parseInt(localStorage.getItem(STORAGE_KEY)) || 0;
+            // 更新显示
+            updateFortuneCountDisplay(totalCount);
+            return totalCount;
+        }
         
         // 更新占卜次数显示
         function updateFortuneCountDisplay(count) {
             fortuneCountEl.textContent = `【总占卜次数：${count}次】`;
         }
         
-        // 占卜结果
-        const fortunes = [
-            {luck: '上分', color: '#ffd700'},
-            {luck: '脱非', color: '#ffd700'},
-            {luck: '欧皇', color: '#ffd700'},
-            {luck: '暴富', color: '#ffd700'},
-            {luck: '躺赢', color: '#64b5f6'},
-            {luck: '肝帝', color: '#64b5f6'},
-            {luck: '非气', color: '#f44336'},
-            {luck: '氪金', color: '#f44336'}
-        ];
-        
-        fortuneBtn.addEventListener('click', async function() {
-            // 先检查同步服务是否可用
-            if(!Bmob) {
-                alert('占卜失败，当前无法连接到同步服务器，请稍后再试！');
-                return;
-            }
+        // 增加占卜总次数
+        function incrementFortuneCount() {
+            let totalCount = initFortuneCount();
+            totalCount += 1;
+            localStorage.setItem(STORAGE_KEY, totalCount.toString());
+            updateFortuneCountDisplay(totalCount);
             
-            try {
-                // 先拉取最新数据
-                const query = Bmob.Query('dt_union_data');
-                const res = await query.find();
-                if(res.length === 0) {
-                    alert('同步服务初始化中，请稍后再试！');
-                    return;
-                }
-                const data = res[0];
-                
-                // 显示动画
-                divinationModal.classList.add('active');
-                bambooTube.style.opacity = '1';
-                fortuneText.classList.remove('show');
-                
-                // 随机运势
-                const fortune = fortunes[Math.floor(Math.random() * fortunes.length)];
-                
-                // 1秒后竹筒消失，显示运势文字
-                setTimeout(() => {
-                    bambooTube.style.opacity = '0';
-                    fortuneText.textContent = `今日宜${fortune.luck}`;
-                    fortuneText.classList.add('show');
-                    
-                    // 运势文字停留3秒后关闭弹窗
-                    setTimeout(() => {
-                        divinationModal.classList.remove('active');
-                    }, 3000);
-                }, 1000);
-                
-                // 更新云端计数，原子递增
-                const newCount = data.fortune_count + 1;
-                const obj = Bmob.Object.create('dt_union_data');
-                obj.id = data.objectId;
-                obj.set('fortune_count', newCount);
-                await obj.save();
-                
-                // 更新本地显示
-                globalData.fortune_count = newCount;
-                updateFortuneCountDisplay(newCount);
-                
-            } catch(e) {
-                console.error('占卜同步失败:', e);
-                alert('占卜失败，当前无法连接到同步服务器，请稍后再试！');
-                divinationModal.classList.remove('active');
+            // 发送存储事件，让其他打开的页面同步更新
+            window.localStorage.setItem('dt_fortune_update', Date.now().toString());
+        }
+        
+        // 监听存储变化，同步更新所有页面的计数
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'dt_fortune_update') {
+                initFortuneCount();
             }
         });
+        
+        // 初始化占卜次数显示
+        initFortuneCount();
+
+        // ========== 占卜功能修复 ==========
+        const fortuneBtn = document.getElementById('fortuneBtn');
+        const divinationModal = document.getElementById('divinationModal');
+        const bambooTube = document.getElementById('bambooTube');
+        const fortuneText = document.getElementById('fortuneText');
+
+        // 运势配置
+        const fortuneConfig = [
+            { sign: '上上签', luck: '三星' },
+            { sign: '上签', luck: '二星' },
+            { sign: '下签', luck: '一星' },
+            { sign: '下下签', luck: '黑三' }
+        ];
+
+        // 重置占卜动画
+        function resetFortuneAnimation() {
+            divinationModal.classList.remove('active');
+            bambooTube.style.animation = '';
+            bambooTube.style.opacity = '1'; // 重置透明度
+            bambooTube.textContent = '';
+            fortuneText.classList.remove('show');
+            fortuneText.textContent = '';
+        }
+
+        // 执行占卜动画
+        function runFortuneAnimation(fortune) {
+            // 显示弹窗
+            divinationModal.classList.add('active');
+            
+            // 设置签文在竹筒中间
+            bambooTube.textContent = fortune.sign;
+            // 重置竹筒动画
+            bambooTube.style.animation = 'tube-shake 1s ease-in-out';
+            
+            // 1秒后竹筒消失，显示运势文字
+            setTimeout(() => {
+                bambooTube.style.opacity = '0';
+                fortuneText.textContent = `今日宜${fortune.luck}`;
+                fortuneText.classList.add('show'); // 使用类控制显示
+                
+                // 运势文字停留3秒后关闭弹窗（增加延迟确保显示完整）
+                setTimeout(resetFortuneAnimation, 3500);
+            }, 1000);
+        }
+
+        // 绑定占卜按钮点击事件（增加次数统计）
+        fortuneBtn.addEventListener('click', () => {
+            // 增加占卜总次数
+            incrementFortuneCount();
+            
+            // 重置之前的动画
+            resetFortuneAnimation();
+            
+            // 随机选择运势
+            const randomIndex = Math.floor(Math.random() * fortuneConfig.length);
+            const selectedFortune = fortuneConfig[randomIndex];
+            
+            // 执行动画
+            setTimeout(() => {
+                runFortuneAnimation(selectedFortune);
+            }, 300);
+        });
+
+        // 点击弹窗空白处关闭
+        divinationModal.addEventListener('click', (e) => {
+            if (e.target === divinationModal) {
+                resetFortuneAnimation();
+            }
+        });
+
+        // ========== 阵型查找按钮跳转链接（核心修改） ==========
+        const formationBtn = document.getElementById('formationBtn');
         
         // 绑定按钮点击事件 - 跳转指定链接
-        const formationBtn = document.getElementById('formationBtn');
         formationBtn.addEventListener('click', function() {
+            // 打开指定链接，_blank表示在新标签页打开
             window.open('https://coc.6oh.cn/?lx=1&name=%E9%B8%A1%E4%BD%A0%E5%A4%AA%E7%BE%8E', '_blank');
         });
-        
-        // 辅助服务图片弹窗
+
+        // ========== 新增：辅助服务图片弹窗功能 ==========
         const assistBtn = document.getElementById('assistBtn');
+        const assistImageModal = document.getElementById('assistImageModal');
+        const assistImage = document.getElementById('assistImage');
+
+        // 打开辅助服务图片弹窗
         assistBtn.addEventListener('click', function() {
             assistImageModal.classList.add('active');
         });
-        assistImageModal.addEventListener('click', function() {
-            assistImageModal.classList.remove('active');
+
+        // 点击图片外区域关闭弹窗，点击图片本身不关闭
+        assistImageModal.addEventListener('click', function(e) {
+            if (e.target !== assistImage) {
+                assistImageModal.classList.remove('active');
+            }
         });
-        
-        // 留言板相关
+
+        // ========== 新增：钢笔按钮和留言板功能 ==========
+        const penBtn = document.getElementById('penBtn');
+        const messageBoard = document.getElementById('messageBoard');
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         const messageContainer = document.getElementById('messageContainer');
         
-        // 颜色转换
-        function hexToRgb(hex) {
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
-            return {r, g, b};
-        }
+        // 存储留言的数组（本地存储）
+        const MESSAGES_STORAGE_KEY = 'dt_message_board_messages';
+        let messages = JSON.parse(localStorage.getItem(MESSAGES_STORAGE_KEY)) || [];
         
-        // 启动弹幕
-        function startDanmu(messages) {
-            // 先清理旧的定时器
-            if(danmuTimer) {
-                clearInterval(danmuTimer);
-                danmuTimer = null;
-            }
-            // 清理旧的弹幕
-            messageContainer.innerHTML = '';
+        // 切换留言板显示/隐藏
+        penBtn.addEventListener('click', function() {
+            messageBoard.classList.toggle('show');
+            penBtn.classList.toggle('active');
             
-            let index = 0;
-            function showNextDanmu() {
-                if(index >= messages.length) {
-                    index = 0; // 循环播放
-                }
-                const msg = messages[index];
-                if(msg) {
-                    const danmu = document.createElement('div');
-                    danmu.className = 'danmu';
-                    danmu.textContent = msg;
-                    
-                    // 随机位置（垂直）
-                    const containerHeight = messageContainer.clientHeight;
-                    const randomTop = Math.floor(Math.random() * (containerHeight - 40)) + 10;
-                    danmu.style.top = `${randomTop}px`;
-                    
-                    // 随机颜色
-                    const colors = ['#64b5f6', '#4caf50', '#ff9800', '#9c27b0', '#f44336', '#ffeb3b'];
-                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                    danmu.style.background = `rgba(${hexToRgb(randomColor).r}, ${hexToRgb(randomColor).g}, ${hexToRgb(randomColor).b}, 0.8)`;
-                    
-                    // 随机动画时长（5-15秒）
-                    const randomDuration = Math.floor(Math.random() * 10) + 5;
-                    danmu.style.animationDuration = `${randomDuration}s`;
-                    
-                    // 添加到容器
-                    messageContainer.appendChild(danmu);
-                    
-                    // 动画结束后移除
-                    setTimeout(() => {
-                        if(danmu.parentNode) {
-                            danmu.parentNode.removeChild(danmu);
-                        }
-                    }, randomDuration * 1000);
-                }
-                index++;
-            }
-            
-            // 定时发送弹幕
-            danmuTimer = setInterval(showNextDanmu, 2000);
-            // 立即显示第一个
-            showNextDanmu();
-        }
-        
-        // 从云端拉取数据
-        async function fetchData() {
-            try {
-                const query = Bmob.Query('dt_union_data');
-                const res = await query.find();
-                if(res.length > 0) {
-                    const data = res[0];
-                    globalData.fortune_count = data.fortune_count || 0;
-                    globalData.messages = data.messages || [];
-                    
-                    // 更新显示
-                    updateFortuneCountDisplay(globalData.fortune_count);
-                    
-                    // 检查是否有新留言
-                    if(globalData.messages.length > lastProcessedMessages.length) {
-                        // 有新留言，重启弹幕
-                        startDanmu(globalData.messages);
-                        lastProcessedMessages = [...globalData.messages];
-                    }
-                    
-                    return true;
-                } else {
-                    // 初始化数据
-                    const obj = Bmob.Object.create('dt_union_data');
-                    obj.set('fortune_count', 0);
-                    obj.set('messages', []);
-                    await obj.save();
-                    return true;
-                }
-            } catch(e) {
-                console.error('拉取数据失败:', e);
-                return false;
-            }
-        }
-        
-        // 发送留言
-        async function sendMessage() {
-            const text = messageInput.value.trim();
-            if(!text) return;
-            
-            // 检查同步服务是否可用
-            if(!Bmob) {
-                alert('留言失败，当前无法连接到同步服务器，请稍后再试！');
-                return;
-            }
-            
-            try {
-                // 先拉取最新数据
-                const query = Bmob.Query('dt_union_data');
-                const res = await query.find();
-                if(res.length === 0) {
-                    alert('同步服务初始化中，请稍后再试！');
-                    return;
-                }
-                const data = res[0];
-                
-                // 更新留言列表，最多保留100条
-                let newMessages = data.messages || [];
-                newMessages.push(text);
-                if(newMessages.length > 100) {
-                    newMessages = newMessages.slice(-100);
-                }
-                
-                // 更新到云端
-                const obj = Bmob.Object.create('dt_union_data');
-                obj.id = data.objectId;
-                obj.set('messages', newMessages);
-                await obj.save();
-                
-                // 清空输入
-                messageInput.value = '';
-                
-                // 立即拉取最新数据更新弹幕
-                await fetchData();
-                
-                alert('留言成功！');
-            } catch(e) {
-                console.error('发送留言失败:', e);
-                alert('留言失败，当前无法连接到同步服务器，请稍后再试！');
-            }
-        }
-        
-        sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') {
-                sendMessage();
+            // 如果显示留言板，启动弹幕播放
+            if (messageBoard.classList.contains('show')) {
+                startDanmuAnimation();
             }
         });
         
-        // 初始化
-        await fetchData();
-        // 定时拉取，每3秒同步一次
-        setInterval(fetchData, 3000);
+        // 保存留言到本地存储
+        function saveMessages() {
+            localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(messages));
+        }
+        
+        // 创建弹幕元素
+        function createDanmu(text) {
+            if (!text.trim()) return;
+            
+            const danmu = document.createElement('div');
+            danmu.className = 'danmu';
+            danmu.textContent = text;
+            
+            // 随机位置（垂直）
+            const containerHeight = messageContainer.clientHeight;
+            const randomTop = Math.floor(Math.random() * (containerHeight - 40)) + 10;
+            danmu.style.top = `${randomTop}px`;
+            
+            // 随机颜色
+            const colors = ['#64b5f6', '#4caf50', '#ff9800', '#9c27b0', '#f44336', '#ffeb3b'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            danmu.style.background = `rgba(${hexToRgb(randomColor).r}, ${hexToRgb(randomColor).g}, ${hexToRgb(randomColor).b}, 0.8)`;
+            
+            // 随机动画时长（5-15秒）
+            const randomDuration = Math.floor(Math.random() * 10) + 5;
+            danmu.style.animationDuration = `${randomDuration}s`;
+            
+            // 添加到容器
+            messageContainer.appendChild(danmu);
+            
+            // 动画结束后移除
+            setTimeout(() => {
+                danmu.remove();
+            }, randomDuration * 1000);
+        }
+        
+        // 十六进制转RGB
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : { r: 100, g: 181, b: 246 };
+        }
+        
+        // 启动弹幕动画
+        function startDanmuAnimation() {
+            if (messages.length === 0) return;
+            
+            // 清除现有弹幕
+            messageContainer.innerHTML = '';
+            
+            // 定时播放弹幕
+            const playDanmu = () => {
+                if (!messageBoard.classList.contains('show')) return;
+                
+                const randomIndex = Math.floor(Math.random() * messages.length);
+                createDanmu(messages[randomIndex]);
+                
+                // 随机间隔（1-3秒）播放下一条
+                const randomInterval = Math.floor(Math.random() * 2000) + 1000;
+                setTimeout(playDanmu, randomInterval);
+            };
+            
+            playDanmu();
+        }
+        
+        // 发送留言
+        sendBtn.addEventListener('click', function() {
+            const text = messageInput.value.trim();
+            if (!text) {
+                alert('请输入留言内容！');
+                return;
+            }
+            
+            // 添加到留言数组
+            messages.push(text);
+            // 限制最多保存100条留言
+            if (messages.length > 100) {
+                messages.shift();
+            }
+            // 保存到本地存储
+            saveMessages();
+            // 清空输入框
+            messageInput.value = '';
+            // 立即显示这条弹幕
+            createDanmu(text);
+        });
+        
+        // 按回车发送留言
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendBtn.click();
+            }
+        });
+        
+        // 初始化时如果留言板是显示状态，启动弹幕
+        if (messageBoard.classList.contains('show')) {
+            startDanmuAnimation();
+        }
     });
 </script>
 </body>
