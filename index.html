@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DT联盟</title>
+<!-- 引入Puter.js云端存储，实现跨设备数据同步 -->
+<script src="https://js.puter.com/v2/"></script>
 <style>
     * {
         margin: 0;
@@ -180,21 +182,6 @@
         font-weight: bold;
         font-size: 1.1rem;
         border-bottom: 1px solid #283593;
-        position: relative; /* 新增：用于定位关闭按钮 */
-    }
-    /* 新增：留言板关闭按钮样式 */
-    .message-close-btn {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        font-size: 1.2rem;
-        cursor: pointer;
-        color: #fff;
-        transition: color 0.3s ease, transform 0.3s ease;
-    }
-    .message-close-btn:hover {
-        color: #64b5f6;
-        transform: rotate(90deg);
     }
     .message-container {
         flex: 1;
@@ -812,23 +799,6 @@
         max-height: 90%;
         border-radius: 8px;
     }
-
-    /* 加载提示样式 */
-    .loading {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: rgba(26, 35, 126, 0.9);
-        color: #fff;
-        padding: 10px 20px;
-        border-radius: 4px;
-        z-index: 9999;
-        display: none;
-    }
-    .loading.show {
-        display: block;
-    }
 </style>
 </head>
 <body>
@@ -836,9 +806,6 @@
 <div class="page-enter">
     <div class="enter-logo">DT联盟</div>
 </div>
-
-<!-- 加载提示 -->
-<div class="loading" id="loading">加载中...</div>
 
 <!-- 天气图标 -->
 <div class="weather-icon" id="weatherIcon">☀️</div>
@@ -944,7 +911,6 @@
 <div class="menu-btn" id="menuBtn">
     <span></span>
     <span></span>
-    <span></span>
 </div>
 
 <!-- 钢笔按钮 -->
@@ -952,11 +918,7 @@
 
 <!-- 留言板 -->
 <div class="message-board" id="messageBoard">
-    <div class="message-board-header">
-        DT联盟留言板
-        <!-- 新增：留言板关闭按钮 -->
-        <span class="message-close-btn" id="messageCloseBtn">×</span>
-    </div>
+    <div class="message-board-header">DT联盟留言板</div>
     <div class="message-container" id="messageContainer"></div>
     <div class="message-input-area">
         <input type="text" class="message-input" id="messageInput" placeholder="请输入您的留言...">
@@ -1069,7 +1031,7 @@
     <!-- ========== 新增：辅助服务板块 ========== -->
     <div class="section" id="assist">
         <h2>🤖辅助服务</h2>
-        <button class="jump-btn" id="assistBtn">养号｜刷墙｜奶号｜招人</button>
+        <button class="jump-btn" id="assistBtn">托管养号｜快速刷墙｜奶号出租｜部落招人</button>
     </div>
 
     <!-- 新增联盟占卜师板块 -->
@@ -1118,135 +1080,13 @@
 </footer>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() {
         const menuBtn = document.getElementById('menuBtn');
         const sidebar = document.getElementById('sidebar');
         const joinCoopBtn = document.getElementById('joinCoopBtn');
         const funcAssistBtn = document.getElementById('funcAssistBtn');
         let currentSpecialTribe = '';
         let currentTagUrl = '';
-        const loading = document.getElementById('loading');
-
-        // ========== 云端存储配置（请替换为你自己的SheetDB信息） ==========
-        // 1. 先去 https://sheetdb.io/ 创建免费表格
-        // 2. 表格结构：
-        //    - 表1（messages）：id(自增), content(留言内容)
-        //    - 表2（counter）：id(固定1), count(占卜次数)
-        const SHEETDB_API_KEY = 'your_api_key_here'; // 替换为你的SheetDB API Key
-        const SHEETDB_BASE_URL = `https://sheetdb.io/api/v1/${SHEETDB_API_KEY}`;
-
-        // 显示加载提示
-        function showLoading() {
-            loading.classList.add('show');
-        }
-
-        // 隐藏加载提示
-        function hideLoading() {
-            loading.classList.remove('show');
-        }
-
-        // ========== 云端数据操作函数 ==========
-        // 1. 获取所有留言
-        async function getMessagesFromCloud() {
-            try {
-                showLoading();
-                const response = await fetch(`${SHEETDB_BASE_URL}/messages`);
-                if (!response.ok) throw new Error('获取留言失败');
-                const data = await response.json();
-                return data.map(item => item.content).filter(Boolean);
-            } catch (error) {
-                console.error('获取云端留言失败:', error);
-                // 降级使用本地存储
-                return JSON.parse(localStorage.getItem('dt_message_board_messages')) || [];
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // 2. 添加留言到云端
-        async function addMessageToCloud(content) {
-            if (!content.trim()) return;
-            
-            try {
-                showLoading();
-                const response = await fetch(`${SHEETDB_BASE_URL}/messages`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ data: { content } })
-                });
-                
-                if (!response.ok) throw new Error('保存留言失败');
-                return true;
-            } catch (error) {
-                console.error('保存云端留言失败:', error);
-                // 降级保存到本地
-                let localMessages = JSON.parse(localStorage.getItem('dt_message_board_messages')) || [];
-                localMessages.push(content);
-                if (localMessages.length > 100) localMessages.shift();
-                localStorage.setItem('dt_message_board_messages', JSON.stringify(localMessages));
-                return false;
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // 3. 获取占卜次数
-        async function getFortuneCountFromCloud() {
-            try {
-                showLoading();
-                const response = await fetch(`${SHEETDB_BASE_URL}/counter/id/1`);
-                if (!response.ok) {
-                    // 如果记录不存在，创建初始记录
-                    await fetch(`${SHEETDB_BASE_URL}/counter`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ data: { id: 1, count: 0 } })
-                    });
-                    return 0;
-                }
-                const data = await response.json();
-                return data.length > 0 ? parseInt(data[0].count) || 0 : 0;
-            } catch (error) {
-                console.error('获取云端占卜次数失败:', error);
-                // 降级使用本地存储
-                return parseInt(localStorage.getItem('dt_total_fortune_count')) || 0;
-            } finally {
-                hideLoading();
-            }
-        }
-
-        // 4. 增加占卜次数
-        async function incrementFortuneCountInCloud() {
-            try {
-                showLoading();
-                // 获取当前次数
-                const currentCount = await getFortuneCountFromCloud();
-                const newCount = currentCount + 1;
-                
-                // 更新云端次数
-                const response = await fetch(`${SHEETDB_BASE_URL}/counter/id/1`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ data: { count: newCount } })
-                });
-                
-                if (!response.ok) throw new Error('更新占卜次数失败');
-                updateFortuneCountDisplay(newCount);
-                return newCount;
-            } catch (error) {
-                console.error('更新云端占卜次数失败:', error);
-                // 降级更新本地
-                let localCount = parseInt(localStorage.getItem('dt_total_fortune_count')) || 0;
-                localCount += 1;
-                localStorage.setItem('dt_total_fortune_count', localCount.toString());
-                updateFortuneCountDisplay(localCount);
-                return localCount;
-            } finally {
-                hideLoading();
-            }
-        }
 
         // 侧边栏
         menuBtn.addEventListener('click', (e) => {
@@ -1419,20 +1259,66 @@
             carouselInterval = setInterval(autoCarousel, 5000);
         });
 
-        // ========== 占卜次数统计功能（云端版） ==========
+        // ========== 占卜次数统计功能（修复为云端全局统计，跨设备同步） ==========
         const fortuneCountEl = document.getElementById('fortuneCount');
+        const FORTUNE_KEY = 'dt_fortune_count';
         
         // 更新占卜次数显示
         function updateFortuneCountDisplay(count) {
             fortuneCountEl.textContent = `【总占卜次数：${count}次】`;
         }
         
-        // 初始化占卜次数显示（从云端获取）
+        // 初始化占卜总次数（从云端拉取）
         async function initFortuneCount() {
-            const count = await getFortuneCountFromCloud();
-            updateFortuneCountDisplay(count);
-            return count;
+            try {
+                let totalCount = await puter.kv.get(FORTUNE_KEY);
+                if (totalCount === null || totalCount === undefined) {
+                    totalCount = 0;
+                    await puter.kv.set(FORTUNE_KEY, 0);
+                }
+                updateFortuneCountDisplay(totalCount);
+                return totalCount;
+            } catch (e) {
+                // 如果云端拉取失败，降级到本地存储
+                console.warn('云端拉取占卜次数失败，使用本地存储', e);
+                let totalCount = parseInt(localStorage.getItem('dt_total_fortune_count')) || 0;
+                updateFortuneCountDisplay(totalCount);
+                return totalCount;
+            }
         }
+        
+        // 增加占卜总次数（原子递增，保证并发安全）
+        async function incrementFortuneCount() {
+            try {
+                // 使用原子递增，避免并发计数错误
+                const newCount = await puter.kv.incr(FORTUNE_KEY);
+                updateFortuneCountDisplay(newCount);
+                return newCount;
+            } catch (e) {
+                // 降级到本地存储
+                console.warn('云端更新占卜次数失败，使用本地存储', e);
+                let totalCount = parseInt(localStorage.getItem('dt_total_fortune_count')) || 0;
+                totalCount += 1;
+                localStorage.setItem('dt_total_fortune_count', totalCount.toString());
+                updateFortuneCountDisplay(totalCount);
+                return totalCount;
+            }
+        }
+        
+        // 定时拉取最新的占卜次数，实现实时同步
+        setInterval(async () => {
+            try {
+                const latestCount = await puter.kv.get(FORTUNE_KEY);
+                if (latestCount !== null) {
+                    updateFortuneCountDisplay(latestCount);
+                }
+            } catch (e) {
+                // 忽略错误
+            }
+        }, 5000);
+        
+        // 初始化占卜次数显示
+        await initFortuneCount();
 
         // ========== 占卜功能修复 ==========
         const fortuneBtn = document.getElementById('fortuneBtn');
@@ -1479,10 +1365,10 @@
             }, 1000);
         }
 
-        // 绑定占卜按钮点击事件（云端统计次数）
+        // 绑定占卜按钮点击事件（增加次数统计）
         fortuneBtn.addEventListener('click', async () => {
-            // 增加占卜总次数（云端）
-            await incrementFortuneCountInCloud();
+            // 增加占卜总次数
+            await incrementFortuneCount();
             
             // 重置之前的动画
             resetFortuneAnimation();
@@ -1530,53 +1416,47 @@
             }
         });
 
-        // ========== 新增：钢笔按钮和留言板功能（云端同步版） ==========
+        // ========== 新增：钢笔按钮和留言板功能（修复为云端全局存储，跨设备同步） ==========
         const penBtn = document.getElementById('penBtn');
         const messageBoard = document.getElementById('messageBoard');
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         const messageContainer = document.getElementById('messageContainer');
-        const messageCloseBtn = document.getElementById('messageCloseBtn'); // 新增：关闭按钮
         
-        let messages = []; // 云端留言数组
-        let currentPlayingDanmu = []; // 记录当前播放的弹幕，避免重复
+        // 存储留言的数组（云端同步）
+        const MESSAGES_KEY = 'dt_messages';
+        const MESSAGES_STORAGE_KEY = 'dt_message_board_messages';
+        let messages = [];
         
         // 切换留言板显示/隐藏
-        function toggleMessageBoard() {
+        penBtn.addEventListener('click', function() {
             messageBoard.classList.toggle('show');
             penBtn.classList.toggle('active');
             
-            // 如果显示留言板，加载云端留言并启动弹幕
+            // 如果显示留言板，启动弹幕播放
             if (messageBoard.classList.contains('show')) {
-                loadMessagesAndStartDanmu();
-            } else {
-                // 隐藏时清空当前弹幕
-                currentPlayingDanmu = [];
-                messageContainer.innerHTML = '';
+                startDanmuAnimation();
+            }
+        });
+        
+        // 保存留言到云端存储
+        async function saveMessages() {
+            try {
+                await puter.kv.set(MESSAGES_KEY, messages);
+            } catch (e) {
+                // 降级到本地存储
+                console.warn('云端保存留言失败，使用本地存储', e);
+                localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(messages));
             }
         }
         
-        penBtn.addEventListener('click', toggleMessageBoard);
-        
-        // 新增：留言板关闭按钮点击事件
-        messageCloseBtn.addEventListener('click', toggleMessageBoard);
-        
-        // 加载云端留言并启动弹幕
-        async function loadMessagesAndStartDanmu() {
-            messages = await getMessagesFromCloud();
-            startDanmuAnimation();
-        }
-        
-        // 创建弹幕元素（避免重复）
+        // 创建弹幕元素
         function createDanmu(text) {
-            if (!text.trim() || currentPlayingDanmu.includes(text)) return;
+            if (!text.trim()) return;
             
             const danmu = document.createElement('div');
             danmu.className = 'danmu';
             danmu.textContent = text;
-            
-            // 记录当前播放的弹幕
-            currentPlayingDanmu.push(text);
             
             // 随机位置（垂直）
             const containerHeight = messageContainer.clientHeight;
@@ -1595,13 +1475,9 @@
             // 添加到容器
             messageContainer.appendChild(danmu);
             
-            // 动画结束后移除并从当前播放列表删除
+            // 动画结束后移除
             setTimeout(() => {
                 danmu.remove();
-                const index = currentPlayingDanmu.indexOf(text);
-                if (index > -1) {
-                    currentPlayingDanmu.splice(index, 1);
-                }
             }, randomDuration * 1000);
         }
         
@@ -1615,28 +1491,19 @@
             } : { r: 100, g: 181, b: 246 };
         }
         
-        // 启动弹幕动画（避免重复播放相同弹幕）
+        // 启动弹幕动画
         function startDanmuAnimation() {
-            if (messages.length === 0 || !messageBoard.classList.contains('show')) return;
+            if (messages.length === 0) return;
             
             // 清除现有弹幕
             messageContainer.innerHTML = '';
-            currentPlayingDanmu = [];
             
             // 定时播放弹幕
             const playDanmu = () => {
                 if (!messageBoard.classList.contains('show')) return;
                 
-                // 过滤掉当前正在播放的弹幕
-                const availableMessages = messages.filter(msg => !currentPlayingDanmu.includes(msg));
-                if (availableMessages.length === 0) {
-                    // 如果所有弹幕都在播放，等待后重试
-                    setTimeout(playDanmu, 1000);
-                    return;
-                }
-                
-                const randomIndex = Math.floor(Math.random() * availableMessages.length);
-                createDanmu(availableMessages[randomIndex]);
+                const randomIndex = Math.floor(Math.random() * messages.length);
+                createDanmu(messages[randomIndex]);
                 
                 // 随机间隔（1-3秒）播放下一条
                 const randomInterval = Math.floor(Math.random() * 2000) + 1000;
@@ -1646,7 +1513,7 @@
             playDanmu();
         }
         
-        // 发送留言（云端同步）
+        // 发送留言
         sendBtn.addEventListener('click', async function() {
             const text = messageInput.value.trim();
             if (!text) {
@@ -1654,16 +1521,14 @@
                 return;
             }
             
-            // 添加到云端
-            await addMessageToCloud(text);
-            
-            // 添加到本地数组
+            // 添加到留言数组
             messages.push(text);
             // 限制最多保存100条留言
             if (messages.length > 100) {
                 messages.shift();
             }
-            
+            // 保存到云端存储
+            await saveMessages();
             // 清空输入框
             messageInput.value = '';
             // 立即显示这条弹幕
@@ -1676,18 +1541,43 @@
                 sendBtn.click();
             }
         });
-
-        // ========== 初始化 ==========
-        // 初始化占卜次数
-        initFortuneCount();
-
-        // 定时刷新数据（每30秒同步一次）
-        setInterval(async () => {
-            if (messageBoard.classList.contains('show')) {
-                await loadMessagesAndStartDanmu();
+        
+        // 初始化留言（从云端拉取）
+        async function initMessages() {
+            try {
+                const cloudMessages = await puter.kv.get(MESSAGES_KEY);
+                if (cloudMessages && Array.isArray(cloudMessages)) {
+                    messages = cloudMessages;
+                } else {
+                    messages = [];
+                    await puter.kv.set(MESSAGES_KEY, messages);
+                }
+            } catch (e) {
+                // 降级到本地存储
+                console.warn('云端拉取留言失败，使用本地存储', e);
+                messages = JSON.parse(localStorage.getItem(MESSAGES_STORAGE_KEY)) || [];
             }
-            await initFortuneCount();
-        }, 30000);
+            
+            // 初始化时如果留言板是显示状态，启动弹幕
+            if (messageBoard.classList.contains('show')) {
+                startDanmuAnimation();
+            }
+        }
+        
+        // 定时拉取最新的留言，实现实时同步
+        setInterval(async () => {
+            try {
+                const latestMessages = await puter.kv.get(MESSAGES_KEY);
+                if (latestMessages && Array.isArray(latestMessages)) {
+                    messages = latestMessages;
+                }
+            } catch (e) {
+                // 忽略错误
+            }
+        }, 5000);
+        
+        // 初始化留言
+        await initMessages();
     });
 </script>
 </body>
