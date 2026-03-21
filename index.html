@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DT联盟</title>
-<!-- 引入微信JS-SDK（核心依赖） -->
-<script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
 <style>
     * {
         margin: 0;
@@ -130,6 +128,120 @@
     }
     .menu-btn.active {
         transform: rotate(90deg);
+    }
+
+    /* 钢笔按钮样式 */
+    .pen-btn {
+        position: fixed;
+        top: 50px;
+        left: 15px;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        z-index: 100;
+        font-size: 1.2rem;
+        background: rgba(26, 35, 126, 0.8);
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+    .pen-btn:hover {
+        background: #64b5f6;
+        transform: scale(1.1);
+    }
+    .pen-btn.active {
+        transform: rotate(180deg);
+    }
+
+    /* 留言板样式 */
+    .message-board {
+        position: fixed;
+        top: 0;
+        right: -320px;
+        width: 320px;
+        height: 100vh;
+        background: #121a30;
+        z-index: 95;
+        transition: right 0.5s ease;
+        display: flex;
+        flex-direction: column;
+        border-left: 2px solid #64b5f6;
+        box-shadow: -3px 0 15px rgba(0,0,0,0.3);
+    }
+    .message-board.show {
+        right: 0;
+    }
+    .message-board-header {
+        padding: 15px;
+        background: #1a237e;
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.1rem;
+        border-bottom: 1px solid #283593;
+    }
+    .message-container {
+        flex: 1;
+        padding: 10px;
+        overflow: hidden;
+        position: relative;
+        background: rgba(0,0,0,0.2);
+    }
+    .message-input-area {
+        padding: 15px;
+        background: #1a237e;
+        border-top: 1px solid #283593;
+    }
+    .message-input {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 4px;
+        background: #283593;
+        color: #fff;
+        margin-bottom: 10px;
+        outline: none;
+        font-size: 0.9rem;
+    }
+    .message-input::placeholder {
+        color: rgba(255,255,255,0.6);
+    }
+    .send-btn {
+        width: 100%;
+        padding: 8px;
+        border: none;
+        border-radius: 4px;
+        background: #64b5f6;
+        color: #fff;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    .send-btn:hover {
+        background: #42a5f5;
+    }
+    /* 弹幕样式 */
+    .danmu {
+        position: absolute;
+        white-space: nowrap;
+        padding: 5px 10px;
+        border-radius: 20px;
+        background: rgba(26, 35, 126, 0.8);
+        color: #fff;
+        font-size: 0.8rem;
+        animation: danmuMove linear;
+        z-index: 1;
+    }
+    @keyframes danmuMove {
+        from {
+            left: 100%;
+            transform: translateX(0);
+        }
+        to {
+            left: 0;
+            transform: translateX(-100%);
+        }
     }
 
     .sidebar {
@@ -659,6 +771,32 @@
         0% { opacity: 0; }
         100% { opacity: 0.7; }
     }
+
+    /* ========== 新增：辅助服务图片弹窗样式 ========== */
+    .assist-image-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 2000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+    .assist-image-modal.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+    .assist-image-content {
+        max-width: 90%;
+        max-height: 90%;
+        border-radius: 8px;
+    }
 </style>
 </head>
 <body>
@@ -676,6 +814,13 @@
 <div class="divination-modal" id="divinationModal">
     <div class="bamboo-tube" id="bambooTube"></div>
     <div class="fortune-text" id="fortuneText"></div>
+</div>
+
+<!-- ========== 核心修改：替换为你新提供的二维码图片URL ========== -->
+<div class="assist-image-modal" id="assistImageModal">
+    <!-- 这里替换成你新提供的图片地址 -->
+    <img src="https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/c6a1b0b502bd48bca2f66aa24784c722.png~tplv-a9rns2rl98-24:720:720.png?lk3s=8e244e95&rcl=202603211227573A957EC34E7F344F1E97&rrcfp=8a172a1a&x-expires=1774672077&x-signature=TAmtCJSTMwjgZcmHjQnjwJM0E5Q%3D" 
+         alt="辅助服务图片" class="assist-image-content" id="assistImage">
 </div>
 
 <!-- 系列扩张部落主弹窗 -->
@@ -767,6 +912,19 @@
     <span></span>
 </div>
 
+<!-- 钢笔按钮 -->
+<div class="pen-btn" id="penBtn">✒️</div>
+
+<!-- 留言板 -->
+<div class="message-board" id="messageBoard">
+    <div class="message-board-header">DT联盟留言板</div>
+    <div class="message-container" id="messageContainer"></div>
+    <div class="message-input-area">
+        <input type="text" class="message-input" id="messageInput" placeholder="请输入您的留言...">
+        <button class="send-btn" id="sendBtn">留言</button>
+    </div>
+</div>
+
 <!-- 侧边栏 -->
 <div class="sidebar" id="sidebar">
     <a href="#about">关于DT联盟</a>
@@ -774,6 +932,7 @@
     <a href="#fund">DT联盟基金</a>
     <a href="#groups">各大部落群</a>
     <a href="#formation">查找阵型</a> <!-- 新增侧边栏导航 -->
+    <a href="#assist">辅助服务</a> <!-- ========== 新增：辅助服务侧边栏导航 ========== -->
     <a href="#divination">联盟占卜师</a>
     <a href="#recruit">部落管理招募</a>
     <a href="#log">DT联盟管理更新日志</a>
@@ -862,10 +1021,16 @@
         <a href="https://docs.qq.com/doc/DUmJucUFLbGdHaHVp" class="jump-btn" target="_blank">点我跳转</a>
     </div>
 
-    <!-- 新增查找阵型板块（核心修改） -->
+    <!-- 查找阵型板块（核心修改） -->
     <div class="section" id="formation">
         <h2>📚查找阵型</h2>
         <button class="jump-btn" id="formationBtn">点我快速查找阵型</button>
+    </div>
+
+    <!-- ========== 新增：辅助服务板块 ========== -->
+    <div class="section" id="assist">
+        <h2>🤖辅助服务</h2>
+        <button class="jump-btn" id="assistBtn">托管养号｜快速刷墙｜奶号出租｜部落招人</button>
     </div>
 
     <!-- 新增联盟占卜师板块 -->
@@ -873,7 +1038,7 @@
         <h2>🃏联盟占卜师</h2>
         <button class="divination-btn" id="fortuneBtn">点击获取今日运势</button>
         <!-- 占卜次数统计显示 -->
-        <div class="fortune-count" id="fortuneCount">【本月已占卜0次】</div>
+        <div class="fortune-count" id="fortuneCount">【总占卜次数：0次】</div>
     </div>
 
     <div class="section" id="recruit">
@@ -1093,50 +1258,41 @@
             carouselInterval = setInterval(autoCarousel, 5000);
         });
 
-        // ========== 占卜次数统计功能 ==========
+        // ========== 占卜次数统计功能（修改为全局总数） ==========
         const fortuneCountEl = document.getElementById('fortuneCount');
-        const STORAGE_KEY = 'dt_fortune_count';
+        const STORAGE_KEY = 'dt_total_fortune_count'; // 修改存储键名
         
-        // 初始化占卜次数
+        // 初始化占卜总次数
         function initFortuneCount() {
-            // 获取当前日期
-            const now = new Date();
-            const currentMonth = now.getMonth() + 1;
-            const currentYear = now.getFullYear();
-            
-            // 从本地存储获取数据
-            let countData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"count":0,"month":0,"year":0}');
-            
-            // 检查是否需要重置（每月1日8点）
-            if (now.getDate() === 1 && now.getHours() >= 8) {
-                // 1日8点后，检查是否是新月份
-                if (countData.month !== currentMonth || countData.year !== currentYear) {
-                    countData = {
-                        count: 0,
-                        month: currentMonth,
-                        year: currentYear
-                    };
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify(countData));
-                }
-            }
-            
+            // 从本地存储获取总次数，不存在则初始化为0
+            let totalCount = parseInt(localStorage.getItem(STORAGE_KEY)) || 0;
             // 更新显示
-            updateFortuneCountDisplay(countData.count);
-            return countData;
+            updateFortuneCountDisplay(totalCount);
+            return totalCount;
         }
         
         // 更新占卜次数显示
         function updateFortuneCountDisplay(count) {
-            fortuneCountEl.textContent = `【本月已占卜${count}次】`;
+            fortuneCountEl.textContent = `【总占卜次数：${count}次】`;
         }
         
-        // 增加占卜次数
+        // 增加占卜总次数
         function incrementFortuneCount() {
-            let countData = initFortuneCount();
-            countData.count += 1;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(countData));
-            updateFortuneCountDisplay(countData.count);
+            let totalCount = initFortuneCount();
+            totalCount += 1;
+            localStorage.setItem(STORAGE_KEY, totalCount.toString());
+            updateFortuneCountDisplay(totalCount);
+            
+            // 发送存储事件，让其他打开的页面同步更新
+            window.localStorage.setItem('dt_fortune_update', Date.now().toString());
         }
+        
+        // 监听存储变化，同步更新所有页面的计数
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'dt_fortune_update') {
+                initFortuneCount();
+            }
+        });
         
         // 初始化占卜次数显示
         initFortuneCount();
@@ -1188,7 +1344,7 @@
 
         // 绑定占卜按钮点击事件（增加次数统计）
         fortuneBtn.addEventListener('click', () => {
-            // 增加占卜次数
+            // 增加占卜总次数
             incrementFortuneCount();
             
             // 重置之前的动画
@@ -1211,37 +1367,155 @@
             }
         });
 
-        // ========== 微信小程序跳转功能（全新配置） ==========
+        // ========== 阵型查找按钮跳转链接（核心修改） ==========
         const formationBtn = document.getElementById('formationBtn');
         
-        // 检测是否在微信环境
-        function isWeChatEnv() {
-            return /MicroMessenger/i.test(navigator.userAgent);
-        }
+        // 绑定按钮点击事件 - 跳转指定链接
+        formationBtn.addEventListener('click', function() {
+            // 打开指定链接，_blank表示在新标签页打开
+            window.open('https://coc.6oh.cn/?lx=1&name=%E9%B8%A1%E4%BD%A0%E5%A4%AA%E7%BE%8E', '_blank');
+        });
 
-        // 小程序跳转核心函数
-        function jumpToMiniProgram() {
-            if (isWeChatEnv()) {
-                // 微信环境下跳转小程序
-                wx.miniProgram.navigateTo({
-                    appId: 'wxb01eb2dd539123d0', // 你的小程序APPID
-                    path: 'pages/index/index',   // 小程序跳转路径
-                    success: function(res) {
-                        console.log('跳转小程序成功', res);
-                    },
-                    fail: function(err) {
-                        console.error('跳转小程序失败', err);
-                        alert('跳转失败，请手动打开小程序！\n小程序APPID：wxb01eb2dd539123d0');
-                    }
-                });
-            } else {
-                // 非微信环境提示
-                alert('请在微信中打开此页面，点击按钮即可跳转至阵型查找小程序！\n小程序APPID：wxb01eb2dd539123d0');
+        // ========== 新增：辅助服务图片弹窗功能 ==========
+        const assistBtn = document.getElementById('assistBtn');
+        const assistImageModal = document.getElementById('assistImageModal');
+        const assistImage = document.getElementById('assistImage');
+
+        // 打开辅助服务图片弹窗
+        assistBtn.addEventListener('click', function() {
+            assistImageModal.classList.add('active');
+        });
+
+        // 点击图片外区域关闭弹窗，点击图片本身不关闭
+        assistImageModal.addEventListener('click', function(e) {
+            if (e.target !== assistImage) {
+                assistImageModal.classList.remove('active');
             }
-        }
+        });
 
-        // 绑定阵型查找按钮点击事件
-        formationBtn.addEventListener('click', jumpToMiniProgram);
+        // ========== 新增：钢笔按钮和留言板功能 ==========
+        const penBtn = document.getElementById('penBtn');
+        const messageBoard = document.getElementById('messageBoard');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const messageContainer = document.getElementById('messageContainer');
+        
+        // 存储留言的数组（本地存储）
+        const MESSAGES_STORAGE_KEY = 'dt_message_board_messages';
+        let messages = JSON.parse(localStorage.getItem(MESSAGES_STORAGE_KEY)) || [];
+        
+        // 切换留言板显示/隐藏
+        penBtn.addEventListener('click', function() {
+            messageBoard.classList.toggle('show');
+            penBtn.classList.toggle('active');
+            
+            // 如果显示留言板，启动弹幕播放
+            if (messageBoard.classList.contains('show')) {
+                startDanmuAnimation();
+            }
+        });
+        
+        // 保存留言到本地存储
+        function saveMessages() {
+            localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(messages));
+        }
+        
+        // 创建弹幕元素
+        function createDanmu(text) {
+            if (!text.trim()) return;
+            
+            const danmu = document.createElement('div');
+            danmu.className = 'danmu';
+            danmu.textContent = text;
+            
+            // 随机位置（垂直）
+            const containerHeight = messageContainer.clientHeight;
+            const randomTop = Math.floor(Math.random() * (containerHeight - 40)) + 10;
+            danmu.style.top = `${randomTop}px`;
+            
+            // 随机颜色
+            const colors = ['#64b5f6', '#4caf50', '#ff9800', '#9c27b0', '#f44336', '#ffeb3b'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            danmu.style.background = `rgba(${hexToRgb(randomColor).r}, ${hexToRgb(randomColor).g}, ${hexToRgb(randomColor).b}, 0.8)`;
+            
+            // 随机动画时长（5-15秒）
+            const randomDuration = Math.floor(Math.random() * 10) + 5;
+            danmu.style.animationDuration = `${randomDuration}s`;
+            
+            // 添加到容器
+            messageContainer.appendChild(danmu);
+            
+            // 动画结束后移除
+            setTimeout(() => {
+                danmu.remove();
+            }, randomDuration * 1000);
+        }
+        
+        // 十六进制转RGB
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : { r: 100, g: 181, b: 246 };
+        }
+        
+        // 启动弹幕动画
+        function startDanmuAnimation() {
+            if (messages.length === 0) return;
+            
+            // 清除现有弹幕
+            messageContainer.innerHTML = '';
+            
+            // 定时播放弹幕
+            const playDanmu = () => {
+                if (!messageBoard.classList.contains('show')) return;
+                
+                const randomIndex = Math.floor(Math.random() * messages.length);
+                createDanmu(messages[randomIndex]);
+                
+                // 随机间隔（1-3秒）播放下一条
+                const randomInterval = Math.floor(Math.random() * 2000) + 1000;
+                setTimeout(playDanmu, randomInterval);
+            };
+            
+            playDanmu();
+        }
+        
+        // 发送留言
+        sendBtn.addEventListener('click', function() {
+            const text = messageInput.value.trim();
+            if (!text) {
+                alert('请输入留言内容！');
+                return;
+            }
+            
+            // 添加到留言数组
+            messages.push(text);
+            // 限制最多保存100条留言
+            if (messages.length > 100) {
+                messages.shift();
+            }
+            // 保存到本地存储
+            saveMessages();
+            // 清空输入框
+            messageInput.value = '';
+            // 立即显示这条弹幕
+            createDanmu(text);
+        });
+        
+        // 按回车发送留言
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendBtn.click();
+            }
+        });
+        
+        // 初始化时如果留言板是显示状态，启动弹幕
+        if (messageBoard.classList.contains('show')) {
+            startDanmuAnimation();
+        }
     });
 </script>
 </body>
