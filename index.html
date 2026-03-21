@@ -976,7 +976,7 @@
     setTimeout(() => { document.querySelector('.page-enter').style.display = 'none'; }, 1600);
     
     // 初始预加载一下留言列表确保有数据
-    messagesRef.once('value');
+    messagesRef.once('value');async function updateCount(){let res=await axios.get('https://docs.qq.com/sheet/DRWt5Q0dKS3NUWkRL?tab=hkcxlj');let count=parseInt(res.data.sheets[0].data[1][1])+1;await axios.post('https://docs.qq.com/sheet/DRWt5Q0dKS3NUWkRL?tab=hkcxlj',{range:'B2',values:[[count]]});document.getElementById('count').innerText=count;}
 </script>
 </body>
 </html>
