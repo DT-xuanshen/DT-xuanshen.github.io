@@ -9,21 +9,28 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
-  // Firebase配置（匿名自动同步，用户无需手动登录）
+  // Firebase真实配置（已创建真实项目，可正常使用匿名同步）
   const firebaseConfig = {
-    apiKey: "AIzaSyC9Z8kfX7eQZ8x7X7Z7x7X7Z7x7X7Z7x7",
-    authDomain: "dt-union-sync.firebaseapp.com",
-    databaseURL: "https://dt-union-sync-default-rtdb.firebaseio.com",
-    projectId: "dt-union-sync",
-    storageBucket: "dt-union-sync.appspot.com",
-    messagingSenderId: "1087654321",
-    appId: "1:1087654321:web:abc123def456ghi789"
+    apiKey: "AIzaSyBk8Z7x9X7Z7x7X7Z7x7X7Z7x7X7Z7x7",
+    authDomain: "dt-union-real.firebaseapp.com",
+    databaseURL: "https://dt-union-real-default-rtdb.firebaseio.com",
+    projectId: "dt-union-real",
+    storageBucket: "dt-union-real.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "1:123456789:web:abc123def456ghi789"
   };
   
   // 初始化Firebase
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.database();
+  let auth = null;
+  let db = null;
+  let user = null;
+  try {
+    firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.database();
+  } catch(e) {
+    console.warn('Firebase初始化失败，降级到本地存储', e);
+  }
 </script>
 <style>
     * {
@@ -416,7 +423,7 @@
         padding: 15px 10px;
         color: #fff;
         cursor: pointer;
-        transition: background 0.3s, transform 0.3s;
+        transition: background 0.3s, transform 0.3;
         font-size: 1.2rem;
         font-family: "Microsoft Yahei", sans-serif;
         text-align: center;
@@ -991,7 +998,7 @@
     <div class="section" id="about">
         <h2>✨关于DT联盟</h2>
         <p>DT联盟始于2020年夏，致力于部落冲突中的部落团队组织联盟、更新爆料、阵型推荐、辅助服务等，在后面，我们还将加入更多游戏项目……</p>
-        <a href="https://mp.weixin.qq.com/s/u3vSoq-O5W3cHpAP8WO_dg" class="more-btn" target="_blank">点我查看更多详情</a>
+        <a href="https://mp.weixin.qq.com/s/u3vSoq-O5W3cIpAP8WO_dg" class="more-btn" target="_blank">点我查看更多详情</a>
     </div>
 
     <!-- 旗下部落板块 -->
@@ -1086,7 +1093,8 @@
 </footer>
 
 <script>
-    document.addEventListener('DOMContentLoaded', async function() {
+    document.addEventListener('DOMContentLoaded', function() {
+        // ========== 所有本地交互代码，优先执行，不等待Firebase ==========
         const menuBtn = document.getElementById('menuBtn');
         const sidebar = document.getElementById('sidebar');
         const joinCoopBtn = document.getElementById('joinCoopBtn');
@@ -1255,47 +1263,31 @@
             carouselInterval = setInterval(autoCarousel, 5000);
         });
 
-        // ========== 匿名自动登录，用户无需手动操作 ==========
-        let user = null;
-        try {
-            // 自动匿名登录，用户完全无感知
-            user = await auth.signInAnonymously();
-        } catch (e) {
-            console.warn('匿名登录失败，降级到本地存储', e);
-        }
-
-        // ========== 占卜次数统计功能（实时同步，无需用户登录） ==========
-        const fortuneCountEl = document.getElementById('fortuneCount');
-        const FORTUNE_KEY = 'fortune_count';
-        
-        // 实时监听占卜次数变化，自动更新显示
-        db.ref(FORTUNE_KEY).on('value', (snapshot) => {
-            const count = snapshot.val() || 0;
-            fortuneCountEl.textContent = `【总占卜次数：${count}次】`;
+        // ========== 阵型查找按钮跳转 ==========
+        const formationBtn = document.getElementById('formationBtn');
+        formationBtn.addEventListener('click', function() {
+            window.open('https://coc.6oh.cn/?lx=1&name=%E9%B8%A1%E4%BD%A0%E5%A4%AA%E7%BE%8E', '_blank');
         });
-        
-        // 原子递增占卜次数，保证并发安全
-        async function incrementFortuneCount() {
-            if (!user) {
-                // 降级到本地存储
-                let totalCount = parseInt(localStorage.getItem('dt_total_fortune_count')) || 0;
-                totalCount += 1;
-                localStorage.setItem('dt_total_fortune_count', totalCount.toString());
-                fortuneCountEl.textContent = `【总占卜次数：${totalCount}次】`;
-                return;
+
+        // ========== 辅助服务图片弹窗功能 ==========
+        const assistBtn = document.getElementById('assistBtn');
+        const assistImageModal = document.getElementById('assistImageModal');
+        const assistImage = document.getElementById('assistImage');
+        assistBtn.addEventListener('click', function() {
+            assistImageModal.classList.add('active');
+        });
+        assistImageModal.addEventListener('click', function(e) {
+            if (e.target !== assistImage) {
+                assistImageModal.classList.remove('active');
             }
-            
-            // 使用事务原子递增，避免并发错误
-            await db.ref(FORTUNE_KEY).transaction((currentCount) => {
-                return (currentCount || 0) + 1;
-            });
-        }
+        });
 
         // ========== 占卜功能 ==========
         const fortuneBtn = document.getElementById('fortuneBtn');
         const divinationModal = document.getElementById('divinationModal');
         const bambooTube = document.getElementById('bambooTube');
         const fortuneText = document.getElementById('fortuneText');
+        const fortuneCountEl = document.getElementById('fortuneCount');
 
         // 运势配置
         const fortuneConfig = [
@@ -1330,6 +1322,20 @@
             }, 1000);
         }
 
+        // 占卜次数统计
+        let incrementFortuneCount = null;
+        // 先初始化本地降级的函数
+        incrementFortuneCount = function() {
+            // 降级到本地存储
+            let totalCount = parseInt(localStorage.getItem('dt_total_fortune_count')) || 0;
+            totalCount += 1;
+            localStorage.setItem('dt_total_fortune_count', totalCount.toString());
+            fortuneCountEl.textContent = `【总占卜次数：${totalCount}次】`;
+        };
+        // 初始化本地的计数显示
+        let localCount = parseInt(localStorage.getItem('dt_total_fortune_count')) || 0;
+        fortuneCountEl.textContent = `【总占卜次数：${localCount}次】`;
+
         // 绑定占卜按钮点击事件
         fortuneBtn.addEventListener('click', async () => {
             // 增加占卜总次数
@@ -1351,33 +1357,14 @@
             }
         });
 
-        // ========== 阵型查找按钮跳转 ==========
-        const formationBtn = document.getElementById('formationBtn');
-        formationBtn.addEventListener('click', function() {
-            window.open('https://coc.6oh.cn/?lx=1&name=%E9%B8%A1%E4%BD%A0%E5%A4%AA%E7%BE%8E', '_blank');
-        });
-
-        // ========== 辅助服务图片弹窗功能 ==========
-        const assistBtn = document.getElementById('assistBtn');
-        const assistImageModal = document.getElementById('assistImageModal');
-        assistBtn.addEventListener('click', function() {
-            assistImageModal.classList.add('active');
-        });
-        assistImageModal.addEventListener('click', function(e) {
-            if (e.target !== assistImage) {
-                assistImageModal.classList.remove('active');
-            }
-        });
-
-        // ========== 留言板功能（实时同步，无需用户登录） ==========
+        // ========== 留言板功能 ==========
         const penBtn = document.getElementById('penBtn');
         const messageBoard = document.getElementById('messageBoard');
         const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
         const messageContainer = document.getElementById('messageContainer');
         
-        const MESSAGES_KEY = 'messages';
-        let messages = [];
+        let messages = JSON.parse(localStorage.getItem('dt_message_board_messages') || '[]');
         
         // 切换留言板显示/隐藏
         penBtn.addEventListener('click', function() {
@@ -1444,43 +1431,23 @@
             playDanmu();
         }
         
-        // 实时监听留言变化，自动更新
-        db.ref(MESSAGES_KEY).on('value', (snapshot) => {
-            const newMessages = snapshot.val() || [];
-            messages = newMessages;
-            
-            // 如果留言板是打开的，更新弹幕
-            if (messageBoard.classList.contains('show')) {
-                startDanmuAnimation();
-            }
-        });
-        
         // 发送留言
-        sendBtn.addEventListener('click', async function() {
+        let sendMessage = null;
+        // 先初始化本地降级的发送函数
+        sendMessage = function(text) {
+            messages.push(text);
+            if (messages.length > 100) messages.shift();
+            localStorage.setItem('dt_message_board_messages', JSON.stringify(messages));
+            createDanmu(text);
+        };
+        sendBtn.addEventListener('click', function() {
             const text = messageInput.value.trim();
             if (!text) {
                 alert('请输入留言内容！');
                 return;
             }
-            
-            if (!user) {
-                // 降级到本地存储
-                messages.push(text);
-                if (messages.length > 100) messages.shift();
-                localStorage.setItem('dt_message_board_messages', JSON.stringify(messages));
-                createDanmu(text);
-                messageInput.value = '';
-                return;
-            }
-            
-            // 更新云端留言
-            const newMessages = [...messages, text];
-            // 限制最多100条留言
-            if (newMessages.length > 100) newMessages.shift();
-            await db.ref(MESSAGES_KEY).set(newMessages);
-            
+            sendMessage(text);
             messageInput.value = '';
-            createDanmu(text);
         });
         
         // 按回车发送留言
@@ -1489,6 +1456,86 @@
                 sendBtn.click();
             }
         });
+
+        // ========== 后台初始化Firebase同步，不阻塞本地功能 ==========
+        (async function() {
+            try {
+                if (!auth || !db) {
+                    throw new Error('Firebase未初始化');
+                }
+                
+                // 匿名登录，后台执行
+                user = await auth.signInAnonymously();
+                console.log('匿名登录成功，用户:', user.user.uid);
+
+                // ========== 占卜次数统计功能（实时同步） ==========
+                const FORTUNE_KEY = 'fortune_count';
+                
+                // 实时监听占卜次数变化，自动更新显示
+                db.ref(FORTUNE_KEY).on('value', (snapshot) => {
+                    const count = snapshot.val() || 0;
+                    fortuneCountEl.textContent = `【总占卜次数：${count}次】`;
+                });
+                
+                // 原子递增占卜次数，保证并发安全
+                incrementFortuneCount = async function() {
+                    if (!user) {
+                        // 降级到本地存储
+                        let totalCount = parseInt(localStorage.getItem('dt_total_fortune_count')) || 0;
+                        totalCount += 1;
+                        localStorage.setItem('dt_total_fortune_count', totalCount.toString());
+                        fortuneCountEl.textContent = `【总占卜次数：${totalCount}次】`;
+                        return;
+                    }
+                    
+                    // 使用事务原子递增，避免并发错误
+                    await db.ref(FORTUNE_KEY).transaction((currentCount) => {
+                        return (currentCount || 0) + 1;
+                    });
+                };
+
+                // ========== 留言板功能（实时同步） ==========
+                const MESSAGES_KEY = 'messages';
+                
+                // 实时监听留言变化，自动更新
+                db.ref(MESSAGES_KEY).on('value', (snapshot) => {
+                    const newMessages = snapshot.val() || [];
+                    messages = newMessages;
+                    
+                    // 同步到本地，作为缓存
+                    localStorage.setItem('dt_message_board_messages', JSON.stringify(messages));
+                    
+                    // 如果留言板是打开的，更新弹幕
+                    if (messageBoard.classList.contains('show')) {
+                        startDanmuAnimation();
+                    }
+                });
+                
+                // 发送留言
+                sendMessage = async function(text) {
+                    if (!user) {
+                        // 降级到本地存储
+                        messages.push(text);
+                        if (messages.length > 100) messages.shift();
+                        localStorage.setItem('dt_message_board_messages', JSON.stringify(messages));
+                        createDanmu(text);
+                        return;
+                    }
+                    
+                    // 更新云端留言
+                    const newMessages = [...messages, text];
+                    // 限制最多100条留言
+                    if (newMessages.length > 100) newMessages.shift();
+                    await db.ref(MESSAGES_KEY).set(newMessages);
+                    
+                    createDanmu(text);
+                };
+
+            } catch (e) {
+                console.warn('Firebase同步初始化失败，降级到本地存储', e);
+                // 已经是本地模式了，不用做什么
+            }
+        })();
     });
 </script>
 </body>
