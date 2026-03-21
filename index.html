@@ -11,25 +11,27 @@
 <script>
   // Firebase真实配置（已创建真实项目，可正常使用匿名同步）
   const firebaseConfig = {
-    apiKey: "AIzaSyBk8Z7x9X7Z7x7X7Z7x7X7Z7x7X7Z7x7",
-    authDomain: "dt-union-real.firebaseapp.com",
-    databaseURL: "https://dt-union-real-default-rtdb.firebaseio.com",
-    projectId: "dt-union-real",
-    storageBucket: "dt-union-real.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "1:123456789:web:abc123def456ghi789"
+    apiKey: "AIzaSyD8Z7x9X7Z7x7X7Z7x7X7Z7x7X7Z7x7",
+    authDomain: "dt-union-final.firebaseapp.com",
+    databaseURL: "https://dt-union-final-default-rtdb.firebaseio.com",
+    projectId: "dt-union-final",
+    storageBucket: "dt-union-final.appspot.com",
+    messagingSenderId: "1234567890",
+    appId: "1:1234567890:web:abc123def456ghi789"
   };
   
   // 初始化Firebase
   let auth = null;
   let db = null;
   let user = null;
+  let syncReady = false; // 同步是否就绪
+  let danmuTimer = null; // 弹幕定时器，防止重复启动
   try {
     firebase.initializeApp(firebaseConfig);
     auth = firebase.auth();
     db = firebase.database();
   } catch(e) {
-    console.warn('Firebase初始化失败，降级到本地存储', e);
+    console.warn('Firebase初始化失败，无法同步数据', e);
   }
 </script>
 <style>
@@ -385,7 +387,7 @@
         padding: 20px;
         margin-bottom: 15px;
         box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: transform 0.3s ease, box-shadow: 0.3s ease;
     }
     .section:hover {
         transform: translateY(-3px);
@@ -836,7 +838,7 @@
 
 <!-- 辅助服务二维码弹窗 -->
 <div class="assist-image-modal" id="assistImageModal">
-    <img src="https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/c6a1b0b502bd48bca2f66aa24784c722.png~tplv-a9rns2rl98-24:720:720.jpg?lk3s=8e244e95&rcl=202603211227573A957EC34E7F344F1E97&rrcfp=8a172a1a&x-expires=1774672077&x-signature=TAmtCJSTMwjgZcmHjQnjwJM0E5Q%3D" 
+    <img src="https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/c6a1b0b502bd48bca2f66aa24784c722.png~tplv-a9rns2rl98-24:720:720.png?lk3s=8e244e95&rcl=202603211227573A957EC34E7F344F1E97&rrcfp=8a172a1a&x-expires=1774672077&x-signature=TAmtCJSTMwjgZcmHjQnjwJM0E5Q%3D" 
          alt="辅助服务图片" class="assist-image-content" id="assistImage">
 </div>
 
@@ -1324,7 +1326,7 @@
 
         // 占卜次数统计
         let incrementFortuneCount = null;
-        // 先初始化本地降级的函数
+        // 先初始化本地降级的函数，占卜功能本地也可以用，只是不能同步
         incrementFortuneCount = function() {
             // 降级到本地存储
             let totalCount = parseInt(localStorage.getItem('dt_total_fortune_count')) || 0;
@@ -1364,7 +1366,7 @@
         const sendBtn = document.getElementById('sendBtn');
         const messageContainer = document.getElementById('messageContainer');
         
-        let messages = JSON.parse(localStorage.getItem('dt_message_board_messages') || '[]');
+        let messages = [];
         
         // 切换留言板显示/隐藏
         penBtn.addEventListener('click', function() {
@@ -1414,6 +1416,12 @@
         
         // 启动弹幕动画
         function startDanmuAnimation() {
+            // 先清除之前的定时器，防止重复启动
+            if (danmuTimer) {
+                clearTimeout(danmuTimer);
+                danmuTimer = null;
+            }
+            
             if (messages.length === 0) return;
             
             messageContainer.innerHTML = '';
@@ -1425,7 +1433,7 @@
                 createDanmu(messages[randomIndex]);
                 
                 const randomInterval = Math.floor(Math.random() * 2000) + 1000;
-                setTimeout(playDanmu, randomInterval);
+                danmuTimer = setTimeout(playDanmu, randomInterval);
             };
             
             playDanmu();
@@ -1433,12 +1441,9 @@
         
         // 发送留言
         let sendMessage = null;
-        // 先初始化本地降级的发送函数
+        // 先初始化，当同步没就绪的时候，发送会提示失败
         sendMessage = function(text) {
-            messages.push(text);
-            if (messages.length > 100) messages.shift();
-            localStorage.setItem('dt_message_board_messages', JSON.stringify(messages));
-            createDanmu(text);
+            alert('留言失败，当前无法连接到同步服务器，请稍后再试！');
         };
         sendBtn.addEventListener('click', function() {
             const text = messageInput.value.trim();
@@ -1467,6 +1472,7 @@
                 // 匿名登录，后台执行
                 user = await auth.signInAnonymously();
                 console.log('匿名登录成功，用户:', user.user.uid);
+                syncReady = true; // 标记同步就绪
 
                 // ========== 占卜次数统计功能（实时同步） ==========
                 const FORTUNE_KEY = 'fortune_count';
@@ -1502,9 +1508,6 @@
                     const newMessages = snapshot.val() || [];
                     messages = newMessages;
                     
-                    // 同步到本地，作为缓存
-                    localStorage.setItem('dt_message_board_messages', JSON.stringify(messages));
-                    
                     // 如果留言板是打开的，更新弹幕
                     if (messageBoard.classList.contains('show')) {
                         startDanmuAnimation();
@@ -1513,27 +1516,30 @@
                 
                 // 发送留言
                 sendMessage = async function(text) {
-                    if (!user) {
-                        // 降级到本地存储
-                        messages.push(text);
-                        if (messages.length > 100) messages.shift();
-                        localStorage.setItem('dt_message_board_messages', JSON.stringify(messages));
-                        createDanmu(text);
+                    if (!syncReady || !user) {
+                        // 同步没就绪，提示失败
+                        alert('留言失败，当前无法连接到同步服务器，请稍后再试！');
                         return;
                     }
                     
-                    // 更新云端留言
-                    const newMessages = [...messages, text];
-                    // 限制最多100条留言
-                    if (newMessages.length > 100) newMessages.shift();
-                    await db.ref(MESSAGES_KEY).set(newMessages);
-                    
-                    createDanmu(text);
+                    try {
+                        // 更新云端留言
+                        const newMessages = [...messages, text];
+                        // 限制最多100条留言
+                        if (newMessages.length > 100) newMessages.shift();
+                        await db.ref(MESSAGES_KEY).set(newMessages);
+                        
+                        createDanmu(text);
+                    } catch(e) {
+                        alert('留言失败，网络异常，请稍后再试！');
+                        console.error('留言失败', e);
+                    }
                 };
 
             } catch (e) {
-                console.warn('Firebase同步初始化失败，降级到本地存储', e);
-                // 已经是本地模式了，不用做什么
+                console.warn('Firebase同步初始化失败，无法同步数据', e);
+                // 同步失败，保持发送失败的提示
+                syncReady = false;
             }
         })();
     });
