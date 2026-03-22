@@ -6,7 +6,7 @@
 <title>DT联盟 - 云端同步版</title>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <style>
-    /* 原有样式保持不变，此处省略（完整保留你原有的所有样式） */
+    /* 所有样式保持不变，完整保留 */
     * {
         margin: 0;
         padding: 0;
@@ -753,18 +753,20 @@
 <footer><p>&copy; 2026 DT联盟. All Rights Reserved.</p></footer>
 
 <script>
-    // ====================== Gitee 配置（已替换为你的信息） ======================
+    // ====================== 核心修复：Gitee配置（新token+中文仓库名编码+跨域代理） ======================
+    // 读取文件的地址（保留原地址，加时间戳防缓存）
     const MESSAGES_URL = "https://gitee.com/jiang-lingxiang/DT官网/raw/master/messages.json";
     const FORTUNE_COUNT_URL = "https://gitee.com/jiang-lingxiang/DT官网/raw/master/fortuneCount.json";
     
-    // Gitee API配置
+    // Gitee API配置（关键修改：中文仓库名编码+新token）
     const GITEE_API_CONFIG = {
         owner: 'jiang-lingxiang',
-        repo: 'DT官网',
+        repo: encodeURIComponent('DT官网'), // 中文仓库名URL编码
         branch: 'master',
-        token: 'bd8a88437fb5b27585b5b465c5707746', // 你的私人令牌
-        messagesPath: 'messages.json', // 根目录
-        fortunePath: 'fortuneCount.json' // 根目录
+        token: '6eeb3396b4d1998db2a62070a11c7489', // 你的新令牌
+        messagesPath: 'messages.json',
+        fortunePath: 'fortuneCount.json',
+        corsProxy: 'https://proxy.cors.sh/' // 跨域代理地址
     };
 
     // 全局变量
@@ -780,10 +782,9 @@
         ipRecords: {} // 存储IP提交记录 {ip: [{time: 时间戳}, ...]}
     };
 
-    // ====================== 获取用户IP（简化版，实际生产建议用专业接口） ======================
+    // ====================== 获取用户IP ======================
     async function getUserIP() {
         try {
-            // 免费IP查询接口，备用：https://api.ipify.org?format=json
             const res = await fetch('https://api.ipify.org?format=json');
             const data = await res.json();
             return data.ip || 'unknown';
@@ -799,7 +800,6 @@
         const now = Date.now();
         const oneMinute = 60 * 1000; // 1分钟毫秒数
 
-        // 初始化IP记录
         if (!MESSAGE_LIMITS.ipRecords[ip]) {
             MESSAGE_LIMITS.ipRecords[ip] = [];
         }
@@ -807,22 +807,19 @@
         // 过滤1分钟前的记录
         MESSAGE_LIMITS.ipRecords[ip] = MESSAGE_LIMITS.ipRecords[ip].filter(item => now - item.time < oneMinute);
         
-        // 检查是否超过限制
         if (MESSAGE_LIMITS.ipRecords[ip].length >= MESSAGE_LIMITS.maxCountPerMinute) {
             alert(`当前IP(${ip})1分钟内最多只能提交${MESSAGE_LIMITS.maxCountPerMinute}条留言，请稍后再试！`);
             return false;
         }
 
-        // 记录本次提交时间
         MESSAGE_LIMITS.ipRecords[ip].push({ time: now });
         return true;
     }
 
-    // ====================== Gitee API 核心函数（读取+写入） ======================
-    // 读取Gitee文件内容（关键修复：添加时间戳避免缓存）
+    // ====================== 核心修复：Gitee API函数（跨域代理+中文仓库名） ======================
+    // 读取Gitee文件内容
     async function fetchGiteeFile(url) {
         try {
-            // 添加时间戳参数，强制浏览器不缓存
             const urlWithTimestamp = `${url}?t=${new Date().getTime()}`;
             const response = await fetch(urlWithTimestamp, {
                 method: 'GET',
@@ -837,7 +834,6 @@
             if (response.ok) {
                 return await response.json();
             } else if (response.status === 404) {
-                // 文件不存在时返回默认值
                 return url.includes('messages') ? [] : { count: 0 };
             } else {
                 console.error('读取Gitee文件失败:', response.status);
@@ -849,20 +845,25 @@
         }
     }
 
-    // 写入Gitee文件（关键修复：完善文件不存在时的创建逻辑）
+    // 写入Gitee文件（核心修复：跨域代理+中文仓库名编码）
     async function writeGiteeFile(path, content) {
-        if (!GITEE_API_CONFIG.token) { // 修复token变量名错误
+        if (!GITEE_API_CONFIG.token) {
             alert('未配置Gitee Token，无法同步数据到云端！请先配置token。');
             console.log('未配置Gitee token，跳过云端写入');
             return false;
         }
 
         try {
-            // 先获取文件的sha（Gitee要求更新文件时需要）
-            const shaResponse = await fetch(`https://gitee.com/api/v5/repos/${GITEE_API_CONFIG.owner}/${GITEE_API_CONFIG.repo}/contents/${path}?ref=${GITEE_API_CONFIG.branch}`, {
+            // 构建完整API地址（跨域代理 + 编码后的仓库名）
+            const baseApiUrl = `${GITEE_API_CONFIG.corsProxy}https://gitee.com/api/v5/repos/${GITEE_API_CONFIG.owner}/${GITEE_API_CONFIG.repo}/contents/${path}`;
+            const shaUrl = `${baseApiUrl}?ref=${GITEE_API_CONFIG.branch}`;
+
+            // 先获取文件的sha
+            const shaResponse = await fetch(shaUrl, {
                 headers: {
-                    'Authorization': `token ${GITEE_API_CONFIG.token}`, // 修复token变量名错误
-                    'Cache-Control': 'no-cache'
+                    'Authorization': `token ${GITEE_API_CONFIG.token}`,
+                    'Cache-Control': 'no-cache',
+                    'x-cors-api-key': 'temp_key' // 跨域代理临时key
                 }
             });
 
@@ -871,10 +872,11 @@
                 const shaData = await shaResponse.json();
                 sha = shaData.sha || '';
             } else if (shaResponse.status === 404) {
-                // 文件不存在，sha留空（Gitee会自动创建）
-                sha = '';
+                sha = ''; // 文件不存在，sha留空
             } else {
-                console.error('获取文件SHA失败:', shaResponse.status);
+                const errorData = await shaResponse.json();
+                console.error('获取文件SHA失败:', errorData);
+                alert(`获取文件信息失败：${errorData.message || '未知错误'}`);
                 return false;
             }
 
@@ -882,13 +884,14 @@
             const contentStr = JSON.stringify(content, null, 2);
             const base64Content = btoa(unescape(encodeURIComponent(contentStr)));
 
-            // 写入文件
-            const response = await fetch(`https://gitee.com/api/v5/repos/${GITEE_API_CONFIG.owner}/${GITEE_API_CONFIG.repo}/contents/${path}`, {
+            // 写入文件（使用跨域代理）
+            const response = await fetch(baseApiUrl, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `token ${GITEE_API_CONFIG.token}`, // 修复token变量名错误
+                    'Authorization': `token ${GITEE_API_CONFIG.token}`,
                     'Content-Type': 'application/json',
-                    'Cache-Control': 'no-cache'
+                    'Cache-Control': 'no-cache',
+                    'x-cors-api-key': 'temp_key' // 跨域代理临时key
                 },
                 body: JSON.stringify({
                     content: base64Content,
@@ -900,7 +903,7 @@
 
             if (response.ok) {
                 console.log(`成功写入${path}到Gitee`);
-                // 写入成功后，立即重新读取最新数据（确保本地和云端一致）
+                // 同步后重新读取最新数据
                 if (path === GITEE_API_CONFIG.messagesPath) {
                     await loadMessagesFromGitee();
                 } else if (path === GITEE_API_CONFIG.fortunePath) {
@@ -910,12 +913,12 @@
             } else {
                 const errorData = await response.json();
                 console.error('写入Gitee失败:', errorData);
-                alert(`同步失败：${errorData.message || '未知错误'}`);
+                alert(`同步失败：${errorData.message || 'Gitee API返回错误'}`);
                 return false;
             }
         } catch (error) {
             console.error('写入Gitee异常:', error);
-            alert('同步到云端时发生错误，请检查网络或token配置！');
+            alert('同步到云端时发生错误，请检查网络或稍后再试！');
             return false;
         }
     }
@@ -926,82 +929,64 @@
         document.getElementById('fortuneCount').textContent = `【总占卜次数：${fortuneCount}次】`;
     }
 
-    // 从Gitee读取占卜次数
     async function loadFortuneCountFromGitee() {
         const data = await fetchGiteeFile(FORTUNE_COUNT_URL);
         updateFortuneDisplay(data.count || 0);
     }
 
-    // 增加占卜次数（本地+云端同步）
     async function incrementFortuneCount() {
-        // 本地先更新，提升体验
         fortuneCount += 1;
         updateFortuneDisplay(fortuneCount);
-        
-        // 同步到Gitee
         await writeGiteeFile(GITEE_API_CONFIG.fortunePath, { count: fortuneCount });
     }
     
-    // ====================== 留言板 Gitee 同步 & 弹幕系统 ======================
-    // 从Gitee读取留言（关键修复：读取后立即更新弹幕）
+    // ====================== 留言板同步 & 弹幕系统 ======================
     async function loadMessagesFromGitee() {
         const data = await fetchGiteeFile(MESSAGES_URL);
         currentMessagesList = Array.isArray(data) ? data : [];
         console.log('从Gitee加载留言成功，共', currentMessagesList.length, '条');
         
-        // 强制更新弹幕显示
         if (isBoardVisible) {
             clearDanmuContainer();
             restartDanmuPlay();
-            // 立即显示所有留言（可选）
             currentMessagesList.forEach(msg => {
                 setTimeout(() => createDanmu(msg), Math.random() * 3000);
             });
         }
     }
 
-    // 添加新留言（增加长度+IP限制）
     async function addMessage(text) {
-        // 1. 空值校验
         if (!text.trim()) {
             alert('留言内容不能为空！');
             return;
         }
 
-        // 2. 长度校验
         if (text.length > MESSAGE_LIMITS.maxLength) {
             alert(`单条留言最多只能输入${MESSAGE_LIMITS.maxLength}个字，请精简内容！`);
             return;
         }
 
-        // 3. IP频率校验
         const canSubmit = await checkIPSubmitLimit();
         if (!canSubmit) return;
 
-        // 4. 本地添加
         const newMessage = text.trim();
         currentMessagesList.push(newMessage);
-        // 保留最新100条
         if (currentMessagesList.length > 100) {
             currentMessagesList.shift();
         }
         
-        // 5. 立即显示弹幕
         if (isBoardVisible) createDanmu(newMessage);
         
-        // 6. 同步到Gitee（等待写入完成）
         const result = await writeGiteeFile(GITEE_API_CONFIG.messagesPath, currentMessagesList);
         if (result) {
             console.log('留言添加并同步成功，当前总数:', currentMessagesList.length);
-            // 清空输入框
             document.getElementById('messageInput').value = '';
         } else {
-            // 同步失败时，从本地移除这条留言（保持数据一致）
             currentMessagesList.pop();
         }
     }
 
-    // ====================== 弹幕辅助函数（补充原有缺失的函数） ======================
+    // ====================== 弹幕辅助函数 ======================
     function clearDanmuContainer() {
         const container = document.getElementById('messageContainer');
         const danmus = container.querySelectorAll('.danmu');
@@ -1010,7 +995,6 @@
 
     function restartDanmuPlay() {
         if (danmuTimer) clearInterval(danmuTimer);
-        // 每3秒随机播放一条弹幕
         danmuTimer = setInterval(() => {
             if (currentMessagesList.length === 0) return;
             const randomIdx = Math.floor(Math.random() * currentMessagesList.length);
@@ -1024,15 +1008,13 @@
         danmu.className = 'danmu';
         danmu.textContent = text;
         
-        // 随机位置和动画时长
         const top = Math.random() * (container.clientHeight - 30);
-        const duration = 10 + Math.random() * 10; // 10-20秒
+        const duration = 10 + Math.random() * 10;
         danmu.style.top = `${top}px`;
         danmu.style.animationDuration = `${duration}s`;
         
         container.appendChild(danmu);
         
-        // 动画结束后移除
         setTimeout(() => {
             danmu.remove();
         }, duration * 1000);
@@ -1040,17 +1022,16 @@
 
     // ====================== 页面初始化 & 事件绑定 ======================
     window.onload = async function() {
-        // 加载留言和占卜次数
         await loadMessagesFromGitee();
         await loadFortuneCountFromGitee();
 
-        // 菜单按钮事件
+        // 菜单按钮
         document.getElementById('menuBtn').addEventListener('click', function() {
             this.classList.toggle('active');
             document.getElementById('sidebar').classList.toggle('show');
         });
 
-        // 钢笔按钮（留言板）事件
+        // 钢笔按钮（留言板）
         document.getElementById('penBtn').addEventListener('click', function() {
             this.classList.toggle('active');
             const board = document.getElementById('messageBoard');
@@ -1059,7 +1040,6 @@
             
             if (isBoardVisible) {
                 restartDanmuPlay();
-                // 立即显示部分弹幕
                 currentMessagesList.slice(0, 5).forEach((msg, idx) => {
                     setTimeout(() => createDanmu(msg), idx * 500);
                 });
@@ -1069,26 +1049,23 @@
             }
         });
 
-        // 留言发送按钮事件
+        // 留言发送
         document.getElementById('sendBtn').addEventListener('click', function() {
             const input = document.getElementById('messageInput');
             addMessage(input.value);
         });
 
-        // 占卜按钮事件
+        // 占卜按钮
         document.getElementById('fortuneBtn').addEventListener('click', async function() {
             const modal = document.getElementById('divinationModal');
             const bambooTube = document.getElementById('bambooTube');
             const fortuneText = document.getElementById('fortuneText');
             
-            // 显示模态框
             modal.classList.add('active');
             bambooTube.textContent = '摇签中...';
             fortuneText.classList.remove('show');
             
-            // 模拟摇签动画
             setTimeout(async () => {
-                // 随机运势
                 const fortunes = [
                     '大吉大利，今日诸事顺遂！',
                     '小吉，宜稳中求进！',
@@ -1104,10 +1081,8 @@
                     fortuneText.classList.add('show');
                 }, 500);
 
-                // 增加占卜次数
                 await incrementFortuneCount();
 
-                // 3秒后关闭模态框
                 setTimeout(() => {
                     modal.classList.remove('active');
                     bambooTube.style.opacity = 1;
@@ -1123,7 +1098,7 @@
             this.classList.remove('active');
         });
 
-        // 部落按钮事件（补充原有缺失的弹窗逻辑）
+        // 部落按钮
         const tribeButtons = document.querySelectorAll('.tribe-button');
         tribeButtons.forEach(btn => {
             btn.addEventListener('click', function() {
@@ -1142,13 +1117,13 @@
             });
         });
 
-        // 部落详情弹窗内按钮事件
+        // 部落详情弹窗内按钮
         document.getElementById('tribeTagBtn').addEventListener('click', function() {
             document.getElementById('popupTribeDetail').classList.remove('show');
             document.getElementById('popupMainTribeTags').classList.add('show');
         });
 
-        // 基金按钮事件
+        // 基金按钮
         document.getElementById('fundStructureBtn').addEventListener('click', function() {
             document.getElementById('overlay').classList.add('show');
             document.getElementById('popupFundStructure').classList.add('show');
@@ -1162,7 +1137,7 @@
             document.getElementById('popupSupportChoose').classList.add('show');
         });
 
-        // 基金支持子按钮事件
+        // 基金支持子按钮
         document.getElementById('goCodeSupport').addEventListener('click', function() {
             document.getElementById('popupSupportChoose').classList.remove('show');
             document.getElementById('popupCodeSupport').classList.add('show');
@@ -1172,13 +1147,12 @@
             document.getElementById('popupLoveSupport').classList.add('show');
         });
 
-        // 阵型按钮事件
+        // 阵型按钮
         document.getElementById('formationBtn').addEventListener('click', function() {
-            // 可替换为实际阵型查询链接
             alert('阵型查询功能正在加载中...');
         });
 
-        // 轮播图逻辑
+        // 轮播图
         let currentSlide = 0;
         const slides = document.querySelectorAll('.carousel-item');
         const dots = document.querySelectorAll('.carousel-dot');
@@ -1196,7 +1170,6 @@
             dot.addEventListener('click', () => goToSlide(idx));
         });
 
-        // 自动轮播
         setInterval(() => {
             currentSlide = (currentSlide + 1) % slides.length;
             goToSlide(currentSlide);
