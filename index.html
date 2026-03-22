@@ -104,51 +104,60 @@
         <div class="input-area">
             <textarea id="messageInput" placeholder="请输入你的留言..."></textarea>
             <button onclick="addMessage()">提交留言</button>
+            <!-- 新增：手动刷新云端数据按钮 -->
+            <button onclick="refreshCloudData()" style="margin-left:10px; background-color:#198754;">刷新最新留言</button>
         </div>
 
         <div class="message-list" id="messageList"></div>
     </div>
 
     <script>
-        // 核心配置（请确认token和仓库地址正确）
+        // 核心配置
         const CONFIG = {
             token: "bd8a88437fb5b27585b5b465c5707746",
-            // 读取云端留言的地址
             readUrl: "https://gitee.com/jiang-lingxiang/dt-official-website/raw/master/messages.json",
-            // Gitee API 写入地址（格式：https://gitee.com/api/v5/repos/用户名/仓库名/contents/文件路径）
             writeUrl: "https://gitee.com/api/v5/repos/jiang-lingxiang/dt-official-website/contents/messages.json"
         };
 
-        // 页面加载时自动同步云端数据
+        // 页面加载：强制拉取云端最新数据（禁用缓存）
         window.onload = async function() {
-            await initAndSyncData();
+            await forcePullLatestCloudData();
             renderMessages();
         };
 
         /**
-         * 初始化并同步云端数据
-         * 优先拉取云端数据，失败则使用本地数据兜底
+         * 核心修复：强制拉取云端最新数据（彻底禁用缓存）
+         * 给readUrl加时间戳 + 禁用缓存，避免加载旧数据
          */
-        async function initAndSyncData() {
+        async function forcePullLatestCloudData() {
             try {
-                setSyncStatus("正在从云端加载留言数据...", "normal");
-                
-                // 拉取云端数据
-                const response = await fetch(CONFIG.readUrl);
+                setSyncStatus("正在拉取云端最新留言...", "normal");
+                // 关键：加时间戳参数 + cache: no-store 禁用所有缓存
+                const timestamp = Date.now(); // 时间戳，确保每次请求地址不同
+                const response = await fetch(`${CONFIG.readUrl}?t=${timestamp}`, {
+                    method: "GET",
+                    cache: "no-store", // 彻底禁用浏览器/CDN缓存
+                    headers: {
+                        "Cache-Control": "no-cache, no-store, must-revalidate",
+                        "Pragma": "no-cache",
+                        "Expires": "0"
+                    }
+                });
+
                 if (!response.ok) throw new Error(`HTTP错误：${response.status}`);
-                
                 const cloudMessages = await response.json();
-                // 验证云端数据格式是否正确
+
+                // 验证格式并覆盖本地数据（关键：用云端最新数据替换本地）
                 if (Array.isArray(cloudMessages)) {
                     localStorage.setItem("messages", JSON.stringify(cloudMessages));
-                    setSyncStatus("云端数据加载成功！", "success");
+                    setSyncStatus("✅ 已加载云端最新留言！", "success");
                 } else {
                     throw new Error("云端数据格式错误");
                 }
             } catch (error) {
-                console.warn("云端同步失败：", error);
-                setSyncStatus(`云端加载失败(${error.message})，使用本地数据`, "error");
-                // 初始化本地空数据（如果没有）
+                console.warn("云端拉取失败：", error);
+                setSyncStatus(`❌ 云端加载失败(${error.message})，使用本地数据`, "error");
+                // 兜底：初始化本地空数据
                 if (!localStorage.getItem("messages")) {
                     localStorage.setItem("messages", JSON.stringify([]));
                 }
@@ -156,55 +165,62 @@
         }
 
         /**
-         * 添加新留言并同步到云端
+         * 新增：手动刷新云端数据（方便用户主动更新）
+         */
+        async function refreshCloudData() {
+            await forcePullLatestCloudData();
+            renderMessages();
+        }
+
+        /**
+         * 添加留言 + 同步云端 + 同步后立即拉取最新数据
          */
         async function addMessage() {
             const inputEl = document.getElementById("messageInput");
             const content = inputEl.value.trim();
             
-            // 空内容校验
             if (!content) {
                 alert("请输入留言内容后再提交！");
                 return;
             }
 
-            // 构造留言对象
             const newMessage = {
-                id: Date.now(),          // 唯一ID（时间戳）
-                content: content,        // 留言内容
-                time: new Date().toLocaleString("zh-CN") // 本地时间
+                id: Date.now(),
+                content: content,
+                time: new Date().toLocaleString("zh-CN")
             };
 
             // 1. 更新本地数据
             const localMessages = JSON.parse(localStorage.getItem("messages") || "[]");
-            localMessages.unshift(newMessage); // 最新留言放最前面
+            localMessages.unshift(newMessage);
             localStorage.setItem("messages", JSON.stringify(localMessages));
 
             // 2. 同步到云端
             const syncSuccess = await syncToCloud(localMessages);
 
-            // 3. 页面更新
-            inputEl.value = ""; // 清空输入框
-            renderMessages();   // 重新渲染留言列表
-            
-            // 4. 状态提示
+            // 3. 同步成功后，立即拉取云端最新数据（确保多设备一致）
             if (syncSuccess) {
-                setSyncStatus("留言已提交并同步到云端，所有人可见！", "success");
+                await forcePullLatestCloudData();
+            }
+
+            // 4. 页面更新 + 状态提示
+            inputEl.value = "";
+            renderMessages();
+            
+            if (syncSuccess) {
+                setSyncStatus("✅ 留言已同步到云端，所有人可见！", "success");
             } else {
-                setSyncStatus("留言已保存到本地（云端同步失败）", "error");
+                setSyncStatus("❌ 留言已保存到本地（云端同步失败）", "error");
             }
         }
 
         /**
-         * 同步数据到Gitee云端
-         * @param {Array} messages 留言数组
-         * @returns {Boolean} 是否同步成功
+         * 同步数据到Gitee云端（原有逻辑保留）
          */
         async function syncToCloud(messages) {
             try {
                 setSyncStatus("正在同步到云端...", "normal");
                 
-                // 步骤1：获取文件SHA值（Gitee API要求必须传）
                 const shaResponse = await fetch(CONFIG.writeUrl, {
                     headers: {
                         "Authorization": `token ${CONFIG.token}`,
@@ -214,11 +230,9 @@
                 const shaData = await shaResponse.json();
                 const fileSha = shaData.sha || "";
 
-                // 步骤2：将内容转为Base64编码（Gitee API要求）
-                const jsonContent = JSON.stringify(messages, null, 2); // 格式化JSON
+                const jsonContent = JSON.stringify(messages, null, 2);
                 const base64Content = btoa(unescape(encodeURIComponent(jsonContent)));
 
-                // 步骤3：调用Gitee API写入数据
                 const writeResponse = await fetch(CONFIG.writeUrl, {
                     method: "PUT",
                     headers: {
@@ -227,9 +241,9 @@
                         "Accept": "application/json"
                     },
                     body: JSON.stringify({
-                        content: base64Content, // Base64编码的内容
-                        sha: fileSha,           // 文件SHA值
-                        message: "新增/更新留言板数据" // 提交说明
+                        content: base64Content,
+                        sha: fileSha,
+                        message: "新增/更新留言板数据"
                     })
                 });
 
@@ -246,19 +260,17 @@
         }
 
         /**
-         * 渲染留言列表到页面
+         * 渲染留言列表
          */
         function renderMessages() {
             const listEl = document.getElementById("messageList");
             const messages = JSON.parse(localStorage.getItem("messages") || "[]");
 
-            // 无留言时的提示
             if (messages.length === 0) {
                 listEl.innerHTML = `<div style="text-align:center; color:#999; padding:20px;">暂无留言，快来留下第一条吧！</div>`;
                 return;
             }
 
-            // 生成留言HTML
             listEl.innerHTML = messages.map(msg => `
                 <div class="message-item">
                     <div class="message-content">${msg.content}</div>
@@ -269,8 +281,6 @@
 
         /**
          * 设置同步状态提示
-         * @param {String} text 提示文本
-         * @param {String} type 类型：normal/success/error
          */
         function setSyncStatus(text, type) {
             const statusEl = document.getElementById("syncStatus");
