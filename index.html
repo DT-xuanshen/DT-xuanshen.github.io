@@ -4,10 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DT联盟 - 云端同步版</title>
-<!-- 引入 Firebase SDK (使用兼容性较好的 v8 版本) -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<!-- 引入axios用于HTTP请求（如果需要） -->
+<!-- 移除Firebase依赖，只保留axios -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <style>
     * {
@@ -756,106 +753,99 @@
 <footer><p>&copy; 2026 DT联盟. All Rights Reserved.</p></footer>
 
 <script>
-    // ====================== Firebase 云存储配置 ======================
-    // 【重要】请按照以下步骤替换为您自己的 Firebase 配置：
-    // 1. 访问 https://console.firebase.google.com/ 创建新项目
-    // 2. 添加 Web 应用，复制生成的配置对象替换下面的 firebaseConfig
-    // 3. 在 Firebase 控制台中打开 Realtime Database，创建数据库（选择测试模式）
-    // 4. 将数据库规则设置为：{ "rules": { ".read": true, ".write": true } } (仅测试使用，生产环境需修改)
-    const firebaseConfig = {
-        // 请替换为您的真实 Firebase 配置
-        apiKey: "YOUR_REAL_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "YOUR_SENDER_ID",
-        appId: "YOUR_APP_ID"
+    // ====================== Gitee 配置 ======================
+    const GITEE_CONFIG = {
+        username: 'jiang-lingxiang',
+        repo: 'DT官网',
+        messagesFile: 'messages.json',
+        fortuneFile: 'fortuneCount.json'
     };
 
-    // 初始化 Firebase 并添加错误处理
-    try {
-        firebase.initializeApp(firebaseConfig);
-        console.log("Firebase 初始化成功！");
-    } catch (error) {
-        console.error("Firebase 初始化失败：", error);
-        alert("数据同步服务初始化失败，请检查 Firebase 配置！");
+    // 构建Gitee文件访问URL
+    function getGiteeFileUrl(filename) {
+        return `https://gitee.com/${GITEE_CONFIG.username}/${GITEE_CONFIG.repo}/raw/main/${filename}`;
     }
 
-    // 获取数据库引用
-    const database = firebase.database();
-    const fortuneRef = database.ref('dtAlliance/fortuneCount'); // 使用命名空间避免冲突
-    const messagesRef = database.ref('dtAlliance/messages');     // 使用命名空间避免冲突
-    
     // 全局变量
-    let currentMessagesList = [];       // 云端留言列表
+    let currentMessagesList = [];       // 留言列表
     let danmuTimer = null;              // 弹幕播放定时器
     let isBoardVisible = false;         // 留言板是否可见
-    
-    // ====================== 占卜次数云端同步 ======================
+    let fortuneCount = 0;               // 占卜次数
+
+    // ====================== 占卜次数同步 ======================
     function updateFortuneDisplay(count) {
-        document.getElementById('fortuneCount').textContent = `【总占卜次数：${count || 0}次】`;
+        fortuneCount = count || 0;
+        document.getElementById('fortuneCount').textContent = `【总占卜次数：${fortuneCount}次】`;
     }
 
-    // 监听云端占卜总数变化（添加错误处理）
-    fortuneRef.on('value', (snapshot) => {
-        let total = snapshot.val() || 0;
-        updateFortuneDisplay(total);
-    }, (error) => {
-        console.error("监听占卜次数失败：", error);
-        alert("无法获取占卜次数数据，请检查网络或 Firebase 配置！");
-    });
-
-    // 增加占卜次数（云端事务，确保原子性）
-    function incrementFortuneCloud() {
-        fortuneRef.transaction((current) => {
-            return (current || 0) + 1;
-        }, (error, committed, snapshot) => {
-            if (error) {
-                console.error("更新占卜次数失败：", error);
-                alert("占卜次数同步失败，请稍后重试！");
+    // 从Gitee读取占卜次数
+    async function loadFortuneCountFromGitee() {
+        try {
+            const response = await fetch(getGiteeFileUrl(GITEE_CONFIG.fortuneFile));
+            if (response.ok) {
+                const data = await response.json();
+                updateFortuneDisplay(data.count || 0);
+            } else {
+                // 文件不存在则初始化
+                updateFortuneDisplay(0);
             }
-        });
+        } catch (error) {
+            console.error('加载占卜次数失败:', error);
+            updateFortuneDisplay(0);
+        }
+    }
+
+    // 增加占卜次数（本地先更，提升体验）
+    function incrementFortuneCount() {
+        fortuneCount += 1;
+        updateFortuneDisplay(fortuneCount);
+        // 这里因为Gitee需要手动提交，暂时只做本地计数
+        // 如果需要云端同步，需要配合Gitee API（需要token）
     }
     
-    // ====================== 留言板云端同步 & 弹幕系统 ======================
-    // 添加新留言到云端 (自动保留最新100条)
-    function addMessageToCloud(text) {
+    // ====================== 留言板 Gitee 同步 & 弹幕系统 ======================
+    // 从Gitee读取留言
+    async function loadMessagesFromGitee() {
+        try {
+            const response = await fetch(getGiteeFileUrl(GITEE_CONFIG.messagesFile));
+            if (response.ok) {
+                const data = await response.json();
+                currentMessagesList = Array.isArray(data) ? data : [];
+                console.log('从Gitee加载留言成功，共', currentMessagesList.length, '条');
+            } else {
+                // 文件不存在则初始化空数组
+                currentMessagesList = [];
+            }
+            
+            // 如果留言板显示，重启弹幕
+            if (isBoardVisible) {
+                restartDanmuPlay();
+            }
+        } catch (error) {
+            console.error('加载留言失败:', error);
+            currentMessagesList = [];
+        }
+    }
+
+    // 添加新留言（本地+模拟云端同步）
+    function addMessage(text) {
         if (!text.trim()) return;
         
-        // 使用事务确保数据一致性
-        messagesRef.transaction((currentMessages) => {
-            const msgs = currentMessages || [];
-            // 保留最新100条
-            if (msgs.length >= 100) {
-                msgs.shift();
-            }
-            msgs.push(text.trim());
-            return msgs;
-        }, (error, committed, snapshot) => {
-            if (error) {
-                console.error("添加留言失败：", error);
-                alert("留言发送失败，请稍后重试！");
-            } else if (committed) {
-                console.log("留言发送成功！");
-            }
-        });
-    }
-    
-    // 监听云端留言变化，更新本地列表
-    messagesRef.on('value', (snapshot) => {
-        let msgs = snapshot.val() || [];
-        currentMessagesList = msgs;
-        console.log("同步到最新留言列表，共", msgs.length, "条");
-        
-        // 如果留言板正在显示，重新启动弹幕播放
-        if (isBoardVisible) {
-            restartDanmuPlay();
+        // 本地添加
+        currentMessagesList.push(text.trim());
+        // 保留最新100条
+        if (currentMessagesList.length > 100) {
+            currentMessagesList.shift();
         }
-    }, (error) => {
-        console.error("监听留言失败：", error);
-        alert("无法获取留言数据，请检查网络或 Firebase 配置！");
-    });
+        
+        // 立即显示弹幕
+        if (isBoardVisible) createDanmu(text.trim());
+        
+        console.log('留言添加成功，当前总数:', currentMessagesList.length);
+        // 提示：如果需要真正的云端同步，需要：
+        // 1. 在Gitee创建messages.json文件（内容为[]）
+        // 2. 使用Gitee API提交修改（需要个人token）
+    }
     
     // 创建单条弹幕 (动画)
     function createDanmu(text) {
@@ -901,7 +891,7 @@
         }, randomDuration * 1000);
     }
     
-    // 随机从当前留言池取一条并播放弹幕
+    // 随机播放弹幕
     function playRandomDanmu() {
         if (!isBoardVisible) return;
         if (currentMessagesList.length === 0) return;
@@ -911,7 +901,7 @@
         if (msg) createDanmu(msg);
     }
     
-    // 启动循环弹幕播放 (每隔1~3秒播放一条)
+    // 启动弹幕播放
     function startDanmuPlay() {
         if (danmuTimer) clearInterval(danmuTimer);
         danmuTimer = setInterval(() => {
@@ -929,10 +919,8 @@
     }
     
     function restartDanmuPlay() {
-        if (isBoardVisible) {
-            stopDanmuPlay();
-            startDanmuPlay();
-        }
+        stopDanmuPlay();
+        startDanmuPlay();
     }
     
     // 清空弹幕区域
@@ -968,14 +956,11 @@
             return; 
         }
         
-        // 添加到云端
-        addMessageToCloud(text);
+        // 添加留言
+        addMessage(text);
         
         // 清空输入框
         messageInput.value = '';
-        
-        // 立即在本地显示（提升用户体验）
-        if (isBoardVisible) createDanmu(text);
     });
     
     // 回车发送
@@ -1138,8 +1123,8 @@
     }
     
     fortuneBtn.addEventListener('click', () => {
-        // 同步到云端
-        incrementFortuneCloud();
+        // 增加占卜次数
+        incrementFortuneCount();
         
         // 播放动画
         resetFortuneAnimation();
@@ -1181,23 +1166,9 @@
         document.querySelector('.page-enter').style.display = 'none'; 
     }, 1600);
     
-    // 初始加载留言列表
-   // 从Gitee读取留言
-async function loadMessagesFromGitee() {
-  try {
-    const response = await fetch('https://gitee.com/jiang-lingxiang/DT官网/raw/main/messages.json');
-    const data = await response.json();
-    currentMessagesList = data || [];
-    console.log('从Gitee加载留言成功');
-  } catch (error) {
-    console.error('加载留言失败:', error);
-  }
-}
-// 初始化时加载留言
-loadMessagesFromGitee();
-
-    // 移除无效的axios代码（避免报错）
-    // async function updateCount(){...} 这段代码被移除，因为没有对应的接口且缺少配置
+    // 初始化加载
+    loadMessagesFromGitee();
+    loadFortuneCountFromGitee();
 </script>
 </body>
 </html>
