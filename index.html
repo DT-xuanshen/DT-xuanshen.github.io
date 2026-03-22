@@ -753,24 +753,102 @@
 <footer><p>&copy; 2026 DT联盟. All Rights Reserved.</p></footer>
 
 <script>
-    // ====================== Gitee 配置 ======================
-    const GITEE_CONFIG = {
-        username: 'jiang-lingxiang',
-        repo: 'DT官网',
-        messagesFile: 'messages.json',
-        fortuneFile: 'fortuneCount.json'
+    // ====================== Gitee 配置（已替换为你的真实链接） ======================
+    const MESSAGES_URL = "https://gitee.com/jiang-lingxiang/dt-official-website/raw/master/messages.json";
+    const FORTUNE_COUNT_URL = "https://gitee.com/jiang-lingxiang/dt-official-website/raw/master/fortuneCount.json";
+    
+    // Gitee API配置（用于写入数据，新手可先注释token，只用读取功能）
+    const GITEE_API_CONFIG = {
+        owner: 'jiang-lingxiang',
+        repo: 'dt-official-website',
+        branch: 'master',
+        // 【可选】替换为你的Gitee私人令牌（获取方式：Gitee设置->私人令牌->生成，勾选projects权限）
+        token: '', // 例如：'gitee_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+        messagesPath: 'messages.json',
+        fortunePath: 'fortuneCount.json'
     };
-
-    // 构建Gitee文件访问URL
-    function getGiteeFileUrl(filename) {
-        return `https://gitee.com/${GITEE_CONFIG.username}/${GITEE_CONFIG.repo}/raw/main/${filename}`;
-    }
 
     // 全局变量
     let currentMessagesList = [];       // 留言列表
     let danmuTimer = null;              // 弹幕播放定时器
     let isBoardVisible = false;         // 留言板是否可见
     let fortuneCount = 0;               // 占卜次数
+
+    // ====================== Gitee API 核心函数（读取+写入） ======================
+    // 读取Gitee文件内容
+    async function fetchGiteeFile(url) {
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                mode: 'cors',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            if (response.ok) {
+                return await response.json();
+            } else if (response.status === 404) {
+                // 文件不存在时返回默认值
+                return url.includes('messages') ? [] : { count: 0 };
+            } else {
+                console.error('读取Gitee文件失败:', response.status);
+                return url.includes('messages') ? [] : { count: 0 };
+            }
+        } catch (error) {
+            console.error('读取Gitee文件异常:', error);
+            return url.includes('messages') ? [] : { count: 0 };
+        }
+    }
+
+    // 写入Gitee文件（需要token）
+    async function writeGiteeFile(path, content) {
+        if (!GITEE_API_CONFIG.token) {
+            console.log('未配置Gitee token，跳过云端写入');
+            return false;
+        }
+
+        try {
+            // 先获取文件的sha（Gitee要求更新文件时需要）
+            const shaResponse = await fetch(`https://gitee.com/api/v5/repos/${GITEE_API_CONFIG.owner}/${GITEE_API_CONFIG.repo}/contents/${path}?ref=${GITEE_API_CONFIG.branch}`, {
+                headers: {
+                    'Authorization': `token ${GITEE_API_CONFIG.token}`
+                }
+            });
+
+            let sha = '';
+            if (shaResponse.ok) {
+                const shaData = await shaResponse.json();
+                sha = shaData.sha || '';
+            }
+
+            // 写入文件
+            const response = await fetch(`https://gitee.com/api/v5/repos/${GITEE_API_CONFIG.owner}/${GITEE_API_CONFIG.repo}/contents/${path}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${GITEE_API_CONFIG.token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    content: btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2)))),
+                    message: `更新${path} - ${new Date().toLocaleString()}`,
+                    branch: GITEE_API_CONFIG.branch,
+                    sha: sha
+                })
+            });
+
+            if (response.ok) {
+                console.log(`成功写入${path}到Gitee`);
+                return true;
+            } else {
+                const errorData = await response.json();
+                console.error('写入Gitee失败:', errorData);
+                return false;
+            }
+        } catch (error) {
+            console.error('写入Gitee异常:', error);
+            return false;
+        }
+    }
 
     // ====================== 占卜次数同步 ======================
     function updateFortuneDisplay(count) {
@@ -780,71 +858,52 @@
 
     // 从Gitee读取占卜次数
     async function loadFortuneCountFromGitee() {
-        try {
-            const response = await fetch(getGiteeFileUrl(GITEE_CONFIG.fortuneFile));
-            if (response.ok) {
-                const data = await response.json();
-                updateFortuneDisplay(data.count || 0);
-            } else {
-                // 文件不存在则初始化
-                updateFortuneDisplay(0);
-            }
-        } catch (error) {
-            console.error('加载占卜次数失败:', error);
-            updateFortuneDisplay(0);
-        }
+        const data = await fetchGiteeFile(FORTUNE_COUNT_URL);
+        updateFortuneDisplay(data.count || 0);
     }
 
-    // 增加占卜次数（本地先更，提升体验）
-    function incrementFortuneCount() {
+    // 增加占卜次数（本地+云端同步）
+    async function incrementFortuneCount() {
+        // 本地先更新，提升体验
         fortuneCount += 1;
         updateFortuneDisplay(fortuneCount);
-        // 这里因为Gitee需要手动提交，暂时只做本地计数
-        // 如果需要云端同步，需要配合Gitee API（需要token）
+        
+        // 同步到Gitee
+        await writeGiteeFile(GITEE_API_CONFIG.fortunePath, { count: fortuneCount });
     }
     
     // ====================== 留言板 Gitee 同步 & 弹幕系统 ======================
     // 从Gitee读取留言
     async function loadMessagesFromGitee() {
-        try {
-            const response = await fetch(getGiteeFileUrl(GITEE_CONFIG.messagesFile));
-            if (response.ok) {
-                const data = await response.json();
-                currentMessagesList = Array.isArray(data) ? data : [];
-                console.log('从Gitee加载留言成功，共', currentMessagesList.length, '条');
-            } else {
-                // 文件不存在则初始化空数组
-                currentMessagesList = [];
-            }
-            
-            // 如果留言板显示，重启弹幕
-            if (isBoardVisible) {
-                restartDanmuPlay();
-            }
-        } catch (error) {
-            console.error('加载留言失败:', error);
-            currentMessagesList = [];
+        const data = await fetchGiteeFile(MESSAGES_URL);
+        currentMessagesList = Array.isArray(data) ? data : [];
+        console.log('从Gitee加载留言成功，共', currentMessagesList.length, '条');
+        
+        // 如果留言板显示，重启弹幕
+        if (isBoardVisible) {
+            restartDanmuPlay();
         }
     }
 
-    // 添加新留言（本地+模拟云端同步）
-    function addMessage(text) {
+    // 添加新留言（本地+云端同步）
+    async function addMessage(text) {
         if (!text.trim()) return;
         
         // 本地添加
-        currentMessagesList.push(text.trim());
+        const newMessage = text.trim();
+        currentMessagesList.push(newMessage);
         // 保留最新100条
         if (currentMessagesList.length > 100) {
             currentMessagesList.shift();
         }
         
         // 立即显示弹幕
-        if (isBoardVisible) createDanmu(text.trim());
+        if (isBoardVisible) createDanmu(newMessage);
+        
+        // 同步到Gitee
+        await writeGiteeFile(GITEE_API_CONFIG.messagesPath, currentMessagesList);
         
         console.log('留言添加成功，当前总数:', currentMessagesList.length);
-        // 提示：如果需要真正的云端同步，需要：
-        // 1. 在Gitee创建messages.json文件（内容为[]）
-        // 2. 使用Gitee API提交修改（需要个人token）
     }
     
     // 创建单条弹幕 (动画)
@@ -949,15 +1008,15 @@
         }
     });
     
-    sendBtn.addEventListener('click', () => {
+    sendBtn.addEventListener('click', async () => {
         const text = messageInput.value.trim();
         if (!text) { 
             alert('请输入留言内容！'); 
             return; 
         }
         
-        // 添加留言
-        addMessage(text);
+        // 添加留言（异步同步到Gitee）
+        await addMessage(text);
         
         // 清空输入框
         messageInput.value = '';
@@ -1122,9 +1181,9 @@
         }, 1000);
     }
     
-    fortuneBtn.addEventListener('click', () => {
-        // 增加占卜次数
-        incrementFortuneCount();
+    fortuneBtn.addEventListener('click', async () => {
+        // 增加占卜次数（同步到Gitee）
+        await incrementFortuneCount();
         
         // 播放动画
         resetFortuneAnimation();
@@ -1167,8 +1226,10 @@
     }, 1600);
     
     // 初始化加载
-    loadMessagesFromGitee();
-    loadFortuneCountFromGitee();
+    window.onload = async () => {
+        await loadMessagesFromGitee();
+        await loadFortuneCountFromGitee();
+    };
 </script>
 </body>
 </html>
