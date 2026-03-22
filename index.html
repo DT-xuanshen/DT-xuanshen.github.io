@@ -576,6 +576,63 @@
         color: #64b5f6;
         transform: rotate(90deg);
     }
+    
+    /* ========== 关键修复：添加部落详情弹窗内按钮样式 ========== */
+    .tribe-detail-item {
+        display: block;
+        width: 100%;
+        padding: 12px 15px;
+        background: #283593;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        text-align: center;
+        cursor: pointer;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+    }
+    .tribe-detail-item:hover {
+        background: #64b5f6;
+        transform: translateY(-2px);
+    }
+    
+    /* 系列扩张部落弹窗内按钮样式 */
+    .series-item {
+        display: block;
+        width: 100%;
+        padding: 12px 15px;
+        background: #283593;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        text-align: center;
+        cursor: pointer;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+    }
+    .series-item:hover {
+        background: #64b5f6;
+        transform: translateY(-2px);
+    }
+    
+    /* 优化弹窗内标题样式 */
+    .popup-series h3, .popup-tribe-detail h3, .popup-main-tribe-tags h3, .popup-fund h3 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #64b5f6;
+        font-size: 1.2rem;
+    }
+    
+    /* 优化标签列表样式 */
+    .tag-list {
+        line-height: 1.8;
+        font-size: 0.9rem;
+        color: #fff;
+        text-align: center;
+    }
+
     .fund-item {
         padding: 12px;
         background: #283a5a;
@@ -1125,12 +1182,19 @@
     }, 1600);
     
     // 初始加载留言列表
-    messagesRef.once('value').then((snapshot) => {
-        currentMessagesList = snapshot.val() || [];
-        console.log("初始加载留言列表，共", currentMessagesList.length, "条");
-    }).catch((error) => {
-        console.error("初始加载留言失败：", error);
-    });
+   // 从Gitee读取留言
+async function loadMessagesFromGitee() {
+  try {
+    const response = await fetch('https://gitee.com/jiang-lingxiang/DT官网/raw/main/messages.json');
+    const data = await response.json();
+    currentMessagesList = data || [];
+    console.log('从Gitee加载留言成功');
+  } catch (error) {
+    console.error('加载留言失败:', error);
+  }
+}
+// 初始化时加载留言
+loadMessagesFromGitee();
 
     // 移除无效的axios代码（避免报错）
     // async function updateCount(){...} 这段代码被移除，因为没有对应的接口且缺少配置
