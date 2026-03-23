@@ -160,6 +160,31 @@
         transform: rotate(180deg);
     }
 
+    /* 新增：新消息气泡提示样式 */
+    .new-message-bubble {
+        position: fixed;
+        top: 85px; /* 钢笔按钮下方位置 */
+        left: 12px; /* 对齐钢笔按钮中心 */
+        background: #ff4757; /* 醒目红色 */
+        color: #fff;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        z-index: 101;
+        /* 气泡三角指向钢笔按钮 */
+    }
+    .new-message-bubble::after {
+        content: '';
+        position: absolute;
+        top: -5px; /* 三角朝上指向钢笔按钮 */
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 0 5px 5px 5px;
+        border-style: solid;
+        border-color: transparent transparent #ff4757 transparent;
+    }
+
     /* 留言板样式 - 优化弹幕容器和按钮样式 */
     .message-board {
         position: fixed;
@@ -807,6 +832,8 @@
 
 <div class="menu-btn" id="menuBtn"><span></span><span></span><span></span></div>
 <div class="pen-btn" id="penBtn">✒️</div>
+<!-- 新增：新消息气泡提示 -->
+<div class="new-message-bubble" id="newMessageBubble">新消息</div>
 
 <!-- 留言板 - 优化弹幕功能 -->
 <div class="message-board" id="messageBoard">
@@ -883,7 +910,7 @@
     </div>
     <div class="section" id="assist">
         <h2>🤖辅助服务</h2>
-        <button class="jump-btn" id="assistBtn">托管养号｜快速刷墙｜奶号出租｜部落招人</button>
+        <button class="jump-btn" id="assistBtn">养号｜刷墙｜奶号｜招人</button>
     </div>
     <div class="section" id="divination">
         <h2>🃏联盟占卜师</h2>
@@ -1010,8 +1037,8 @@
         const randomTop = Math.floor(Math.random() * (containerHeight - 40)) + 10;
         danmu.style.top = `${randomTop}px`;
         
-        // 随机动画时长 (8-15秒)
-        const randomDuration = Math.floor(Math.random() * 7) + 8;
+        // 【修改】弹幕速度调快：动画时长从 8-15秒 改为 3-8秒
+        const randomDuration = Math.floor(Math.random() * 5) + 3;
         danmu.style.animationDuration = `${randomDuration}s`;
         
         // 添加到容器
@@ -1030,12 +1057,12 @@
     // 启动弹幕播放
     function startDanmuPlay() {
         if (danmuTimer) clearInterval(danmuTimer);
-        // 每隔2-4秒生成一条弹幕
+        // 【优化】弹幕生成间隔从 2-4秒 改为 1-2秒，弹幕更密集
         danmuTimer = setInterval(() => {
             if (isBoardVisible && danmuCount < 5) {
                 createDanmu();
             }
-        }, Math.floor(Math.random() * 2000) + 2000);
+        }, Math.floor(Math.random() * 1000) + 1000);
     }
 
     // 停止弹幕播放
@@ -1096,13 +1123,16 @@
         document.getElementById('overlay').classList.add('show');
     });
 
-    // 留言板控制
+    // 留言板控制 + 新消息气泡隐藏逻辑
     document.getElementById('penBtn').addEventListener('click', function(e) {
         e.stopPropagation(); // 阻止事件冒泡
         const messageBoard = document.getElementById('messageBoard');
         messageBoard.classList.toggle('show');
         this.classList.toggle('active');
         isBoardVisible = messageBoard.classList.contains('show');
+        
+        // 点击钢笔按钮后隐藏新消息气泡
+        document.getElementById('newMessageBubble').style.display = 'none';
         
         if (isBoardVisible) {
             startDanmuPlay(); // 启动弹幕
