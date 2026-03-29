@@ -22,7 +22,6 @@
         line-height: 1.6;
         overflow-x: hidden;
     }
-    }
 
     /* 图片轮播样式 */
     .carousel-container {
@@ -672,15 +671,16 @@
         cursor: pointer;
         transition: background 0.3s, transform 0.3s ease;
     }
-    /* 支持联盟基金 彩色渐变加粗 */
-    #supportFundBtn {
+    /* 新增：支持联盟基金按钮文字渐变彩色+加粗样式 */
+    .support-fund-text {
         background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
         background-size: 500% 100%;
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
-        font-weight: bold;
         animation: colorChange 3s linear infinite;
+        font-weight: bold;
+        font-size: 1.1rem;
     }
     .recruit-img {
         width: 100%;
@@ -997,44 +997,6 @@
         font-size: 18px;
         cursor: pointer;
     }
-
-    /* 卡通小人掉落样式 */
-    .cartoon-fall {
-        position: fixed;
-        top: -100px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 60px;
-        height: 60px;
-        font-size: 30px;
-        text-align: center;
-        z-index: 9999;
-        animation: fallDown 0.8s ease forwards;
-    }
-    .cartoon-tip {
-        position: fixed;
-        top: 70px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #fff;
-        color: #000;
-        padding: 8px 12px;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: bold;
-        white-space: nowrap;
-        z-index: 9999;
-        opacity: 0;
-        animation: showTip 0.5s ease 0.8s forwards;
-    }
-    @keyframes fallDown {
-        0% { top: -100px; }
-        100% { top: 20px; }
-    }
-    @keyframes showTip {
-        0% { opacity: 0; }
-        100% { opacity: 1; }
-    }
 </style>
 </head>
 <body>
@@ -1148,7 +1110,7 @@
 </div>
 <div class="popup-base" id="popupSupportChoose">
     <span class="popup-close" onclick="closeAllPopups()">×</span>
-    <h3>支持联盟基金</h3>
+    <h3>联盟基金</h3>
     <div class="fund-item" id="goCodeSupport">联盟代码支持</div>
     <div class="fund-item" id="goLoveSupport">为联盟发电支持</div>
 </div>
@@ -1231,7 +1193,8 @@
         <h2>✨DT联盟基金</h2>
         <div class="fund-btn" id="fundStructureBtn">联盟基金构成</div>
         <div class="fund-btn" id="fundUseBtn">联盟基金用途</div>
-        <div class="fund-btn" id="supportFundBtn">支持联盟基金</div>
+        <!-- 修改：添加渐变彩色样式类 -->
+        <div class="fund-btn" id="supportFundBtn"><span class="support-fund-text">支持联盟基金</span></div>
     </div>
     <div class="section" id="groups">
         <h2>✨各大部落群</h2>
@@ -1519,31 +1482,6 @@
         };
     }
 
-    // 卡通小人掉落函数
-    function showCartoonFall() {
-        // 移除旧的
-        document.querySelectorAll('.cartoon-fall, .cartoon-tip').forEach(el => el.remove());
-        
-        // 创建小人
-        const cartoon = document.createElement('div');
-        cartoon.className = 'cartoon-fall';
-        cartoon.textContent = '👨';
-        
-        // 创建提示语
-        const tip = document.createElement('div');
-        tip.className = 'cartoon-tip';
-        tip.textContent = '每日一个灵魂拷问，今天你检查联盟的代码是否又到期了吗';
-        
-        document.body.appendChild(cartoon);
-        document.body.appendChild(tip);
-        
-        // 3秒后自动消失
-        setTimeout(() => {
-            cartoon.remove();
-            tip.remove();
-        }, 3000);
-    }
-
     // ====================== 事件绑定 ======================
     // 占卜次数同步
     function updateFortuneDisplay(count) {
@@ -1632,6 +1570,7 @@
             return;
         }
         goldCount -= 1;
+        updateAllGoldUI();
 
         const modal = document.getElementById('divinationModal');
         const bambooTube = document.getElementById('bambooTube');
@@ -1645,13 +1584,13 @@
         // 显示模态框
         modal.classList.add('active');
         
-        // 随机运势文本 + 对应DT币
+        // 随机运势文本（修改币值规则）
         const fortunes = [
-            { text: "大吉！今日部落战必胜✨", add: 5 },
-            { text: "吉！今日招人顺利🥳", add: 3 },
-            { text: "平！今日稳扎稳打😐", add: 0 },
-            { text: "小凶！今日要黑三⚠️", add: -2 },
-            { text: "大凶！飞机票在来的路上了🧘‍♂️", add: -6 }
+            { text: "大吉！今日部落战必胜✨", add: 5 },    // 大吉+5币
+            { text: "吉！今日招人顺利🥳", add: 3 },         // 吉+3币
+            { text: "平！今日稳扎稳打😐", add: 0 },          // 平无变化
+            { text: "小凶！今日要黑三⚠️", add: -2 },        // 小凶-2币
+            { text: "大凶！飞机票在来的路上了🧘‍♂️", add: -6 } // 大凶-6币
         ];
         const random = fortunes[Math.floor(Math.random() * fortunes.length)];
         
@@ -1765,12 +1704,10 @@
     // 初始化显示
     updateAllGoldUI();
     
-    // 显示/隐藏签到面板 + 掉落小人
+    // 显示/隐藏签到面板
     goldBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         signPanel.classList.toggle('show');
-        // 触发卡通小人掉落
-        showCartoonFall();
     });
     
     // 点击外部关闭面板
@@ -1778,18 +1715,18 @@
         signPanel.classList.remove('show');
     });
     
-    // 每日签到 +2 DT币
+    // 每日签到（修改：签到获得2DT币）
     signBtn.addEventListener('click', () => {
         const today = new Date().toDateString();
         const lastSign = localStorage.getItem('dtLastSign');
         
         if (lastSign !== today) {
-            goldCount += 2;
+            goldCount += 2; // 原100改为2
             localStorage.setItem('dtLastSign', today);
             updateAllGoldUI();
             alert('签到成功！DT币+2');
         } else {
-            alert('莫要贪心哦，明天再来吧！');
+            alert('今日已签到，明天再来吧！');
         }
     });
 
