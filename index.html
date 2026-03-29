@@ -22,6 +22,7 @@
         line-height: 1.6;
         overflow-x: hidden;
     }
+    }
 
     /* 图片轮播样式 */
     .carousel-container {
@@ -671,6 +672,16 @@
         cursor: pointer;
         transition: background 0.3s, transform 0.3s ease;
     }
+    /* 支持联盟基金 彩色渐变加粗 */
+    #supportFundBtn {
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+        background-size: 500% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-weight: bold;
+        animation: colorChange 3s linear infinite;
+    }
     .recruit-img {
         width: 100%;
         border-radius: 8px;
@@ -985,6 +996,44 @@
         color: #fff;
         font-size: 18px;
         cursor: pointer;
+    }
+
+    /* 卡通小人掉落样式 */
+    .cartoon-fall {
+        position: fixed;
+        top: -100px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 60px;
+        font-size: 30px;
+        text-align: center;
+        z-index: 9999;
+        animation: fallDown 0.8s ease forwards;
+    }
+    .cartoon-tip {
+        position: fixed;
+        top: 70px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #fff;
+        color: #000;
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        white-space: nowrap;
+        z-index: 9999;
+        opacity: 0;
+        animation: showTip 0.5s ease 0.8s forwards;
+    }
+    @keyframes fallDown {
+        0% { top: -100px; }
+        100% { top: 20px; }
+    }
+    @keyframes showTip {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
     }
 </style>
 </head>
@@ -1470,6 +1519,31 @@
         };
     }
 
+    // 卡通小人掉落函数
+    function showCartoonFall() {
+        // 移除旧的
+        document.querySelectorAll('.cartoon-fall, .cartoon-tip').forEach(el => el.remove());
+        
+        // 创建小人
+        const cartoon = document.createElement('div');
+        cartoon.className = 'cartoon-fall';
+        cartoon.textContent = '👨';
+        
+        // 创建提示语
+        const tip = document.createElement('div');
+        tip.className = 'cartoon-tip';
+        tip.textContent = '每日一个灵魂拷问，今天你检查联盟的代码是否又到期了吗';
+        
+        document.body.appendChild(cartoon);
+        document.body.appendChild(tip);
+        
+        // 3秒后自动消失
+        setTimeout(() => {
+            cartoon.remove();
+            tip.remove();
+        }, 3000);
+    }
+
     // ====================== 事件绑定 ======================
     // 占卜次数同步
     function updateFortuneDisplay(count) {
@@ -1558,7 +1632,6 @@
             return;
         }
         goldCount -= 1;
-        updateAllGoldUI();
 
         const modal = document.getElementById('divinationModal');
         const bambooTube = document.getElementById('bambooTube');
@@ -1572,13 +1645,13 @@
         // 显示模态框
         modal.classList.add('active');
         
-        // 随机运势文本
+        // 随机运势文本 + 对应DT币
         const fortunes = [
-            { text: "大吉！今日部落战必胜✨", add: 30 },
-            { text: "吉！今日招人顺利🥳", add: 20 },
+            { text: "大吉！今日部落战必胜✨", add: 5 },
+            { text: "吉！今日招人顺利🥳", add: 3 },
             { text: "平！今日稳扎稳打😐", add: 0 },
-            { text: "小凶！今日要黑三⚠️", add: 10 },
-            { text: "凶！飞机票在来的路上了🧘‍♂️", add: -2 }
+            { text: "小凶！今日要黑三⚠️", add: -2 },
+            { text: "大凶！飞机票在来的路上了🧘‍♂️", add: -6 }
         ];
         const random = fortunes[Math.floor(Math.random() * fortunes.length)];
         
@@ -1692,10 +1765,12 @@
     // 初始化显示
     updateAllGoldUI();
     
-    // 显示/隐藏签到面板
+    // 显示/隐藏签到面板 + 掉落小人
     goldBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         signPanel.classList.toggle('show');
+        // 触发卡通小人掉落
+        showCartoonFall();
     });
     
     // 点击外部关闭面板
@@ -1703,17 +1778,16 @@
         signPanel.classList.remove('show');
     });
     
-    // 每日签到
+    // 每日签到 +2 DT币
     signBtn.addEventListener('click', () => {
         const today = new Date().toDateString();
         const lastSign = localStorage.getItem('dtLastSign');
         
         if (lastSign !== today) {
-            // 已修改：签到获得 DT 币 +100
-            goldCount += 100;
+            goldCount += 2;
             localStorage.setItem('dtLastSign', today);
             updateAllGoldUI();
-            alert('签到成功！DT币+100');
+            alert('签到成功！DT币+2');
         } else {
             alert('今日已签到，明天再来吧！');
         }
