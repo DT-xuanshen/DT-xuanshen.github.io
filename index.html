@@ -728,35 +728,6 @@
         border-radius: 8px;
     }
 
-    /* 新人福利按钮样式 */
-    .newbie-btn {
-        position: fixed;
-        bottom: 85px;
-        right: 20px;
-        width: 55px;
-        height: 55px;
-        background: linear-gradient(135deg, #ff6b9d, #f9844a);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 22px;
-        cursor: pointer;
-        box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4);
-        z-index: 999;
-        transition: transform 0.3s ease;
-        color: #fff;
-        font-weight: bold;
-    }
-    .newbie-btn:hover {
-        transform: scale(1.1);
-    }
-    .newbie-btn.used {
-        background: linear-gradient(135deg, #616161, #9e9e9e);
-        cursor: not-allowed;
-        transform: scale(0.95);
-    }
-
     /* 金币按钮样式 + 去掉DT币标识 */
     .gold-btn {
         position: fixed;
@@ -1200,7 +1171,7 @@
         </div>
         <div class="carousel-dots" id="carouselDots">
             <div class="carousel-dot active" data-index="0"></div>
-            <div class="carousel-dot data-index="1"></div>
+            <div class="carousel-dot" data-index="1"></div>
             <div class="carousel-dot" data-index="2"></div>
         </div>
     </div>
@@ -1273,9 +1244,6 @@
 <!-- 举报/建议按钮 -->
 <button class="report-btn" id="reportBtn" onclick="window.open('https://wj.qq.com/s2/25486960/0107/','_blank')">举报/建议</button>
 
-<!-- 新增：新人福利按钮 -->
-<div class="newbie-btn" id="newbieBtn">🎁</div>
-
 <!-- 金币按钮 + 签到面板 -->
 <div class="gold-btn" id="goldBtn">🪙</div>
 <div class="sign-panel" id="signPanel">
@@ -1346,6 +1314,9 @@
     let danmuTimer = null;              // 弹幕定时器
     let isBoardVisible = false;         // 留言板是否可见
     let danmuCount = 0;                 // 当前弹幕数量
+    // 新增：占卜机制相关全局变量
+    let consecutiveBadLuck = 0;         // 连续大凶次数
+    let divinationCount = 0;            // 累计占卜次数
     // 6. 弹幕内容池
     const danmuTexts = [
         "记得游戏内商店绑定联盟的创作者代码：dt8888",
@@ -1366,8 +1337,6 @@
 
     // DT币全局
     let goldCount = localStorage.getItem('dtGold') ? parseFloat(localStorage.getItem('dtGold')) : 0;
-    // 新人福利是否已领取
-    let newbieRewardClaimed = localStorage.getItem('newbieRewardClaimed') === 'true';
     
     // 更新所有DT币显示
     function updateAllGoldUI() {
@@ -1516,29 +1485,6 @@
         };
     }
 
-    // 新人福利领取函数
-    function claimNewbieReward() {
-        if (newbieRewardClaimed) {
-            alert("您已领取过新人福利，每人仅限一次哦！");
-            return;
-        }
-        
-        // 增加50 DT币
-        goldCount += 50;
-        updateAllGoldUI();
-        
-        // 标记为已领取
-        newbieRewardClaimed = true;
-        localStorage.setItem('newbieRewardClaimed', 'true');
-        
-        // 更新按钮样式
-        const newbieBtn = document.getElementById('newbieBtn');
-        newbieBtn.classList.add('used');
-        newbieBtn.textContent = "✅";
-        
-        alert("恭喜！领取新人福利成功，DT币+50！");
-    }
-
     // ====================== 事件绑定 ======================
     // 占卜次数同步
     function updateFortuneDisplay(count) {
@@ -1619,11 +1565,11 @@
         }
     });
 
-    // 占卜按钮事件 + DT币逻辑
+    // 占卜按钮事件 + DT币逻辑（新增安慰机制和保底机制）
     document.getElementById('fortuneBtn').addEventListener('click', function() {
         // 每次占卜扣1币
         if (goldCount < 1) {
-            alert("DT币不足，无法占卜！");
+            alert("DT币不足，还当赌狗？");
             return;
         }
         goldCount -= 1;
@@ -1643,11 +1589,11 @@
         
         // 随机运势文本（修改币值规则）
         const fortunes = [
-            { text: "大吉！今日部落战必胜✨", add: 5 },    // 大吉+5币
-            { text: "吉！今日招人顺利🥳", add: 3 },         // 吉+3币
-            { text: "平！今日稳扎稳打😐", add: 0 },          // 平无变化
-            { text: "小凶！今日要黑三⚠️", add: -2 },        // 小凶-2币
-            { text: "大凶！飞机票在来的路上了🧘‍♂️", add: -6 } // 大凶-6币
+            { text: "大吉！今日部落战必胜✨", add: 5, type: "good" },    // 大吉+5币
+            { text: "吉！今日招人顺利🥳", add: 3, type: "good" },         // 吉+3币
+            { text: "平！今日稳扎稳打😐", add: 0, type: "normal" },       // 平+1币
+            { text: "小凶！今日要黑三⚠️", add: -2, type: "bad" },         // 小凶-2币
+            { text: "大凶！飞机票在来的路上了🧘‍♂️", add: -6, type: "worst" } // 大凶-6币
         ];
         const random = fortunes[Math.floor(Math.random() * fortunes.length)];
         
@@ -1659,6 +1605,29 @@
             
             // 增减DT币
             goldCount += random.add;
+            
+            // ===== 新增：赌狗安慰机制（连续两次大凶）=====
+            if (random.type === "worst") {
+                consecutiveBadLuck++;
+                // 连续两次大凶触发安慰机制
+                if (consecutiveBadLuck >= 2) {
+                    goldCount += 3; // 额外+3币
+                    alert(`触发赌狗安慰机制！额外获得3DT币！`);
+                    consecutiveBadLuck = 0; // 重置连续大凶计数
+                }
+            } else {
+                consecutiveBadLuck = 0; // 非大凶则重置计数
+            }
+            
+            // ===== 新增：保底机制（连续占卜10次）=====
+            divinationCount++;
+            if (divinationCount >= 10) {
+                goldCount += 5; // 额外+5币
+                alert(`触发保底机制！额外获得5DT币！`);
+                divinationCount = 0; // 重置累计占卜次数
+            }
+            
+            // 更新UI和提示
             updateAllGoldUI();
             if (random.add > 0) {
                 alert(`恭喜！获得${random.add}DT币！`);
@@ -1760,22 +1729,6 @@
     
     // 初始化显示
     updateAllGoldUI();
-    
-    // 初始化新人福利按钮状态
-    const newbieBtn = document.getElementById('newbieBtn');
-    if (newbieRewardClaimed) {
-        newbieBtn.classList.add('used');
-        newbieBtn.textContent = "✅";
-    }
-    // 绑定新人福利按钮点击事件
-    newbieBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (!newbieRewardClaimed) {
-            claimNewbieReward();
-        } else {
-            alert("您已领取过新人福利，每人仅限一次哦！");
-        }
-    });
     
     // 显示/隐藏签到面板
     goldBtn.addEventListener('click', (e) => {
