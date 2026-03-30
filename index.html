@@ -4,10 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DT联盟官网</title>
-<!-- 引入 Firebase SDK (使用兼容性较好的 v8 版本) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<!-- 引入axios用于HTTP请求（如果需要） -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <style>
     * {
@@ -23,7 +21,6 @@
         overflow-x: hidden;
     }
 
-    /* 图片轮播样式 */
     .carousel-container {
         width: 100%;
         overflow: hidden;
@@ -65,7 +62,6 @@
         background: #64b5f6;
     }
 
-    /* 炫酷入场特效 */
     .page-enter {
         position: fixed;
         top: 0;
@@ -95,7 +91,6 @@
         100% { transform: scale(1.1); }
     }
 
-    /* 天气图标样式 */
     .weather-icon {
         position: fixed;
         top: 15px;
@@ -135,7 +130,6 @@
         transform: rotate(90deg);
     }
 
-    /* 钢笔按钮样式 */
     .pen-btn {
         position: fixed;
         top: 50px;
@@ -160,24 +154,22 @@
         transform: rotate(180deg);
     }
 
-    /* 新增：新消息气泡提示样式 */
     .new-message-bubble {
         position: fixed;
-        top: 85px; /* 钢笔按钮下方位置 */
-        left: 12px; /* 对齐钢笔按钮中心 */
-        background: #ff4757; /* 醒目红色 */
+        top: 85px;
+        left: 12px;
+        background: #ff4757;
         color: #fff;
         font-size: 10px;
         padding: 2px 6px;
         border-radius: 4px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.3);
         z-index: 101;
-        /* 气泡三角指向钢笔按钮 */
     }
     .new-message-bubble::after {
         content: '';
         position: absolute;
-        top: -5px; /* 三角朝上指向钢笔按钮 */
+        top: -5px;
         left: 50%;
         transform: translateX(-50%);
         border-width: 0 5px 5px 5px;
@@ -185,7 +177,6 @@
         border-color: transparent transparent #ff4757 transparent;
     }
 
-    /* 留言板样式 - 优化弹幕容器和按钮样式 */
     .message-board {
         position: fixed;
         top: 0;
@@ -218,7 +209,6 @@
         position: relative;
         background: rgba(0,0,0,0.2);
     }
-    /* 留言跳转按钮样式 */
     .message-jump-btn {
         padding: 15px;
         background: #1a237e;
@@ -239,7 +229,6 @@
     .jump-to-message:hover {
         background: #42a5f5;
     }
-    /* 弹幕样式优化 - 控制最多5条，随机颜色 */
     .danmu {
         position: absolute;
         white-space: nowrap;
@@ -249,17 +238,11 @@
         font-size: 0.8rem;
         animation: danmuMove linear;
         z-index: 1;
-        pointer-events: none; /* 避免遮挡点击 */
+        pointer-events: none;
     }
     @keyframes danmuMove {
-        from {
-            left: 100%;
-            transform: translateX(0);
-        }
-        to {
-            left: 0;
-            transform: translateX(-100%);
-        }
+        from { left: 100%; transform: translateX(0); }
+        to { left: 0; transform: translateX(-100%); }
     }
 
     .sidebar {
@@ -307,7 +290,7 @@
         align-items: center;
         white-space: nowrap;
         z-index: 2;
-        font-family: "SimHei", "黑体", sans-serif;
+        font-family: "SimHei", sans-serif;
         font-size: 14px;
     }
     .scroll-wrap {
@@ -326,7 +309,7 @@
         white-space: nowrap;
         animation: scroll 20s linear infinite;
         padding-left: 10px;
-        font-family: "SimHei", "黑体", "STHeiti", sans-serif;
+        font-family: "SimHei", sans-serif;
         font-size: 14px;
         font-weight: 900;
         letter-spacing: 1px;
@@ -349,7 +332,6 @@
         0% { opacity: 0; transform: translateY(-50px); }
         100% { opacity: 1; transform: translateY(0); }
     }
-    /* DT联盟彩色渐变动画 */
     header h1 {
         font-size: 2rem;
         margin-bottom: 8px;
@@ -397,7 +379,7 @@
         color: #64b5f6;
         margin-bottom: 15px;
         font-size: 1.2rem;
-        font-family: "KaiTi", "STKaiti", "楷体", "楷书", serif;
+        font-family: "KaiTi", serif;
         font-weight: normal;
         border-bottom: 2px solid #283593;
         padding-bottom: 8px;
@@ -416,7 +398,6 @@
         grid-template-columns: 1fr 1fr;
         gap: 15px;
     }
-    /* 二级分类按钮形状优化 */
     .tribe-button {
         background: linear-gradient(135deg, #1a237e, #283593);
         border: none;
@@ -567,7 +548,6 @@
         100% { opacity: 1; }
     }
 
-    /* 通用弹窗样式 */
     .popup-base {
         position: fixed;
         left: 50%;
@@ -605,7 +585,6 @@
         color: #64b5f6;
         transform: rotate(90deg);
     }
-    /* 弹窗按钮样式 */
     .popup-btn {
         display: block;
         width: 100%;
@@ -623,10 +602,9 @@
         background: #3949ab;
     }
 
-    /* 主力部落标签弹窗样式 - 黑小四号字 */
     #popupMainTribeTags .tag-content {
-        font-size: 14px; /* 小四号字体大小 */
-        color: #000; /* 黑色文字 */
+        font-size: 14px;
+        color: #000;
         line-height: 1.8;
         background: #fff;
         padding: 15px;
@@ -671,7 +649,6 @@
         cursor: pointer;
         transition: background 0.3s, transform 0.3s ease;
     }
-    /* 新增：支持联盟基金按钮文字渐变彩色+加粗样式 */
     .support-fund-text {
         background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
         background-size: 500% 100%;
@@ -728,7 +705,6 @@
         border-radius: 8px;
     }
 
-    /* 金币按钮样式 + 去掉DT币标识 */
     .gold-btn {
         position: fixed;
         bottom: 20px;
@@ -751,7 +727,6 @@
     .gold-btn:hover {
         transform: scale(1.1);
     }
-    /* 举报/建议按钮 左下角 */
     .report-btn {
         position: fixed;
         bottom: 20px;
@@ -773,7 +748,6 @@
         background: #e03a46;
         transform: scale(1.05);
     }
-    /* 签到面板 */
     .sign-panel {
         position: fixed;
         bottom: 85px;
@@ -817,6 +791,24 @@
         cursor: pointer;
         margin-bottom: 8px;
     }
+    /* 修改：获取DT币按钮样式统一 + 彩色渐变文字 */
+    .get-gold-btn {
+        width: 100%;
+        padding: 10px;
+        background: #64b5f6;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-bottom: 8px;
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+        background-size: 500% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: colorChange 3s linear infinite;
+    }
     .gold-count {
         text-align: center;
         color: #ffd700;
@@ -824,7 +816,6 @@
         font-size: 16px;
     }
 
-    /* DT币兑换商城面板 */
     .dt-shop-modal {
         position: fixed;
         left: 50%;
@@ -932,7 +923,6 @@
         font-size: 18px;
     }
 
-    /* 兑换成功卡片弹窗 */
     .card-modal {
         position: fixed;
         left: 0;
@@ -971,7 +961,6 @@
         animation: colorChange 3s linear infinite;
         margin-bottom: 10px;
     }
-    /* 已修改：时间移到卡片最左上角 */
     .card-time {
         position: absolute;
         top: 12px;
@@ -997,6 +986,139 @@
         font-size: 18px;
         cursor: pointer;
     }
+
+    /* 重做：精美立体宝箱样式 */
+    .chest-container {
+        text-align: center;
+        margin: 25px 0;
+        position: relative;
+    }
+    .chest {
+        width: 140px;
+        height: 110px;
+        margin: 0 auto;
+        position: relative;
+        cursor: pointer;
+        filter: drop-shadow(0 8px 12px rgba(255,215,0,0.4));
+        transition: transform 0.3s ease;
+    }
+    .chest:hover {
+        transform: scale(1.05);
+    }
+    /* 宝箱主体 - 立体效果 */
+    .chest-body {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 70px;
+        background: linear-gradient(180deg, #8B4513, #5D2906);
+        border-radius: 8px;
+        border: 3px solid #D2B48C;
+        box-shadow: 
+            inset 0 4px 8px rgba(0,0,0,0.5),
+            0 4px 0 #4b2304;
+    }
+    /* 宝箱盖子 - 立体开合 */
+    .chest-lid {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 126px;
+        height: 35px;
+        background: linear-gradient(180deg, #A0522D, #7c3f14);
+        border-radius: 10px 10px 0 0;
+        border: 3px solid #D2B48C;
+        border-bottom: none;
+        box-shadow: inset 0 -3px 6px rgba(0,0,0,0.4);
+        transform-origin: bottom center;
+        animation: chestLid 3.2s ease-in-out infinite;
+    }
+    /* 宝箱锁扣 */
+    .chest-lock {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 18px;
+        height: 22px;
+        background: linear-gradient(45deg, #FFD700, #FFA500);
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        z-index: 2;
+    }
+    .chest-lock::after {
+        content: '';
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 8px;
+        height: 10px;
+        background: #1a1a1a;
+        border-radius: 2px;
+    }
+    /* 宝箱光芒特效 */
+    .chest-light {
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 50px;
+        background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, transparent 65%);
+        opacity: 0;
+        animation: chestLight 3.2s ease-in-out infinite;
+        z-index: -1;
+    }
+    @keyframes chestLid {
+        0%,100% { transform: translateX(-50%) rotateX(0deg); top:20px; }
+        50% { transform: translateX(-50%) rotateX(-25deg); top:10px; }
+    }
+    @keyframes chestLight {
+        0%,100% { opacity: 0; }
+        50% { opacity: 1; }
+    }
+    .chest-text {
+        margin-top: 15px;
+        color: #ffd700;
+        font-weight: bold;
+        font-size: 1.1rem;
+        text-shadow: 0 0 8px rgba(255,215,0,0.6);
+    }
+    .chest-rule-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #283593;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+    .code-btn {
+        width: 100%;
+        padding: 10px;
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+        background-size: 500% 100%;
+        color: #000;
+        font-weight: bold;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-bottom: 15px;
+        animation: colorChange 3s linear infinite;
+    }
+    .get-gold-tip {
+        text-align: right;
+        font-size: 11px;
+        color: #ccc;
+        margin-top: 5px;
+    }
 </style>
 </head>
 <body>
@@ -1004,10 +1126,8 @@
 <div class="weather-icon" id="weatherIcon">☀️</div>
 <div class="overlay" id="overlay"></div>
 <div class="divination-modal" id="divinationModal"><div class="bamboo-tube" id="bambooTube"></div><div class="fortune-text" id="fortuneText"></div></div>
-<!-- 修复：辅助服务弹窗图片链接 -->
 <div class="assist-image-modal" id="assistImageModal"><img src="https://s41.ax1x.com/2026/03/28/pe1P9W4.png" alt="辅助服务图片" class="assist-image-content" id="assistImage"></div>
 
-<!-- 1. 主力部落弹窗 - 重构为三个按钮 -->
 <div class="popup-base" id="popupMainTribe">
     <span class="popup-close" onclick="closeAllPopups()">×</span>
     <h3>主力部落</h3>
@@ -1016,7 +1136,6 @@
     <button class="popup-btn" onclick="showMainTribeTags()">主力部落标签</button>
 </div>
 
-<!-- 主力部落标签弹窗 - 黑小四号字 -->
 <div class="popup-base" id="popupMainTribeTags">
     <span class="popup-close" onclick="closeAllPopups()">×</span>
     <h3>主力部落标签</h3>
@@ -1033,7 +1152,6 @@
     </div>
 </div>
 
-<!-- 2. 系列扩张部落弹窗 - 重构为四个系列按钮 -->
 <div class="popup-base" id="popupSeries">
     <span class="popup-close" onclick="closeAllPopups()">×</span>
     <h3>系列扩张部落</h3>
@@ -1043,7 +1161,6 @@
     <button class="popup-btn" onclick="showSeriesPopup('jianghu')">江湖系列</button>
 </div>
 
-<!-- 强盛系列弹窗 -->
 <div class="popup-base" id="popupQiangSheng">
     <span class="popup-close" onclick="closeAllPopups()">×</span>
     <h3>强盛系列</h3>
@@ -1052,7 +1169,6 @@
     <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUktQWWFVZm9YWUxZ', '_blank')">强盛部落标签</button>
 </div>
 
-<!-- 北斗系列弹窗 -->
 <div class="popup-base" id="popupBeiDou">
     <span class="popup-close" onclick="closeAllPopups()">×</span>
     <h3>北斗系列</h3>
@@ -1061,7 +1177,6 @@
     <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmFCaHdQUHB0cmVX', '_blank')">北斗部落标签</button>
 </div>
 
-<!-- 山海经系列弹窗 -->
 <div class="popup-base" id="popupShanHaiJing">
     <span class="popup-close" onclick="closeAllPopups()">×</span>
     <h3>山海经系列</h3>
@@ -1070,7 +1185,6 @@
     <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUnFqc2Z3UEVLbUxi', '_blank')">山海经部落标签</button>
 </div>
 
-<!-- 江湖系列弹窗 -->
 <div class="popup-base" id="popupJiangHu">
     <span class="popup-close" onclick="closeAllPopups()">×</span>
     <h3>江湖系列</h3>
@@ -1079,7 +1193,6 @@
     <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmpwRmt5QXpHTnhP', '_blank')">江湖部落标签</button>
 </div>
 
-<!-- 3. 加盟合作部落弹窗 -->
 <div class="popup-base" id="popupJoinCoop">
     <span class="popup-close" onclick="closeAllPopups()">×</span>
     <h3>加盟合作部落</h3>
@@ -1088,7 +1201,6 @@
     <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmN2cXB0R2JUbmNO', '_blank')">加盟合作部落标签</button>
 </div>
 
-<!-- 4. 辅助功能性部落弹窗 -->
 <div class="popup-base" id="popupFuncAssist">
     <span class="popup-close" onclick="closeAllPopups()">×</span>
     <h3>辅助功能性部落</h3>
@@ -1097,7 +1209,6 @@
     <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUk1td09Md2xtUk92', '_blank')">辅助功能性部落标签</button>
 </div>
 
-<!-- 基金相关弹窗 -->
 <div class="popup-base" id="popupFundStructure">
     <span class="popup-close" onclick="closeAllPopups()">×</span>
     <h3>联盟基金构成</h3>
@@ -1125,12 +1236,21 @@
     <div>在DT联盟官方微信公众号【轩神辅助coc】的主页置顶文章中的“DT联盟详情介绍”这篇文章滑至末尾点击“喜欢作者”即可为DT联盟发电<br><br>温馨提示：请量力而行，即使再普通的成员，DT联盟仍然一样欢迎您！</div>
 </div>
 
+<!-- 宝箱规则弹窗 -->
+<div class="popup-base" id="chestRuleModal">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>宝箱规则</h3>
+    <div style="line-height:1.8;">
+        ①开启宝箱会消耗10DT币/次<br>
+        ②宝箱可开出黄金令牌，碎片，红包，DT币，再来一次，毛都没有等奖品<br>
+        ③本活动的最终解释权归DT联盟所有
+    </div>
+</div>
+
 <div class="menu-btn" id="menuBtn"><span></span><span></span><span></span></div>
 <div class="pen-btn" id="penBtn">✒️</div>
-<!-- 新增：新消息气泡提示 -->
 <div class="new-message-bubble" id="newMessageBubble">新消息</div>
 
-<!-- 留言板 - 优化弹幕功能 -->
 <div class="message-board" id="messageBoard">
     <div class="message-board-header">DT联盟留言板</div>
     <div class="message-container" id="messageContainer"></div>
@@ -1151,6 +1271,7 @@
     <a href="#log">DT联盟管理更新日志</a>
     <a href="#match">DT联盟官方赛事</a>
     <a href="#download">DT联盟资源下载</a>
+    <a href="#chest">宝箱的诱惑</a>
     <a href="#contact">DT联盟官方媒体</a>
 </div>
 
@@ -1164,7 +1285,6 @@
 <div class="container">
     <div class="carousel-container">
         <div class="carousel-slide" id="carouselSlide">
-            <!-- 替换轮播图图片链接为新的直链 -->
             <div class="carousel-item"><img src="https://s41.ax1x.com/2026/03/29/pe1bpOe.jpg" alt="轩神辅助coc"></div>
             <div class="carousel-item"><img src="https://s41.ax1x.com/2026/03/29/pe1bSyD.jpg" alt="创作者代码支持"></div>
             <div class="carousel-item"><img src="https://s41.ax1x.com/2026/03/29/pe1HzQO.jpg" alt="DT联盟欢迎您"></div>
@@ -1175,11 +1295,13 @@
             <div class="carousel-dot" data-index="2"></div>
         </div>
     </div>
+
     <div class="section" id="about">
         <h2>✨关于DT联盟</h2>
         <p>DT联盟始于2020年夏，致力于部落冲突中的部落团队组织联盟、更新爆料、阵型推荐、辅助服务等，在后面，我们还将加入更多游戏项目……</p>
         <a href="https://mp.weixin.qq.com/s/u3vSoq-O5W3cHpAP8WO_dg" class="more-btn" target="_blank">点我查看更多详情</a>
     </div>
+
     <div class="section" id="tribes">
         <h2>✨旗下部落</h2>
         <div class="tribe-buttons">
@@ -1189,48 +1311,70 @@
             <button class="tribe-button" id="funcAssistBtn">辅助功能性部落<small>（点我查看详情）</small></button>
         </div>
     </div>
+
     <div class="section" id="fund">
         <h2>✨DT联盟基金</h2>
         <div class="fund-btn" id="fundStructureBtn">联盟基金构成</div>
         <div class="fund-btn" id="fundUseBtn">联盟基金用途</div>
-        <!-- 修改：添加渐变彩色样式类 -->
         <div class="fund-btn" id="supportFundBtn"><span class="support-fund-text">支持联盟基金</span></div>
     </div>
+
     <div class="section" id="groups">
         <h2>✨各大部落群</h2>
         <a href="https://docs.qq.com/doc/DUmJucUFLbGdHaHVp" class="jump-btn" target="_blank">点我跳转</a>
     </div>
+
     <div class="section" id="formation">
         <h2>📚查找阵型</h2>
-        <!-- 5. 修改查找阵型按钮跳转链接 -->
         <button class="jump-btn" id="formationBtn" onclick="window.open('https://coc.6oh.cn/?lx=1&name=%E9%B8%A1%E4%BD%A0%E5%A4%AA%E7%BE%8E', '_blank')">点我快速查找阵型</button>
     </div>
+
     <div class="section" id="assist">
         <h2>🤖辅助服务</h2>
         <button class="jump-btn" id="assistBtn">养号｜刷墙｜奶号｜招人</button>
     </div>
+
     <div class="section" id="divination">
         <h2>🃏联盟占卜师</h2>
         <button class="divination-btn" id="fortuneBtn">点击获取今日运势</button>
         <div class="fortune-count" id="fortuneCount">【总占卜次数：0次】</div>
     </div>
+
     <div class="section" id="recruit">
         <h2>✨部落管理招募</h2>
-        <!-- 替换招募图片并添加点击跳转 -->
         <img src="https://s41.ax1x.com/2026/03/29/pe1bBkR.jpg" alt="招募" class="recruit-img" onclick="window.open('https://docs.qq.com/doc/DUmhCbGNGcm9ZWGtX','_blank')">
         <div class="section" id="log" style="margin-top: 15px; margin-bottom: 0;">
             <h2>✨DT联盟管理更新日志</h2>
             <a href="https://docs.qq.com/doc/DUnhDUVBrRGtnZ2R1" class="jump-btn" target="_blank">重要通知更新日志</a>
         </div>
     </div>
+
     <div class="section" id="match">
         <h2>✨DT联盟官方赛事</h2>
         <a href="https://docs.qq.com/sheet/DUk5Gd25TUHZFR2NI" class="jump-btn" target="_blank">近期联盟部落赛程</a>
     </div>
+
     <div class="section" id="download">
         <h2>✨DT联盟资源下载</h2>
         <a href="https://pan.quark.cn/s/d12d0f3f39a8" class="jump-btn" target="_blank">点击获取</a>
     </div>
+
+    <!-- 精美立体宝箱板块 -->
+    <div class="section" id="chest">
+        <h2>✨宝箱的诱惑
+            <button class="chest-rule-btn" id="chestRuleBtn">规则</button>
+        </h2>
+        <div class="chest-container">
+            <div class="chest" id="chestBtn">
+                <div class="chest-light"></div>
+                <div class="chest-lid"></div>
+                <div class="chest-body"></div>
+                <div class="chest-lock"></div>
+            </div>
+            <div class="chest-text">10DT币/次</div>
+        </div>
+    </div>
+
     <div class="section" id="contact">
         <h2>✨DT联盟官方媒体</h2>
         <div style="font-size: 0.75rem; line-height: 1.8;">
@@ -1239,20 +1383,20 @@
         </div>
     </div>
 </div>
+
 <footer><p>&copy; 2026 DT联盟. All Rights Reserved.</p></footer>
 
-<!-- 举报/建议按钮 -->
 <button class="report-btn" id="reportBtn" onclick="window.open('https://wj.qq.com/s2/25486960/0107/','_blank')">举报/建议</button>
 
-<!-- 金币按钮 + 签到面板 -->
 <div class="gold-btn" id="goldBtn">🪙</div>
 <div class="sign-panel" id="signPanel">
     <button class="sign-btn" id="signBtn">每日签到</button>
     <button class="use-gold-btn" id="useGoldBtn">使用DT币</button>
+    <button class="get-gold-btn" id="getGoldBtn">获取DT币</button>
     <div class="gold-count" id="goldCount">DT币数量：0</div>
+    <div class="get-gold-tip">你还可以通过签到，占卜，转盘等官网活动获取海量DT币</div>
 </div>
 
-<!-- DT币兑换中心 -->
 <div class="dt-shop-modal" id="dtShopModal">
     <div class="shop-header">
         <div class="shop-title">DT币兑换中心</div>
@@ -1273,7 +1417,6 @@
     <span class="popup-close" onclick="closeShop()">×</span>
 </div>
 
-<!-- DT币规则弹窗 -->
 <div class="rule-modal" id="ruleModal">
     <span class="close-rule" onclick="closeRule()">×</span>
     <div>
@@ -1286,7 +1429,6 @@
 </div>
 
 <script>
-    // Firebase 配置（请替换为您自己的配置）
     const firebaseConfig = {
         apiKey: "YOUR_REAL_API_KEY",
         authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -1297,27 +1439,22 @@
         appId: "YOUR_APP_ID"
     };
 
-    // 初始化 Firebase
     try {
         firebase.initializeApp(firebaseConfig);
         console.log("Firebase 初始化成功！");
     } catch (error) {
         console.error("Firebase 初始化失败：", error);
-        alert("数据同步服务初始化失败，请检查 Firebase 配置！");
     }
 
-    // 获取数据库引用
     const database = firebase.database();
     const fortuneRef = database.ref('dtAlliance/fortuneCount');
     
-    // 全局变量
-    let danmuTimer = null;              // 弹幕定时器
-    let isBoardVisible = false;         // 留言板是否可见
-    let danmuCount = 0;                 // 当前弹幕数量
-    // 新增：占卜机制相关全局变量
-    let consecutiveBadLuck = 0;         // 连续大凶次数
-    let divinationCount = 0;            // 累计占卜次数
-    // 6. 弹幕内容池
+    let danmuTimer = null;
+    let isBoardVisible = false;
+    let danmuCount = 0;
+    let consecutiveBadLuck = 0;
+    let divinationCount = 0;
+    
     const danmuTexts = [
         "记得游戏内商店绑定联盟的创作者代码：dt8888",
         "DT联盟因为有我们而更加强大",
@@ -1325,49 +1462,41 @@
         "DT联盟代码dt8888每七天需要重新绑定才能生效",
         "COC三千州，何人不识DT联盟"
     ];
-    // 弹幕颜色池
     const danmuColors = [
-        "rgba(100, 181, 246, 0.85)",  // 蓝色
-        "rgba(76, 175, 80, 0.85)",    // 绿色
-        "rgba(255, 152, 0, 0.85)",    // 橙色
-        "rgba(156, 39, 176, 0.85)",   // 紫色
-        "rgba(244, 67, 54, 0.85)",    // 红色
-        "rgba(255, 235, 59, 0.85)"    // 黄色
+        "rgba(100, 181, 246, 0.85)",
+        "rgba(76, 175, 80, 0.85)",
+        "rgba(255, 152, 0, 0.85)",
+        "rgba(156, 39, 176, 0.85)",
+        "rgba(244, 67, 54, 0.85)",
+        "rgba(255, 235, 59, 0.85)"
     ];
 
-    // DT币全局
     let goldCount = localStorage.getItem('dtGold') ? parseFloat(localStorage.getItem('dtGold')) : 0;
     
-    // 更新所有DT币显示
     function updateAllGoldUI() {
         document.getElementById('goldCount').textContent = `DT币数量：${goldCount.toFixed(1)}`;
         document.getElementById('currentGoldShop').textContent = `当前：${goldCount.toFixed(1)}币`;
         localStorage.setItem('dtGold', goldCount);
     }
 
-    // 关闭所有弹窗
     function closeAllPopups() {
         document.querySelectorAll('.popup-base').forEach(p => p.classList.remove('show'));
         document.getElementById('overlay').classList.remove('show');
     }
-    // 关闭商城
     function closeShop() {
         document.getElementById('dtShopModal').classList.remove('show');
         document.getElementById('overlay').classList.remove('show');
     }
-    // 关闭规则
     function closeRule() {
         document.getElementById('ruleModal').classList.remove('show');
     }
 
-    // 显示主力部落标签弹窗
     function showMainTribeTags() {
         closeAllPopups();
         document.getElementById('popupMainTribeTags').classList.add('show');
         document.getElementById('overlay').classList.add('show');
     }
 
-    // 显示系列扩张部落子弹窗
     function showSeriesPopup(type) {
         closeAllPopups();
         const popupIds = {
@@ -1380,10 +1509,8 @@
         document.getElementById('overlay').classList.add('show');
     }
 
-    // 6. 创建单条弹幕（控制最多5条）
     function createDanmu() {
-        if (danmuCount >= 5) return; // 最多5条弹幕
-        
+        if (danmuCount >= 5) return;
         const container = document.getElementById('messageContainer');
         if (!container) return;
         
@@ -1395,20 +1522,16 @@
         danmu.textContent = text;
         danmu.style.background = color;
         
-        // 随机位置
         const containerHeight = container.clientHeight;
         const randomTop = Math.floor(Math.random() * (containerHeight - 40)) + 10;
         danmu.style.top = `${randomTop}px`;
         
-        // 【修改】弹幕速度调快：动画时长从 8-15秒 改为 3-8秒
         const randomDuration = Math.floor(Math.random() * 5) + 3;
         danmu.style.animationDuration = `${randomDuration}s`;
         
-        // 添加到容器
         container.appendChild(danmu);
         danmuCount++;
         
-        // 动画结束后移除
         setTimeout(() => {
             if (danmu && danmu.parentNode) {
                 danmu.remove();
@@ -1417,10 +1540,8 @@
         }, randomDuration * 1000);
     }
 
-    // 启动弹幕播放
     function startDanmuPlay() {
         if (danmuTimer) clearInterval(danmuTimer);
-        // 【优化】弹幕生成间隔从 2-4秒 改为 1-2秒，弹幕更密集
         danmuTimer = setInterval(() => {
             if (isBoardVisible && danmuCount < 5) {
                 createDanmu();
@@ -1428,18 +1549,15 @@
         }, Math.floor(Math.random() * 1000) + 1000);
     }
 
-    // 停止弹幕播放
     function stopDanmuPlay() {
         if (danmuTimer) {
             clearInterval(danmuTimer);
             danmuTimer = null;
         }
-        // 清空所有弹幕
         document.getElementById('messageContainer').innerHTML = '';
         danmuCount = 0;
     }
 
-    // 兑换商品
     function exchangeGoods(type) {
         const goods = [
             { cost: 50, title: "免处罚卡", time: "3天", desc: "有效期3天，过期无效，请务必截图保存" },
@@ -1453,15 +1571,12 @@
             alert("DT币不足，无法兑换！");
             return;
         }
-        // 扣币
         goldCount -= item.cost;
         updateAllGoldUI();
-        // 弹出卡片
         showExchangeCard(item.title, item.desc);
     }
 
-    // 显示兑换卡片
-    function showExchangeCard(title, desc) {
+    function showExchangeCard(title, desc, timeDesc = "") {
         const now = new Date();
         const timeStr = now.getFullYear() + "-" + 
                        String(now.getMonth() + 1).padStart(2, '0') + "-" + 
@@ -1474,7 +1589,7 @@
         card.innerHTML = `
             <div class="exchange-card">
                 <span class="close-card" onclick="this.parentElement.parentElement.remove()">×</span>
-                <div class="card-time">兑换时间：${timeStr}</div>
+                <div class="card-time">${timeDesc || '兑换时间：'+timeStr}</div>
                 <div class="card-title">${title}</div>
                 <div class="card-desc">${desc}</div>
             </div>
@@ -1485,79 +1600,65 @@
         };
     }
 
-    // ====================== 事件绑定 ======================
-    // 占卜次数同步
     function updateFortuneDisplay(count) {
         document.getElementById('fortuneCount').textContent = `【总占卜次数：${count || 0}次】`;
     }
     fortuneRef.on('value', (snapshot) => {
         let total = snapshot.val() || 0;
         updateFortuneDisplay(total);
-    }, (error) => {
-        console.error("监听占卜次数失败：", error);
     });
 
-    // 增加占卜次数
     function incrementFortuneCloud() {
         fortuneRef.transaction((current) => {
             return (current || 0) + 1;
         });
     }
 
-    // 1. 主力部落按钮点击事件
     document.getElementById('mainTribeBtn').addEventListener('click', function() {
         closeAllPopups();
         document.getElementById('popupMainTribe').classList.add('show');
         document.getElementById('overlay').classList.add('show');
     });
 
-    // 2. 系列扩张部落按钮点击事件
     document.getElementById('seriesTribeBtn').addEventListener('click', function() {
         closeAllPopups();
         document.getElementById('popupSeries').classList.add('show');
         document.getElementById('overlay').classList.add('show');
     });
 
-    // 3. 加盟合作部落按钮点击事件
     document.getElementById('joinCoopBtn').addEventListener('click', function() {
         closeAllPopups();
         document.getElementById('popupJoinCoop').classList.add('show');
         document.getElementById('overlay').classList.add('show');
     });
 
-    // 4. 辅助功能性部落按钮点击事件
     document.getElementById('funcAssistBtn').addEventListener('click', function() {
         closeAllPopups();
         document.getElementById('popupFuncAssist').classList.add('show');
         document.getElementById('overlay').classList.add('show');
     });
 
-    // 留言板控制 + 新消息气泡隐藏逻辑
     document.getElementById('penBtn').addEventListener('click', function(e) {
-        e.stopPropagation(); // 阻止事件冒泡
+        e.stopPropagation();
         const messageBoard = document.getElementById('messageBoard');
         messageBoard.classList.toggle('show');
         this.classList.toggle('active');
         isBoardVisible = messageBoard.classList.contains('show');
         
-        // 点击钢笔按钮后隐藏新消息气泡
         document.getElementById('newMessageBubble').style.display = 'none';
         
         if (isBoardVisible) {
-            startDanmuPlay(); // 启动弹幕
+            startDanmuPlay();
         } else {
-            stopDanmuPlay();  // 停止弹幕
+            stopDanmuPlay();
         }
     });
 
-    // 6. 点击留言板外部收起留言板
     document.addEventListener('click', function(e) {
         const messageBoard = document.getElementById('messageBoard');
         const penBtn = document.getElementById('penBtn');
         
-        if (isBoardVisible && 
-            !messageBoard.contains(e.target) && 
-            e.target !== penBtn) {
+        if (isBoardVisible && !messageBoard.contains(e.target) && e.target !== penBtn) {
             messageBoard.classList.remove('show');
             penBtn.classList.remove('active');
             isBoardVisible = false;
@@ -1565,9 +1666,8 @@
         }
     });
 
-    // 占卜按钮事件 + DT币逻辑（新增安慰机制和保底机制）
+    // 占卜：平改为+1
     document.getElementById('fortuneBtn').addEventListener('click', function() {
-        // 每次占卜扣1币
         if (goldCount < 1) {
             alert("DT币不足，还当赌狗？");
             return;
@@ -1579,55 +1679,46 @@
         const bambooTube = document.getElementById('bambooTube');
         const fortuneText = document.getElementById('fortuneText');
         
-        // 重置动画
         bambooTube.style.animation = 'none';
         void bambooTube.offsetWidth;
         bambooTube.style.animation = 'tube-shake 1s ease-in-out';
         
-        // 显示模态框
         modal.classList.add('active');
         
-        // 随机运势文本（修改币值规则）
         const fortunes = [
-            { text: "大吉！今日部落战必胜✨", add: 5, type: "good" },    // 大吉+5币
-            { text: "吉！今日招人顺利🥳", add: 3, type: "good" },         // 吉+3币
-            { text: "平！今日稳扎稳打😐", add: 0, type: "normal" },       // 平+1币
-            { text: "小凶！今日要黑三⚠️", add: -2, type: "bad" },         // 小凶-2币
-            { text: "大凶！飞机票在来的路上了🧘‍♂️", add: -6, type: "worst" } // 大凶-6币
+            { text: "大吉！今日部落战必胜✨", add: 5, type: "good" },
+            { text: "吉！今日招人顺利🥳", add: 3, type: "good" },
+            { text: "平！今日稳扎稳打😐", add: 1, type: "normal" }, // 修改：+1
+            { text: "小凶！今日要黑三⚠️", add: -2, type: "bad" },
+            { text: "大凶！飞机票在来的路上了🧘‍♂️", add: -6, type: "worst" }
         ];
         const random = fortunes[Math.floor(Math.random() * fortunes.length)];
         
-        // 延迟显示运势
         setTimeout(() => {
             fortuneText.textContent = random.text;
             fortuneText.classList.add('show');
             incrementFortuneCloud();
             
-            // 增减DT币
             goldCount += random.add;
             
-            // ===== 新增：赌狗安慰机制（连续两次大凶）=====
             if (random.type === "worst") {
                 consecutiveBadLuck++;
-                // 连续两次大凶触发安慰机制
                 if (consecutiveBadLuck >= 2) {
-                    goldCount += 3; // 额外+3币
+                    goldCount += 3;
                     alert(`触发赌狗安慰机制！额外获得3DT币！`);
-                    consecutiveBadLuck = 0; // 重置连续大凶计数
+                    consecutiveBadLuck = 0;
                 }
             } else {
-                consecutiveBadLuck = 0; // 非大凶则重置计数
+                consecutiveBadLuck = 0;
             }
             
-            // ===== 新增：保底机制（连续占卜10次）=====
             divinationCount++;
             if (divinationCount >= 10) {
-                goldCount += 5; // 额外+5币
+                goldCount += 5;
                 alert(`触发保底机制！额外获得5DT币！`);
-                divinationCount = 0; // 重置累计占卜次数
+                divinationCount = 0;
             }
             
-            // 更新UI和提示
             updateAllGoldUI();
             if (random.add > 0) {
                 alert(`恭喜！获得${random.add}DT币！`);
@@ -1636,7 +1727,6 @@
             }
         }, 1000);
         
-        // 3秒后关闭
         setTimeout(() => {
             modal.classList.remove('active');
             fortuneText.classList.remove('show');
@@ -1644,7 +1734,6 @@
         }, 4000);
     });
 
-    // 基金按钮事件
     document.getElementById('fundStructureBtn').addEventListener('click', () => {
         closeAllPopups();
         document.getElementById('popupFundStructure').classList.add('show');
@@ -1671,18 +1760,15 @@
         document.getElementById('overlay').classList.add('show');
     });
 
-    // 辅助服务按钮 - 直接跳转链接
     document.getElementById('assistBtn').addEventListener('click', function() {
         window.open('https://docs.qq.com/doc/DUnp4U05aYXRWRUdh', '_blank');
     });
 
-    // 侧边栏菜单事件
     document.getElementById('menuBtn').addEventListener('click', function() {
         this.classList.toggle('active');
         document.getElementById('sidebar').classList.toggle('show');
     });
 
-    // 轮播图功能
     let currentSlide = 0;
     const slides = document.querySelectorAll('.carousel-item');
     const dots = document.querySelectorAll('.carousel-dot');
@@ -1701,53 +1787,46 @@
         dot.addEventListener('click', () => goToSlide(i));
     });
 
-    // 自动轮播
     setInterval(() => {
         currentSlide = (currentSlide + 1) % slides.length;
         goToSlide(currentSlide);
     }, 3000);
 
-    // 天气图标随机切换
     const weatherIcons = ['☀️', '🌤️', '⛅', '🌧️', '❄️', '🌪️'];
     setInterval(() => {
         const randomIcon = weatherIcons[Math.floor(Math.random() * weatherIcons.length)];
         document.getElementById('weatherIcon').textContent = randomIcon;
     }, 60000);
 
-    // 点击遮罩层关闭弹窗
     document.getElementById('overlay').addEventListener('click', () => {
         closeAllPopups();
         closeShop();
         closeRule();
     });
 
-    // ====================== 金币签到功能 ======================
     const goldBtn = document.getElementById('goldBtn');
     const signPanel = document.getElementById('signPanel');
     const signBtn = document.getElementById('signBtn');
     const useGoldBtn = document.getElementById('useGoldBtn');
+    const getGoldBtn = document.getElementById('getGoldBtn');
     
-    // 初始化显示
     updateAllGoldUI();
     
-    // 显示/隐藏签到面板
     goldBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         signPanel.classList.toggle('show');
     });
     
-    // 点击外部关闭面板
     document.addEventListener('click', () => {
         signPanel.classList.remove('show');
     });
     
-    // 每日签到（修改：签到获得2DT币）
     signBtn.addEventListener('click', () => {
         const today = new Date().toDateString();
         const lastSign = localStorage.getItem('dtLastSign');
         
         if (lastSign !== today) {
-            goldCount += 2; // 原100改为2
+            goldCount += 2;
             localStorage.setItem('dtLastSign', today);
             updateAllGoldUI();
             alert('签到成功！DT币+2');
@@ -1756,7 +1835,6 @@
         }
     });
 
-    // 打开DT币商城
     useGoldBtn.addEventListener('click', () => {
         signPanel.classList.remove('show');
         updateAllGoldUI();
@@ -1764,9 +1842,88 @@
         document.getElementById('overlay').classList.add('show');
     });
 
-    // 打开规则
+    // 获取DT币 + 兑换码
+    getGoldBtn.addEventListener('click', () => {
+        const codeUsed = localStorage.getItem('codeUsed');
+        if(codeUsed){
+            alert('兑换码已使用！');
+            return;
+        }
+        const code = prompt('请输入兑换码：');
+        if(code === 'DTLIANMENG1973/22'){
+            goldCount +=30;
+            updateAllGoldUI();
+            localStorage.setItem('codeUsed','true');
+            alert('兑换成功！DT币+30！');
+        }else if(code){
+            alert('兑换码错误！');
+        }
+    });
+
     document.getElementById('ruleBtn').addEventListener('click', () => {
         document.getElementById('ruleModal').classList.add('show');
+    });
+
+    // 宝箱抽奖
+    document.getElementById('chestRuleBtn').addEventListener('click',()=>{
+        closeAllPopups();
+        document.getElementById('chestRuleModal').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    });
+
+    document.getElementById('chestBtn').addEventListener('click',()=>{
+        if(goldCount <10){
+            alert('DT币不足，无法开启宝箱！');
+            return;
+        }
+        goldCount -=10;
+        updateAllGoldUI();
+
+        const random = Math.random()*100;
+        let prize,title,desc,timeDesc;
+
+        if(random <1){
+            title = "黄金令牌（1/6）";
+            desc = "有效期180天，过期未兑换成功无效，请务必截图保存";
+            timeDesc = "";
+        }else if(random <3){
+            title = "现金红包3元";
+            desc = "有效期30天，过期未兑换成功无效，请务必截图保存";
+            timeDesc = "";
+        }else if(random <3.25){
+            title = "黄金令牌一张";
+            desc = "有效期60天，过期未兑换成功无效，请务必截图保存";
+            timeDesc = "";
+        }else if(random <21.25){
+            title = "DT币18个";
+            desc = "DT联盟祝您万事如意！";
+            timeDesc = "无需兑换，自动增加";
+            goldCount +=18;
+            updateAllGoldUI();
+        }else if(random <31.25){
+            title = "DT币38个";
+            desc = "DT联盟祝您万事如意！";
+            timeDesc = "无需兑换，自动增加";
+            goldCount +=38;
+            updateAllGoldUI();
+        }else if(random <36.25){
+            title = "DT币68个";
+            desc = "DT联盟祝您万事如意！";
+            timeDesc = "无需兑换，自动增加";
+            goldCount +=68;
+            updateAllGoldUI();
+        }else if(random <66.25){
+            title = "再来一次";
+            desc = "DT联盟祝您万事如意！";
+            timeDesc = "无需兑换，自动增加";
+            goldCount +=10;
+            updateAllGoldUI();
+        }else{
+            title = "啥也没有";
+            desc = "哈哈，毛都没有";
+            timeDesc = "";
+        }
+        showExchangeCard(title,desc,timeDesc);
     });
 </script>
 </body>
