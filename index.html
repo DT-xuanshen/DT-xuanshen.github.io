@@ -1993,10 +1993,17 @@
         document.getElementById('ruleModal').classList.add('show');
     });
 
-    // 2. 补偿礼包按钮 +66DT币
+    // 补偿礼包按钮 仅可领取一次
     document.getElementById('giftBtn').addEventListener('click', () => {
+        const hasGotGift = localStorage.getItem('hasGotGift');
+        if(hasGotGift){
+            alert('你已领取过补偿礼包，不可重复领取！');
+            return;
+        }
+        // 未领取，发放奖励
         goldCount += 66;
         updateAllGoldUI();
+        localStorage.setItem('hasGotGift','true');
         alert('领取成功！DT币 +66');
     });
 
