@@ -769,6 +769,18 @@
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
     }
+    /* 修改：统一我的神兽按钮样式 */
+    .pet-btn {
+        width: 100%;
+        padding: 10px;
+        background: #ffd700;
+        color: #000;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-bottom: 8px;
+    }
     .sign-btn {
         width: 100%;
         padding: 10px;
@@ -791,7 +803,6 @@
         cursor: pointer;
         margin-bottom: 8px;
     }
-    /* 修改：获取DT币按钮样式统一 + 彩色渐变文字 */
     .get-gold-btn {
         width: 100%;
         padding: 10px;
@@ -987,7 +998,6 @@
         cursor: pointer;
     }
 
-    /* 重做：精美立体宝箱样式 */
     .chest-container {
         text-align: center;
         margin: 25px 0;
@@ -1005,7 +1015,6 @@
     .chest:hover {
         transform: scale(1.05);
     }
-    /* 宝箱主体 - 立体效果 */
     .chest-body {
         position: absolute;
         bottom: 0;
@@ -1020,7 +1029,6 @@
             inset 0 4px 8px rgba(0,0,0,0.5),
             0 4px 0 #4b2304;
     }
-    /* 宝箱盖子 - 立体开合 */
     .chest-lid {
         position: absolute;
         top: 20px;
@@ -1036,7 +1044,6 @@
         transform-origin: bottom center;
         animation: chestLid 3.2s ease-in-out infinite;
     }
-    /* 宝箱锁扣 */
     .chest-lock {
         position: absolute;
         top: 50%;
@@ -1060,7 +1067,6 @@
         background: #1a1a1a;
         border-radius: 2px;
     }
-    /* 宝箱光芒特效 */
     .chest-light {
         position: absolute;
         top: -10px;
@@ -1120,7 +1126,6 @@
         margin-top: 5px;
     }
 
-    /* 补偿礼包按钮 */
     .gift-btn {
         position: fixed;
         bottom: 70px;
@@ -1137,13 +1142,13 @@
         z-index: 999;
         box-shadow: 0 3px 8px rgba(255,215,0,0.3);
         transition: all 0.3s ease;
+        display: none;
     }
     .gift-btn:hover {
         background: #ffaf00;
         transform: scale(1.05);
     }
 
-    /* 收件箱按钮 */
     .inbox-btn {
         position: fixed;
         bottom: 20px;
@@ -1160,13 +1165,13 @@
         z-index: 999;
         box-shadow: 0 3px 8px rgba(100,181,246,0.3);
         transition: all 0.3s ease;
+        display: none;
     }
     .inbox-btn:hover {
         background: #42a5f5;
         transform: scale(1.05);
     }
 
-    /* 信件弹窗 */
     .letter-modal {
         position: fixed;
         top: 0;
@@ -1213,6 +1218,153 @@
         font-size: 20px;
         cursor: pointer;
         color: #333;
+    }
+
+    /* 神兽弹窗样式 */
+    .pet-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.85);
+        z-index: 8888;
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+    .pet-box {
+        width: 320px;
+        height: 320px;
+        background: #1a237e;
+        border: 3px solid #64b5f6;
+        border-radius: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        position: relative;
+        box-shadow: 0 0 30px rgba(100,181,246,0.4);
+    }
+    .pet-level-bar {
+        position: absolute;
+        top: 20px;
+        width: 80%;
+        height: 8px;
+        background: #2a3a5a;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .pet-level-progress {
+        height: 100%;
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+        width: 0%;
+        transition: width 0.5s ease;
+        border-radius: 4px;
+    }
+    .pet-level-text {
+        position: absolute;
+        top: 35px;
+        color: #ffd700;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    .pet-body {
+        width: 160px;
+        height: 160px;
+        margin-top: 30px;
+        position: relative;
+        animation: petFloat 2s ease-in-out infinite;
+    }
+    @keyframes petFloat {
+        0%,100% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+    }
+    .pet-shape {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 80px;
+        transition: all 0.6s ease;
+    }
+    .pet-feed-btn {
+        margin-top: 20px;
+        padding: 10px 25px;
+        background: linear-gradient(45deg, #ffd700, #ffaf00);
+        color: #000;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 15px;
+        transition: transform 0.2s ease;
+    }
+    .pet-feed-btn:active {
+        transform: scale(0.95);
+    }
+    /* 修改：更新神兽等级样式类 */
+    .pet-egg {
+        background: radial-gradient(circle, #fff 0%, #ffd700 60%);
+        box-shadow: 0 0 20px #ffd700;
+    }
+    .pet-lv1 {
+        background: radial-gradient(circle, #e3f2fd 0%, #64b5f6 70%);
+        box-shadow: 0 0 25px #64b5f6;
+    }
+    .pet-lv5 {
+        background: radial-gradient(circle, #fce4ec 0%, #f48fb1 70%);
+        box-shadow: 0 0 30px #f48fb1;
+        font-size: 95px;
+    }
+    .pet-lv10 {
+        background: radial-gradient(circle, #fff3e0 0%, #ffb74d 70%);
+        box-shadow: 0 0 35px #ffb74d;
+        font-size: 110px;
+    }
+    .pet-lv15 {
+        background: radial-gradient(circle, #e8f5e8 0%, #81c784 70%);
+        box-shadow: 0 0 40px #81c784;
+        font-size: 125px;
+    }
+    .pet-lv20 {
+        background: radial-gradient(circle, #f3e5f5 0%, #ce93d8 70%);
+        box-shadow: 0 0 50px #ce93d8;
+        font-size: 140px;
+    }
+    .pet-lv25 {
+        background: radial-gradient(circle, #ffe0b2 0%, #ff9800 70%);
+        box-shadow: 0 0 55px #ff9800;
+        font-size: 150px;
+    }
+    .pet-lv50 {
+        background: radial-gradient(circle, #e0f7fa 0%, #00bcd4 70%);
+        box-shadow: 0 0 60px #00bcd4;
+        font-size: 160px;
+    }
+    .pet-lv100 {
+        background: radial-gradient(circle, #f5f5f5 0%, #9c27b0 70%);
+        box-shadow: 0 0 70px #9c27b0;
+        font-size: 170px;
+    }
+    .pet-egg-btn {
+        position: absolute;
+        bottom: 25px;
+        right: 25px;
+        width: 45px;
+        height: 45px;
+        background: #ffd700;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 0 15px #ffd700;
+        display: none;
     }
 </style>
 </head>
@@ -1331,7 +1483,6 @@
     <div>在DT联盟官方微信公众号【轩神辅助coc】的主页置顶文章中的“DT联盟详情介绍”这篇文章滑至末尾点击“喜欢作者”即可为DT联盟发电<br><br>温馨提示：请量力而行，即使再普通的成员，DT联盟仍然一样欢迎您！</div>
 </div>
 
-<!-- 宝箱规则弹窗 -->
 <div class="popup-base" id="chestRuleModal">
     <span class="popup-close" onclick="closeAllPopups()">×</span>
     <h3>宝箱规则</h3>
@@ -1454,7 +1605,6 @@
         <a href="https://pan.quark.cn/s/d12d0f3f39a8" class="jump-btn" target="_blank">点击获取</a>
     </div>
 
-    <!-- 精美立体宝箱板块 -->
     <div class="section" id="chest">
         <h2>✨宝箱的诱惑
             <button class="chest-rule-btn" id="chestRuleBtn">规则</button>
@@ -1481,15 +1631,14 @@
 
 <footer><p>&copy; 2026 DT联盟. All Rights Reserved.</p></footer>
 
-<!-- 新增：补偿礼包按钮 -->
 <button class="gift-btn" id="giftBtn">补偿礼包</button>
-<!-- 新增：收件箱按钮 -->
 <button class="inbox-btn" id="inboxBtn">收件箱</button>
 
 <button class="report-btn" id="reportBtn" onclick="window.open('https://wj.qq.com/s2/25486960/0107/','_blank')">举报/建议</button>
 
 <div class="gold-btn" id="goldBtn">🪙</div>
 <div class="sign-panel" id="signPanel">
+    <button class="pet-btn" id="openPetBtn">我的神兽</button>
     <button class="sign-btn" id="signBtn">每日签到</button>
     <button class="use-gold-btn" id="useGoldBtn">使用DT币</button>
     <button class="get-gold-btn" id="getGoldBtn">获取DT币</button>
@@ -1528,7 +1677,6 @@
     </div>
 </div>
 
-<!-- 信件弹窗 -->
 <div class="letter-modal" id="letterModal" style="display:none;">
     <div class="letter-box">
         <span class="close-letter" onclick="closeLetter()">×</span>
@@ -1540,6 +1688,21 @@
             ③修复了宝箱相关问题<br>
             ④发现bug之前的部分奖品进行了兑换，发现bug后抽中的奖品作废
         </div>
+    </div>
+</div>
+
+<!-- 神兽弹窗 -->
+<div class="pet-modal" id="petModal">
+    <div class="pet-box" id="petBox">
+        <div class="pet-level-bar">
+            <div class="pet-level-progress" id="petProgress"></div>
+        </div>
+        <div class="pet-level-text" id="petLevelText">等级：0</div>
+        <div class="pet-body">
+            <div class="pet-shape pet-egg" id="petShape">🥚</div>
+        </div>
+        <button class="pet-feed-btn" id="petFeedBtn">喂养神兽（1币）</button>
+        <div class="pet-egg-btn" id="petEggBtn">🥚</div>
     </div>
 </div>
 
@@ -1586,7 +1749,6 @@
         "rgba(255, 235, 59, 0.85)"
     ];
 
-    // 1. 首次进入清空DT币（仅一次）
     const firstEnter = localStorage.getItem('dtFirstEnter');
     let goldCount = 0;
     if(!firstEnter){
@@ -1596,9 +1758,14 @@
         goldCount = localStorage.getItem('dtGold') ? parseFloat(localStorage.getItem('dtGold')) : 0;
     }
 
-    // 宝箱抽奖次数统计
     let chestOpenCount = localStorage.getItem('chestOpenCount') ? parseInt(localStorage.getItem('chestOpenCount')) : 0;
     
+    // 神兽数据初始化
+    let petLevel = parseInt(localStorage.getItem('petLevel')) || 0;
+    let petFeedCount = parseInt(localStorage.getItem('petFeedCount')) || 0;
+    let lastFeedDate = localStorage.getItem('lastFeedDate') || '';
+    let todayEggGot = localStorage.getItem('todayEggGot') === 'true';
+
     function updateAllGoldUI() {
         document.getElementById('goldCount').textContent = `DT币数量：${goldCount.toFixed(1)}`;
         document.getElementById('currentGoldShop').textContent = `当前：${goldCount.toFixed(1)}币`;
@@ -1795,7 +1962,6 @@
         }
     });
 
-    // 占卜：平改为+1
     document.getElementById('fortuneBtn').addEventListener('click', function() {
         if (goldCount < 1) {
             alert("DT币不足，还当赌狗？");
@@ -1817,7 +1983,7 @@
         const fortunes = [
             { text: "大吉！今日部落战必胜✨", add: 5, type: "good" },
             { text: "吉！今日招人顺利🥳", add: 3, type: "good" },
-            { text: "平！今日稳扎稳打😐", add: 1, type: "normal" }, // 修改：+1
+            { text: "平！今日稳扎稳打😐", add: 1, type: "normal" },
             { text: "小凶！今日要黑三⚠️", add: -2, type: "bad" },
             { text: "大凶！飞机票在来的路上了🧘‍♂️", add: -6, type: "worst" }
         ];
@@ -1938,16 +2104,29 @@
     const signBtn = document.getElementById('signBtn');
     const useGoldBtn = document.getElementById('useGoldBtn');
     const getGoldBtn = document.getElementById('getGoldBtn');
+    const giftBtn = document.getElementById('giftBtn');
+    const inboxBtn = document.getElementById('inboxBtn');
     
     updateAllGoldUI();
     
+    // 点击金币按钮显示/隐藏 补偿礼包 + 收件箱
     goldBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         signPanel.classList.toggle('show');
+        
+        if(signPanel.classList.contains('show')){
+            giftBtn.style.display = 'block';
+            inboxBtn.style.display = 'block';
+        }else{
+            giftBtn.style.display = 'none';
+            inboxBtn.style.display = 'none';
+        }
     });
     
     document.addEventListener('click', () => {
         signPanel.classList.remove('show');
+        giftBtn.style.display = 'none';
+        inboxBtn.style.display = 'none';
     });
     
     signBtn.addEventListener('click', () => {
@@ -1966,12 +2145,13 @@
 
     useGoldBtn.addEventListener('click', () => {
         signPanel.classList.remove('show');
+        giftBtn.style.display = 'none';
+        inboxBtn.style.display = 'none';
         updateAllGoldUI();
         document.getElementById('dtShopModal').classList.add('show');
         document.getElementById('overlay').classList.add('show');
     });
 
-    // 获取DT币 + 兑换码
     getGoldBtn.addEventListener('click', () => {
         const codeUsed = localStorage.getItem('codeUsed');
         if(codeUsed){
@@ -1993,26 +2173,22 @@
         document.getElementById('ruleModal').classList.add('show');
     });
 
-    // 补偿礼包按钮 仅可领取一次
     document.getElementById('giftBtn').addEventListener('click', () => {
         const hasGotGift = localStorage.getItem('hasGotGift');
         if(hasGotGift){
             alert('你已领取过补偿礼包，不可重复领取！');
             return;
         }
-        // 未领取，发放奖励
         goldCount += 66;
         updateAllGoldUI();
         localStorage.setItem('hasGotGift','true');
         alert('领取成功！DT币 +66');
     });
 
-    // 3. 收件箱按钮 - 打开信件
     document.getElementById('inboxBtn').addEventListener('click', () => {
         document.getElementById('letterModal').style.display = 'flex';
     });
 
-    // 4. 宝箱抽奖重做（连续次数保底）
     document.getElementById('chestRuleBtn').addEventListener('click',()=>{
         closeAllPopups();
         document.getElementById('chestRuleModal').classList.add('show');
@@ -2031,38 +2207,31 @@
 
         let prize,title,desc,timeDesc;
 
-        // 连续开启保底机制
         if(chestOpenCount % 200 === 0){
-            // 黄金令牌一张
             title = "黄金令牌一张";
             desc = "有效期60天，过期未兑换成功无效，请务必截图保存";
             timeDesc = "";
         }else if(chestOpenCount % 100 === 0){
-            // 黄金令牌（1/6）
             title = "黄金令牌（1/6）";
             desc = "有效期180天，过期未兑换成功无效，请务必截图保存";
             timeDesc = "";
         }else if(chestOpenCount % 50 === 0){
-            // 现金红包3元
             title = "现金红包3元";
             desc = "有效期30天，过期未兑换成功无效，请务必截图保存";
             timeDesc = "";
         }else if(chestOpenCount % 25 === 0){
-            // DT币68个
             title = "DT币68个";
             desc = "DT联盟祝您万事如意！";
             timeDesc = "无需兑换，自动增加";
             goldCount +=68;
             updateAllGoldUI();
         }else if(chestOpenCount % 15 === 0){
-            // DT币38个
             title = "DT币38个";
             desc = "DT联盟祝您万事如意！";
             timeDesc = "无需兑换，自动增加";
             goldCount +=38;
             updateAllGoldUI();
         }else if(chestOpenCount % 10 === 0){
-            // DT币18个
             title = "DT币18个";
             desc = "DT联盟祝您万事如意！";
             timeDesc = "无需兑换，自动增加";
@@ -2071,22 +2240,154 @@
         }else{
             const random = Math.random();
             if(random < 0.3){
-                // 再来0.5次
                 title = "再来0.5次";
                 desc = "DT联盟祝您万事如意！";
                 timeDesc = "无需兑换，自动增加";
                 goldCount +=5;
                 updateAllGoldUI();
             }else{
-                // 啥也没有
                 title = "啥也没有";
                 desc = "哈哈，毛都没有";
                 timeDesc = "";
             }
         }
-
         showExchangeCard(title,desc,timeDesc);
     });
+
+    // ==================== 神兽系统核心逻辑 ====================
+    const petModal = document.getElementById('petModal');
+    const petBox = document.getElementById('petBox');
+    const petShape = document.getElementById('petShape');
+    const petProgress = document.getElementById('petProgress');
+    const petLevelText = document.getElementById('petLevelText');
+    const petFeedBtn = document.getElementById('petFeedBtn');
+    const petEggBtn = document.getElementById('petEggBtn');
+    const openPetBtn = document.getElementById('openPetBtn');
+
+    // 打开神兽面板
+    openPetBtn.addEventListener('click', () => {
+        petModal.style.display = 'flex';
+        renderPet();
+    });
+
+    // 点击空白关闭神兽
+    petModal.addEventListener('click', (e) => {
+        if(e.target === petModal) petModal.style.display = 'none';
+    });
+
+    // 渲染神兽外观 + 等级
+    function renderPet() {
+        petLevelText.textContent = `等级：${petLevel}`;
+        const progress = Math.min((petFeedCount % 5) * 20, 100);
+        petProgress.style.width = `${progress}%`;
+
+        petShape.className = 'pet-shape';
+        // 修改：更新神兽等级判断和形象
+        if(petLevel === 0){
+            petShape.classList.add('pet-egg');
+            petShape.textContent = '🧩';
+        }else if(petLevel <=5){
+            petShape.classList.add('pet-lv1');
+            petShape.textContent = '🪺';
+        }else if(petLevel <=10){
+            petShape.classList.add('pet-lv5');
+            petShape.textContent = '🥚';
+        }else if(petLevel <=15){
+            petShape.classList.add('pet-lv10');
+            petShape.textContent = '🐣';
+        }else if(petLevel <=20){
+            petShape.classList.add('pet-lv15');
+            petShape.textContent = '🐯';
+        }else if(petLevel <=25){
+            petShape.classList.add('pet-lv20');
+            petShape.textContent = '🦅';
+        }else if(petLevel <=50){
+            petShape.classList.add('pet-lv25');
+            petShape.textContent = '🦄';
+        }else{
+            petShape.classList.add('pet-lv50');
+            petShape.textContent = '🐉';
+        }
+
+        // 喂养消耗
+        const cost = petLevel <=15 ? 1 : 2;
+        petFeedBtn.textContent = `喂养神兽（${cost}币）`;
+
+        // 每日彩蛋
+        refreshDailyEgg();
+    }
+
+    // 喂养神兽
+    petFeedBtn.addEventListener('click', () => {
+        const cost = petLevel <=15 ? 1 : 2;
+        if(goldCount < cost){
+            alert('DT币不足，无法喂养！');
+            return;
+        }
+        goldCount -= cost;
+        updateAllGoldUI();
+
+        petFeedCount++;
+        lastFeedDate = new Date().toDateString();
+        localStorage.setItem('lastFeedDate', lastFeedDate);
+        localStorage.setItem('petFeedCount', petFeedCount);
+
+        if(petFeedCount >=5){
+            petLevel++;
+            petFeedCount = 0;
+            localStorage.setItem('petLevel', petLevel);
+            alert('恭喜！神兽升级啦！');
+        }
+        renderPet();
+    });
+
+    // 每日未喂养降级
+    function checkPetDegrade() {
+        const today = new Date().toDateString();
+        if(lastFeedDate && lastFeedDate !== today && petLevel >0){
+            petLevel--;
+            petFeedCount = 0;
+            localStorage.setItem('petLevel', petLevel);
+            localStorage.setItem('petFeedCount', 0);
+            lastFeedDate = today;
+            localStorage.setItem('lastFeedDate', today);
+        }
+    }
+
+    // 每日彩蛋奖励
+    function refreshDailyEgg() {
+        const today = new Date().toDateString();
+        const lastEggDate = localStorage.getItem('lastEggDate') || '';
+
+        if(petLevel >=5 && lastEggDate !== today){
+            petEggBtn.style.display = 'flex';
+            todayEggGot = false;
+        }else{
+            petEggBtn.style.display = 'none';
+        }
+    }
+
+    // 点击彩蛋领取DT币
+    petEggBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if(todayEggGot) return;
+
+        let add = 1;
+        if(petLevel >=10) add=2;
+        if(petLevel >=20) add=3;
+        if(petLevel >=50) add=5;
+
+        goldCount += add;
+        updateAllGoldUI();
+        todayEggGot = true;
+        localStorage.setItem('todayEggGot', 'true');
+        localStorage.setItem('lastEggDate', new Date().toDateString());
+        petEggBtn.style.display = 'none';
+        alert(`彩蛋奖励！DT币 +${add}`);
+    });
+
+    // 初始化检查
+    checkPetDegrade();
 </script>
 </body>
 </html>
