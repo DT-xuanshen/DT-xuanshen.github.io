@@ -2195,12 +2195,17 @@
         
         modal.classList.add('active');
         
+        // 新增4条占卜结果
         const fortunes = [
             { text: "大吉！今日部落战必胜✨", add: 5, type: "good" },
             { text: "吉！今日招人顺利🥳", add: 3, type: "good" },
             { text: "平！今日稳扎稳打😐", add: 1, type: "normal" },
             { text: "小凶！今日要黑三⚠️", add: -2, type: "bad" },
-            { text: "大凶！飞机票在来的路上了🧘‍♂️", add: -6, type: "worst" }
+            { text: "大凶！飞机票在来的路上了🧘‍♂️", add: -6, type: "worst" },
+            { text: "😤糟糕，部落战打一半断网了", add: -8, type: "bad" },
+            { text: "🥰不错哦，今日部落战三星拿下", add: 2, type: "good" },
+            { text: "🤡我的发！忘记绑定代码联盟代码了", add: -2, type: "bad" },
+            { text: "🤩今日检查绑定联盟代码dt8888了", add: 0, ticket:12, type: "good" }
         ];
         const random = fortunes[Math.floor(Math.random() * fortunes.length)];
         
@@ -2209,7 +2214,15 @@
             fortuneText.classList.add('show');
             incrementFortuneCloud();
             
-            goldCount += random.add;
+            // 处理DT币增减
+            if(random.add !== 0){
+                goldCount += random.add;
+            }
+            // 处理DT券增减
+            if(random.ticket){
+                ticketCount += random.ticket;
+                updateTicketUI();
+            }
             
             if (random.type === "worst") {
                 consecutiveBadLuck++;
@@ -2230,10 +2243,14 @@
             }
             
             updateAllGoldUI();
+            // 提示语
             if (random.add > 0) {
                 alert(`恭喜！获得${random.add}DT币！`);
             } else if (random.add < 0) {
                 alert(`遗憾！扣除${Math.abs(random.add)}DT币！`);
+            }
+            if(random.ticket){
+                alert(`恭喜！获得${random.ticket}张DT券！`);
             }
         }, 1000);
         
@@ -2306,7 +2323,14 @@
             updateAllGoldUI();
         }else{
             const random = Math.random();
-            if(random < 0.3){
+            // 20%概率中100DT券
+            if(random < 0.2){
+                title = "DT券100张";
+                desc = "DT联盟祝您万事如意！";
+                timeDesc = "无需兑换，自动增加";
+                ticketCount += 100;
+                updateTicketUI();
+            }else if(random < 0.5){
                 title = "再来0.5次";
                 desc = "DT联盟祝您万事如意！";
                 timeDesc = "无需兑换，自动增加";
