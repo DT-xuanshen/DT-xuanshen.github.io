@@ -76,10 +76,16 @@
         animation: pageFadeOut 1.5s ease forwards;
     }
     .enter-logo {
-        font-size: 3rem;
-        color: #64b5f6;
-        text-shadow: 0 0 20px rgba(100, 181, 246, 0.8);
-        animation: logoPulse 1s ease infinite alternate;
+        font-size: 2rem;
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+        background-size: 500% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: colorChange 3s linear infinite, logoPulse 1s ease infinite alternate;
+        text-align: center;
+        padding: 0 20px;
+        line-height: 1.4;
     }
     @keyframes pageFadeOut {
         0% { opacity: 1; }
@@ -982,8 +988,8 @@
         top: 10px;
         right: 15px;
         color: #fff;
-        font-size: 18px;
         cursor: pointer;
+        font-size: 18px;
     }
 
     .chest-container {
@@ -1133,12 +1139,17 @@
 
     .pet-btn-float {
         position: fixed;
-        bottom: 170px;
+        bottom: 70px;
         left: 20px;
         width: 70px;
         height: 40px;
         background: #666;
-        color: #fff;
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+        background-size: 500% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: colorChange 3s linear infinite;
         border: none;
         border-radius: 6px;
         font-size: 14px;
@@ -1490,7 +1501,7 @@
 </style>
 </head>
 <body>
-<div class="page-enter"><div class="enter-logo">DT联盟</div></div>
+<div class="page-enter"><div class="enter-logo">今天你检查联盟代码绑定情况了吗</div></div>
 <div class="weather-icon" id="weatherIcon">☀️</div>
 <div class="overlay" id="overlay"></div>
 <div class="divination-modal" id="divinationModal"><div class="bamboo-tube" id="bambooTube"></div><div class="fortune-text" id="fortuneText"></div></div>
@@ -1752,8 +1763,8 @@
 
 <footer><p>&copy; 2026 DT联盟. All Rights Reserved.</p></footer>
 
-<button class="pet-btn-float" id="petBtnFloat">我的神兽</button>
 <button class="gift-btn" id="bagBtn">我的背包</button>
+<button class="pet-btn-float" id="petBtnFloat">我的神兽</button>
 <button class="inbox-btn" id="inboxBtn">收件箱</button>
 <button class="code-center-btn" id="codeCenterBtn">兑换码中心</button>
 
@@ -2008,7 +2019,7 @@
     function exchangeGoods(type) {
         const goods = [
             { cost: 50, title: "免处罚卡", time: "3天", desc: "有效期3天，过期无效，请务必截图保存" },
-            { cost: 388, title: "实物礼品", time: "15天", desc: "有效期15天，过期未兑换成功无效，请务必截图保存" },
+            { cost: 388, title: "黄金令牌", time: "30天", desc: "有效期30天，过期未兑换成功无效，请务必截图保存" },
             { cost: 258, title: "实物礼品", time: "30天", desc: "有效期30天，过期未兑换成功无效，请务必截图保存" },
             { cost: 188, title: "3元红包", time: "15天", desc: "有效期15天，过期未兑换成功无效，请务必截图保存" },
             { cost: 0.1, title: "测试专用", time: "7天", desc: "有效期7天，过期未兑换成功无效，请务必截图保存" }
@@ -2400,13 +2411,13 @@
         signPanel.classList.toggle('show');
         
         if(signPanel.classList.contains('show')){
-            petBtnFloat.style.display = 'block';
             bagBtn.style.display = 'block';
+            petBtnFloat.style.display = 'block';
             inboxBtn.style.display = 'block';
             codeCenterBtn.style.display = 'block';
         }else{
-            petBtnFloat.style.display = 'none';
             bagBtn.style.display = 'none';
+            petBtnFloat.style.display = 'none';
             inboxBtn.style.display = 'none';
             codeCenterBtn.style.display = 'none';
         }
