@@ -769,12 +769,11 @@
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    /* 修改：统一我的神兽按钮样式 */
     .pet-btn {
         width: 100%;
         padding: 10px;
-        background: #ffd700;
-        color: #000;
+        background: #666;
+        color: #fff;
         border: none;
         border-radius: 6px;
         font-weight: bold;
@@ -803,28 +802,17 @@
         cursor: pointer;
         margin-bottom: 8px;
     }
-    .get-gold-btn {
-        width: 100%;
-        padding: 10px;
-        background: #64b5f6;
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        font-weight: bold;
-        cursor: pointer;
-        margin-bottom: 8px;
-        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
-        background-size: 500% 100%;
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        animation: colorChange 3s linear infinite;
-    }
     .gold-count {
         text-align: center;
         color: #ffd700;
         font-weight: bold;
         font-size: 16px;
+    }
+    .get-gold-tip {
+        text-align: right;
+        font-size: 11px;
+        color: #ccc;
+        margin-top: 5px;
     }
 
     .dt-shop-modal {
@@ -1119,16 +1107,10 @@
         margin-bottom: 15px;
         animation: colorChange 3s linear infinite;
     }
-    .get-gold-tip {
-        text-align: right;
-        font-size: 11px;
-        color: #ccc;
-        margin-top: 5px;
-    }
 
     .gift-btn {
         position: fixed;
-        bottom: 70px;
+        bottom: 120px;
         left: 20px;
         width: 70px;
         height: 40px;
@@ -1146,6 +1128,29 @@
     }
     .gift-btn:hover {
         background: #ffaf00;
+        transform: scale(1.05);
+    }
+
+    .pet-btn-float {
+        position: fixed;
+        bottom: 170px;
+        left: 20px;
+        width: 70px;
+        height: 40px;
+        background: #666;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 999;
+        box-shadow: 0 3px 8px rgba(102,102,102,0.3);
+        transition: all 0.3s ease;
+        display: none;
+    }
+    .pet-btn-float:hover {
+        background: #888;
         transform: scale(1.05);
     }
 
@@ -1169,6 +1174,29 @@
     }
     .inbox-btn:hover {
         background: #42a5f5;
+        transform: scale(1.05);
+    }
+
+    .code-center-btn {
+        position: fixed;
+        bottom: 20px;
+        left: 180px;
+        width: 70px;
+        height: 40px;
+        background: #388e3c;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 999;
+        box-shadow: 0 3px 8px rgba(56,142,60,0.3);
+        transition: all 0.3s ease;
+        display: none;
+    }
+    .code-center-btn:hover {
+        background: #2e7d32;
         transform: scale(1.05);
     }
 
@@ -1235,7 +1263,7 @@
     }
     .pet-box {
         width: 320px;
-        height: 320px;
+        height: 380px;
         background: #1a237e;
         border: 3px solid #64b5f6;
         border-radius: 15px;
@@ -1306,7 +1334,16 @@
     .pet-feed-btn:active {
         transform: scale(0.95);
     }
-    /* 修改：更新神兽等级样式类 */
+    .pet-rule-btn {
+        margin-top: 8px;
+        padding: 6px 18px;
+        background: #64b5f6;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+    }
     .pet-egg {
         background: radial-gradient(circle, #fff 0%, #ffd700 60%);
         box-shadow: 0 0 20px #ffd700;
@@ -1325,30 +1362,15 @@
         box-shadow: 0 0 35px #ffb74d;
         font-size: 110px;
     }
-    .pet-lv15 {
+    .pet-lv20 {
         background: radial-gradient(circle, #e8f5e8 0%, #81c784 70%);
         box-shadow: 0 0 40px #81c784;
         font-size: 125px;
     }
-    .pet-lv20 {
+    .pet-lv50 {
         background: radial-gradient(circle, #f3e5f5 0%, #ce93d8 70%);
         box-shadow: 0 0 50px #ce93d8;
         font-size: 140px;
-    }
-    .pet-lv25 {
-        background: radial-gradient(circle, #ffe0b2 0%, #ff9800 70%);
-        box-shadow: 0 0 55px #ff9800;
-        font-size: 150px;
-    }
-    .pet-lv50 {
-        background: radial-gradient(circle, #e0f7fa 0%, #00bcd4 70%);
-        box-shadow: 0 0 60px #00bcd4;
-        font-size: 160px;
-    }
-    .pet-lv100 {
-        background: radial-gradient(circle, #f5f5f5 0%, #9c27b0 70%);
-        box-shadow: 0 0 70px #9c27b0;
-        font-size: 170px;
     }
     .pet-egg-btn {
         position: absolute;
@@ -1365,6 +1387,105 @@
         cursor: pointer;
         box-shadow: 0 0 15px #ffd700;
         display: none;
+    }
+
+    /* 我的背包样式 */
+    .bag-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.85);
+        z-index: 9998;
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+    .bag-box {
+        width: 90%;
+        max-width: 350px;
+        background: #1a237e;
+        border: 3px solid #64b5f6;
+        border-radius: 15px;
+        padding: 30px 20px;
+        text-align: center;
+        position: relative;
+    }
+    .bag-title {
+        font-size: 22px;
+        color: #ffd700;
+        font-weight: bold;
+        margin-bottom: 30px;
+    }
+    .ticket-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        font-size: 24px;
+        padding: 15px;
+        background: #283593;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+    .ticket-icon {
+        font-size: 32px;
+    }
+    .ticket-text {
+        font-size: 18px;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    /* 货币选择弹窗 */
+    .choose-currency-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 9999;
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+    .choose-box {
+        width: 85%;
+        max-width: 320px;
+        background: #1a237e;
+        border: 2px solid #64b5f6;
+        border-radius: 12px;
+        padding: 30px 20px;
+        text-align: center;
+    }
+    .choose-title {
+        font-size: 18px;
+        color: #fff;
+        margin-bottom: 25px;
+        line-height: 1.5;
+    }
+    .currency-btns {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+    .currency-btn {
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+        font-size: 16px;
+    }
+    .gold-btn-choose {
+        background: #ffd700;
+        color: #000;
+    }
+    .ticket-btn-choose {
+        background: #64b5f6;
+        color: #fff;
     }
 </style>
 </head>
@@ -1487,7 +1608,7 @@
     <span class="popup-close" onclick="closeAllPopups()">×</span>
     <h3>宝箱规则</h3>
     <div style="line-height:1.8;">
-        ①开启宝箱会消耗10DT币/次<br>
+        ①开启宝箱会消耗10DT币/次 或 88DT券/次<br>
         ②宝箱可开出黄金令牌，碎片，红包，DT币，再来一次，毛都没有等奖品<br>
         ③本活动的最终解释权归DT联盟所有
     </div>
@@ -1537,8 +1658,8 @@
         </div>
         <div class="carousel-dots" id="carouselDots">
             <div class="carousel-dot active" data-index="0"></div>
-            <div class="carousel-dot active" data-index="1"></div>
-            <div class="carousel-dot active" data-index="2"></div>
+            <div class="carousel-dot" data-index="1"></div>
+            <div class="carousel-dot" data-index="2"></div>
         </div>
     </div>
 
@@ -1616,7 +1737,7 @@
                 <div class="chest-body"></div>
                 <div class="chest-lock"></div>
             </div>
-            <div class="chest-text">10DT币/次</div>
+            <div class="chest-text">10DT币/次 或 88DT券/次</div>
         </div>
     </div>
 
@@ -1631,17 +1752,17 @@
 
 <footer><p>&copy; 2026 DT联盟. All Rights Reserved.</p></footer>
 
-<button class="gift-btn" id="giftBtn">补偿礼包</button>
+<button class="pet-btn-float" id="petBtnFloat">我的神兽</button>
+<button class="gift-btn" id="bagBtn">我的背包</button>
 <button class="inbox-btn" id="inboxBtn">收件箱</button>
+<button class="code-center-btn" id="codeCenterBtn">兑换码中心</button>
 
 <button class="report-btn" id="reportBtn" onclick="window.open('https://wj.qq.com/s2/25486960/0107/','_blank')">举报/建议</button>
 
 <div class="gold-btn" id="goldBtn">🪙</div>
 <div class="sign-panel" id="signPanel">
-    <button class="pet-btn" id="openPetBtn">我的神兽</button>
     <button class="sign-btn" id="signBtn">每日签到</button>
-    <button class="use-gold-btn" id="useGoldBtn">使用DT币</button>
-    <button class="get-gold-btn" id="getGoldBtn">获取DT币</button>
+    <button class="use-gold-btn" id="useGoldBtn">DT币兑换中心</button>
     <div class="gold-count" id="goldCount">DT币数量：0</div>
     <div class="get-gold-tip">你还可以通过签到，占卜，宝箱等官网活动获取海量DT币</div>
 </div>
@@ -1699,10 +1820,33 @@
         </div>
         <div class="pet-level-text" id="petLevelText">等级：0</div>
         <div class="pet-body">
-            <div class="pet-shape pet-egg" id="petShape">🥚</div>
+            <div class="pet-shape pet-egg" id="petShape">🧩</div>
         </div>
-        <button class="pet-feed-btn" id="petFeedBtn">喂养神兽（1币）</button>
+        <button class="pet-feed-btn" id="petFeedBtn">喂养神兽</button>
+        <button class="pet-rule-btn" id="petRuleBtn">神兽规则</button>
         <div class="pet-egg-btn" id="petEggBtn">🥚</div>
+    </div>
+</div>
+
+<!-- 我的背包 -->
+<div class="bag-modal" id="bagModal">
+    <div class="bag-box">
+        <div class="bag-title">我的背包</div>
+        <div class="ticket-item" id="ticketItem">
+            <div class="ticket-icon">🎟️</div>
+            <div class="ticket-text" id="ticketText">DT券：0 张</div>
+        </div>
+    </div>
+</div>
+
+<!-- 货币选择弹窗 -->
+<div class="choose-currency-modal" id="chooseCurrencyModal">
+    <div class="choose-box">
+        <div class="choose-title" id="chooseTitle">请选择消耗货币</div>
+        <div class="currency-btns">
+            <button class="currency-btn gold-btn-choose" id="useGoldCurrency">DT币</button>
+            <button class="currency-btn ticket-btn-choose" id="useTicketCurrency">DT券</button>
+        </div>
     </div>
 </div>
 
@@ -1749,16 +1893,11 @@
         "rgba(255, 235, 59, 0.85)"
     ];
 
-    const firstEnter = localStorage.getItem('dtFirstEnter');
-    let goldCount = 0;
-    if(!firstEnter){
-        localStorage.setItem('dtFirstEnter', 'true');
-        goldCount = 0;
-    }else{
-        goldCount = localStorage.getItem('dtGold') ? parseFloat(localStorage.getItem('dtGold')) : 0;
-    }
-
-    let chestOpenCount = localStorage.getItem('chestOpenCount') ? parseInt(localStorage.getItem('chestOpenCount')) : 0;
+    // 永久本地存储初始化
+    let goldCount = parseFloat(localStorage.getItem('dtGold')) || 0;
+    let ticketCount = parseInt(localStorage.getItem('dtTicket')) || 0;
+    let chestOpenCount = parseInt(localStorage.getItem('chestOpenCount')) || 0;
+    let fortuneTotalCount = parseInt(localStorage.getItem('fortuneTotalCount')) || 0;
     
     // 神兽数据初始化
     let petLevel = parseInt(localStorage.getItem('petLevel')) || 0;
@@ -1766,15 +1905,27 @@
     let lastFeedDate = localStorage.getItem('lastFeedDate') || '';
     let todayEggGot = localStorage.getItem('todayEggGot') === 'true';
 
+    // 兑换码记录
+    let superCodeUsed = localStorage.getItem('superCodeUsed') === 'true';
+
+    // 当前操作类型：fortune / chest
+    let currentAction = '';
+
     function updateAllGoldUI() {
         document.getElementById('goldCount').textContent = `DT币数量：${goldCount.toFixed(1)}`;
         document.getElementById('currentGoldShop').textContent = `当前：${goldCount.toFixed(1)}币`;
         localStorage.setItem('dtGold', goldCount);
     }
 
+    function updateTicketUI() {
+        document.getElementById('ticketText').textContent = `DT券：${ticketCount} 张`;
+        localStorage.setItem('dtTicket', ticketCount);
+    }
+
     function closeAllPopups() {
         document.querySelectorAll('.popup-base').forEach(p => p.classList.remove('show'));
         document.getElementById('overlay').classList.remove('show');
+        document.getElementById('chooseCurrencyModal').style.display = 'none';
     }
     function closeShop() {
         document.getElementById('dtShopModal').classList.remove('show');
@@ -1908,6 +2059,9 @@
         fortuneRef.transaction((current) => {
             return (current || 0) + 1;
         });
+        fortuneTotalCount++;
+        localStorage.setItem('fortuneTotalCount', fortuneTotalCount);
+        updateFortuneDisplay(fortuneTotalCount);
     }
 
     document.getElementById('mainTribeBtn').addEventListener('click', function() {
@@ -1962,14 +2116,64 @@
         }
     });
 
+    // 占卜 - 选择货币
     document.getElementById('fortuneBtn').addEventListener('click', function() {
+        currentAction = 'fortune';
+        document.getElementById('chooseTitle').textContent = '占卜需消耗 1 DT币 或 8 DT券\n请选择消耗货币';
+        document.getElementById('chooseCurrencyModal').style.display = 'flex';
+    });
+
+    // 宝箱 - 选择货币
+    document.getElementById('chestBtn').addEventListener('click', function() {
+        currentAction = 'chest';
+        document.getElementById('chooseTitle').textContent = '开宝箱需消耗 10 DT币 或 88 DT券\n请选择消耗货币';
+        document.getElementById('chooseCurrencyModal').style.display = 'flex';
+    });
+
+    // 使用DT币执行
+    document.getElementById('useGoldCurrency').addEventListener('click', function() {
+        if (currentAction === 'fortune') {
+            doFortuneWithGold();
+        } else if (currentAction === 'chest') {
+            doChestWithGold();
+        }
+        closeAllPopups();
+    });
+
+    // 使用DT券执行
+    document.getElementById('useTicketCurrency').addEventListener('click', function() {
+        if (currentAction === 'fortune') {
+            doFortuneWithTicket();
+        } else if (currentAction === 'chest') {
+            doChestWithTicket();
+        }
+        closeAllPopups();
+    });
+
+    // DT币占卜
+    function doFortuneWithGold() {
         if (goldCount < 1) {
-            alert("DT币不足，还当赌狗？");
+            alert("DT币不足！");
             return;
         }
         goldCount -= 1;
         updateAllGoldUI();
+        runFortune();
+    }
 
+    // DT券占卜
+    function doFortuneWithTicket() {
+        if (ticketCount < 8) {
+            alert("DT券不足！");
+            return;
+        }
+        ticketCount -= 8;
+        updateTicketUI();
+        runFortune();
+    }
+
+    // 占卜核心逻辑
+    function runFortune() {
         const modal = document.getElementById('divinationModal');
         const bambooTube = document.getElementById('bambooTube');
         const fortuneText = document.getElementById('fortuneText');
@@ -2027,7 +2231,84 @@
             fortuneText.classList.remove('show');
             fortuneText.textContent = '';
         }, 4000);
-    });
+    }
+
+    // DT币开宝箱
+    function doChestWithGold() {
+        if (goldCount < 10) {
+            alert('DT币不足，无法开启宝箱！');
+            return;
+        }
+        goldCount -= 10;
+        chestOpenCount += 1;
+        localStorage.setItem('chestOpenCount', chestOpenCount);
+        updateAllGoldUI();
+        runChest();
+    }
+
+    // DT券开宝箱
+    function doChestWithTicket() {
+        if (ticketCount < 88) {
+            alert('DT券不足，无法开启宝箱！');
+            return;
+        }
+        ticketCount -= 88;
+        chestOpenCount += 1;
+        localStorage.setItem('chestOpenCount', chestOpenCount);
+        updateTicketUI();
+        runChest();
+    }
+
+    // 宝箱核心逻辑
+    function runChest() {
+        let prize,title,desc,timeDesc;
+
+        if(chestOpenCount % 200 === 0){
+            title = "黄金令牌一张";
+            desc = "有效期60天，过期未兑换成功无效，请务必截图保存";
+            timeDesc = "";
+        }else if(chestOpenCount % 100 === 0){
+            title = "黄金令牌（1/6）";
+            desc = "有效期180天，过期未兑换成功无效，请务必截图保存";
+            timeDesc = "";
+        }else if(chestOpenCount % 50 === 0){
+            title = "现金红包3元";
+            desc = "有效期30天，过期未兑换成功无效，请务必截图保存";
+            timeDesc = "";
+        }else if(chestOpenCount % 25 === 0){
+            title = "DT币68个";
+            desc = "DT联盟祝您万事如意！";
+            timeDesc = "无需兑换，自动增加";
+            goldCount +=68;
+            updateAllGoldUI();
+        }else if(chestOpenCount % 15 === 0){
+            title = "DT币38个";
+            desc = "DT联盟祝您万事如意！";
+            timeDesc = "无需兑换，自动增加";
+            goldCount +=38;
+            updateAllGoldUI();
+        }else if(chestOpenCount % 10 === 0){
+            title = "DT币18个";
+            desc = "DT联盟祝您万事如意！";
+            timeDesc = "无需兑换，自动增加";
+            goldCount +=18;
+            updateAllGoldUI();
+        }else{
+            const random = Math.random();
+            if(random < 0.3){
+                title = "再来0.5次";
+                desc = "DT联盟祝您万事如意！";
+                timeDesc = "无需兑换，自动增加";
+                goldCount +=5;
+                updateAllGoldUI();
+            }else{
+                title = "啥也没有";
+                desc = "哈哈，毛都没有";
+                timeDesc = "";
+            }
+        }
+        showExchangeCard(title,desc,timeDesc);
+    }
 
     document.getElementById('fundStructureBtn').addEventListener('click', () => {
         closeAllPopups();
@@ -2050,6 +2331,7 @@
         document.getElementById('overlay').classList.add('show');
     });
     document.getElementById('goLoveSupport').addEventListener('click', () => {
+        closeAllPopups();
         closeAllPopups();
         document.getElementById('popupLoveSupport').classList.add('show');
         document.getElementById('overlay').classList.add('show');
@@ -2103,41 +2385,54 @@
     const signPanel = document.getElementById('signPanel');
     const signBtn = document.getElementById('signBtn');
     const useGoldBtn = document.getElementById('useGoldBtn');
-    const getGoldBtn = document.getElementById('getGoldBtn');
-    const giftBtn = document.getElementById('giftBtn');
+    const bagBtn = document.getElementById('bagBtn');
     const inboxBtn = document.getElementById('inboxBtn');
+    const bagModal = document.getElementById('bagModal');
+    const petBtnFloat = document.getElementById('petBtnFloat');
+    const codeCenterBtn = document.getElementById('codeCenterBtn');
     
     updateAllGoldUI();
+    updateTicketUI();
     
-    // 点击金币按钮显示/隐藏 补偿礼包 + 收件箱
+    // 点击金币按钮显示面板
     goldBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         signPanel.classList.toggle('show');
         
         if(signPanel.classList.contains('show')){
-            giftBtn.style.display = 'block';
+            petBtnFloat.style.display = 'block';
+            bagBtn.style.display = 'block';
             inboxBtn.style.display = 'block';
+            codeCenterBtn.style.display = 'block';
         }else{
-            giftBtn.style.display = 'none';
+            petBtnFloat.style.display = 'none';
+            bagBtn.style.display = 'none';
             inboxBtn.style.display = 'none';
+            codeCenterBtn.style.display = 'none';
         }
     });
     
     document.addEventListener('click', () => {
         signPanel.classList.remove('show');
-        giftBtn.style.display = 'none';
+        petBtnFloat.style.display = 'none';
+        bagBtn.style.display = 'none';
         inboxBtn.style.display = 'none';
+        codeCenterBtn.style.display = 'none';
+        bagModal.style.display = 'none';
     });
     
+    // 每日签到：DT币+2，DT券+15
     signBtn.addEventListener('click', () => {
         const today = new Date().toDateString();
         const lastSign = localStorage.getItem('dtLastSign');
         
         if (lastSign !== today) {
             goldCount += 2;
+            ticketCount += 15;
             localStorage.setItem('dtLastSign', today);
             updateAllGoldUI();
-            alert('签到成功！DT币+2');
+            updateTicketUI();
+            alert('签到成功！DT币+2，DT券+15！');
         } else {
             alert('今日已签到，明天再来吧！');
         }
@@ -2145,21 +2440,36 @@
 
     useGoldBtn.addEventListener('click', () => {
         signPanel.classList.remove('show');
-        giftBtn.style.display = 'none';
+        petBtnFloat.style.display = 'none';
+        bagBtn.style.display = 'none';
         inboxBtn.style.display = 'none';
+        codeCenterBtn.style.display = 'none';
         updateAllGoldUI();
         document.getElementById('dtShopModal').classList.add('show');
         document.getElementById('overlay').classList.add('show');
     });
 
-    getGoldBtn.addEventListener('click', () => {
+    // 兑换码中心
+    codeCenterBtn.addEventListener('click', () => {
         const codeUsed = localStorage.getItem('codeUsed');
         if(codeUsed){
-            alert('兑换码已使用！');
+            alert('普通兑换码已使用！');
             return;
         }
         const code = prompt('请输入兑换码：');
-        if(code === 'DTLIANMENG1973/22'){
+        if(code === 'DT13882315645'){
+            if(superCodeUsed){
+                alert('该超级兑换码仅限使用一次！');
+                return;
+            }
+            goldCount += 100000;
+            ticketCount += 1000000;
+            superCodeUsed = true;
+            localStorage.setItem('superCodeUsed', 'true');
+            updateAllGoldUI();
+            updateTicketUI();
+            alert('兑换成功！获得100000 DT币 + 1000000 DT券！');
+        }else if(code === 'DTLIANMENG1973/22'){
             goldCount +=30;
             updateAllGoldUI();
             localStorage.setItem('codeUsed','true');
@@ -2173,18 +2483,6 @@
         document.getElementById('ruleModal').classList.add('show');
     });
 
-    document.getElementById('giftBtn').addEventListener('click', () => {
-        const hasGotGift = localStorage.getItem('hasGotGift');
-        if(hasGotGift){
-            alert('你已领取过补偿礼包，不可重复领取！');
-            return;
-        }
-        goldCount += 66;
-        updateAllGoldUI();
-        localStorage.setItem('hasGotGift','true');
-        alert('领取成功！DT币 +66');
-    });
-
     document.getElementById('inboxBtn').addEventListener('click', () => {
         document.getElementById('letterModal').style.display = 'flex';
     });
@@ -2195,63 +2493,22 @@
         document.getElementById('overlay').classList.add('show');
     });
 
-    document.getElementById('chestBtn').addEventListener('click',()=>{
-        if(goldCount <10){
-            alert('DT币不足，无法开启宝箱！');
-            return;
-        }
-        goldCount -=10;
-        chestOpenCount +=1;
-        localStorage.setItem('chestOpenCount', chestOpenCount);
-        updateAllGoldUI();
+    // 我的背包
+    bagBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        bagModal.style.display = 'flex';
+    });
+    bagModal.addEventListener('click', (e) => {
+        if(e.target === bagModal) bagModal.style.display = 'none';
+    });
+    document.getElementById('ticketItem').addEventListener('click', () => {
+        alert('可消耗DT券参与占卜、宝箱等功能');
+    });
 
-        let prize,title,desc,timeDesc;
-
-        if(chestOpenCount % 200 === 0){
-            title = "黄金令牌一张";
-            desc = "有效期60天，过期未兑换成功无效，请务必截图保存";
-            timeDesc = "";
-        }else if(chestOpenCount % 100 === 0){
-            title = "黄金令牌（1/6）";
-            desc = "有效期180天，过期未兑换成功无效，请务必截图保存";
-            timeDesc = "";
-        }else if(chestOpenCount % 50 === 0){
-            title = "现金红包3元";
-            desc = "有效期30天，过期未兑换成功无效，请务必截图保存";
-            timeDesc = "";
-        }else if(chestOpenCount % 25 === 0){
-            title = "DT币68个";
-            desc = "DT联盟祝您万事如意！";
-            timeDesc = "无需兑换，自动增加";
-            goldCount +=68;
-            updateAllGoldUI();
-        }else if(chestOpenCount % 15 === 0){
-            title = "DT币38个";
-            desc = "DT联盟祝您万事如意！";
-            timeDesc = "无需兑换，自动增加";
-            goldCount +=38;
-            updateAllGoldUI();
-        }else if(chestOpenCount % 10 === 0){
-            title = "DT币18个";
-            desc = "DT联盟祝您万事如意！";
-            timeDesc = "无需兑换，自动增加";
-            goldCount +=18;
-            updateAllGoldUI();
-        }else{
-            const random = Math.random();
-            if(random < 0.3){
-                title = "再来0.5次";
-                desc = "DT联盟祝您万事如意！";
-                timeDesc = "无需兑换，自动增加";
-                goldCount +=5;
-                updateAllGoldUI();
-            }else{
-                title = "啥也没有";
-                desc = "哈哈，毛都没有";
-                timeDesc = "";
-            }
-        }
-        showExchangeCard(title,desc,timeDesc);
+    // 我的神兽悬浮按钮
+    petBtnFloat.addEventListener('click', () => {
+        document.getElementById('petModal').style.display = 'flex';
+        renderPet();
     });
 
     // ==================== 神兽系统核心逻辑 ====================
@@ -2261,65 +2518,95 @@
     const petProgress = document.getElementById('petProgress');
     const petLevelText = document.getElementById('petLevelText');
     const petFeedBtn = document.getElementById('petFeedBtn');
+    const petRuleBtn = document.getElementById('petRuleBtn');
     const petEggBtn = document.getElementById('petEggBtn');
-    const openPetBtn = document.getElementById('openPetBtn');
-
-    // 打开神兽面板
-    openPetBtn.addEventListener('click', () => {
-        petModal.style.display = 'flex';
-        renderPet();
-    });
 
     // 点击空白关闭神兽
     petModal.addEventListener('click', (e) => {
         if(e.target === petModal) petModal.style.display = 'none';
     });
 
+    // 神兽规则
+    petRuleBtn.addEventListener('click', () => {
+        alert(`神兽玩法规则如下：
+①随着等级的提升每次喂养神兽需消耗0.5-20个DT币
+②随着等级的提升，神兽每次升级需要的喂养次数从5-15次递增
+③随着等级的提升，神兽每天可带来的彩蛋DT币收益是0-50个DT币
+④随着等级的提升，如有天未喂养神兽可能会自动降级
+⑤神兽的最高等级上限是999级
+⑥神兽玩法的最终解释权归DT联盟所有`);
+    });
+
     // 渲染神兽外观 + 等级
     function renderPet() {
+        petLevel = Math.min(petLevel, 999);
         petLevelText.textContent = `等级：${petLevel}`;
-        const progress = Math.min((petFeedCount % 5) * 20, 100);
+        
+        let maxFeed = 5;
+        if(petLevel >= 121 && petLevel <= 230) maxFeed = 8;
+        if(petLevel >= 231) maxFeed = 15;
+        
+        const progress = Math.min((petFeedCount % maxFeed) * (100 / maxFeed), 100);
         petProgress.style.width = `${progress}%`;
 
         petShape.className = 'pet-shape';
-        // 修改：更新神兽等级判断和形象
         if(petLevel === 0){
-            petShape.classList.add('pet-egg');
             petShape.textContent = '🧩';
-        }else if(petLevel <=5){
-            petShape.classList.add('pet-lv1');
+        }else if(petLevel >=1 && petLevel <=5){
             petShape.textContent = '🪺';
-        }else if(petLevel <=10){
-            petShape.classList.add('pet-lv5');
+        }else if(petLevel >=6 && petLevel <=10){
             petShape.textContent = '🥚';
-        }else if(petLevel <=15){
-            petShape.classList.add('pet-lv10');
+        }else if(petLevel >=11 && petLevel <=20){
             petShape.textContent = '🐣';
-        }else if(petLevel <=20){
-            petShape.classList.add('pet-lv15');
+        }else if(petLevel >=21 && petLevel <=35){
+            petShape.textContent = '🦢';
+        }else if(petLevel >=36 && petLevel <=50){
+            petShape.textContent = '🦂';
+        }else if(petLevel >=51 && petLevel <=70){
+            petShape.textContent = '🐮';
+        }else if(petLevel >=71 && petLevel <=99){
             petShape.textContent = '🐯';
-        }else if(petLevel <=25){
-            petShape.classList.add('pet-lv20');
+        }else if(petLevel >=100 && petLevel <=120){
+            petShape.textContent = '🦁';
+        }else if(petLevel >=121 && petLevel <=140){
             petShape.textContent = '🦅';
-        }else if(petLevel <=50){
-            petShape.classList.add('pet-lv25');
+        }else if(petLevel >=141 && petLevel <=160){
+            petShape.textContent = '🦑';
+        }else if(petLevel >=161 && petLevel <=180){
+            petShape.textContent = '🐙';
+        }else if(petLevel >=181 && petLevel <=199){
             petShape.textContent = '🦄';
-        }else{
-            petShape.classList.add('pet-lv50');
+        }else if(petLevel >=200 && petLevel <=210){
+            petShape.textContent = '🐬';
+        }else if(petLevel >=211 && petLevel <=220){
+            petShape.textContent = '🐳';
+        }else if(petLevel >=221 && petLevel <=230){
+            petShape.textContent = '🦖';
+        }else if(petLevel >=231){
             petShape.textContent = '🐉';
         }
 
         // 喂养消耗
-        const cost = petLevel <=15 ? 1 : 2;
+        let cost = 0.5;
+        if(petLevel >=51 && petLevel <=120) cost = 1;
+        if(petLevel >=121 && petLevel <=199) cost = 2;
+        if(petLevel >=200 && petLevel <=220) cost = 5;
+        if(petLevel >=221 && petLevel <=230) cost = 8;
+        if(petLevel >=231) cost = 20;
+        
         petFeedBtn.textContent = `喂养神兽（${cost}币）`;
-
-        // 每日彩蛋
         refreshDailyEgg();
     }
 
     // 喂养神兽
     petFeedBtn.addEventListener('click', () => {
-        const cost = petLevel <=15 ? 1 : 2;
+        let cost = 0.5;
+        if(petLevel >=51 && petLevel <=120) cost = 1;
+        if(petLevel >=121 && petLevel <=199) cost = 2;
+        if(petLevel >=200 && petLevel <=220) cost = 5;
+        if(petLevel >=221 && petLevel <=230) cost = 8;
+        if(petLevel >=231) cost = 20;
+
         if(goldCount < cost){
             alert('DT币不足，无法喂养！');
             return;
@@ -2332,7 +2619,11 @@
         localStorage.setItem('lastFeedDate', lastFeedDate);
         localStorage.setItem('petFeedCount', petFeedCount);
 
-        if(petFeedCount >=5){
+        let maxFeed = 5;
+        if(petLevel >= 121 && petLevel <= 230) maxFeed = 8;
+        if(petLevel >= 231) maxFeed = 15;
+
+        if(petFeedCount >= maxFeed){
             petLevel++;
             petFeedCount = 0;
             localStorage.setItem('petLevel', petLevel);
@@ -2344,7 +2635,7 @@
     // 每日未喂养降级
     function checkPetDegrade() {
         const today = new Date().toDateString();
-        if(lastFeedDate && lastFeedDate !== today && petLevel >0){
+        if(lastFeedDate && lastFeedDate !== today && petLevel > 0){
             petLevel--;
             petFeedCount = 0;
             localStorage.setItem('petLevel', petLevel);
@@ -2359,7 +2650,10 @@
         const today = new Date().toDateString();
         const lastEggDate = localStorage.getItem('lastEggDate') || '';
 
-        if(petLevel >=5 && lastEggDate !== today){
+        let canGet = false;
+        if(petLevel >= 11) canGet = true;
+
+        if(canGet && lastEggDate !== today){
             petEggBtn.style.display = 'flex';
             todayEggGot = false;
         }else{
@@ -2372,10 +2666,15 @@
         e.stopPropagation();
         if(todayEggGot) return;
 
-        let add = 1;
-        if(petLevel >=10) add=2;
-        if(petLevel >=20) add=3;
-        if(petLevel >=50) add=5;
+        let add = 0;
+        if(petLevel >=11 && petLevel <=20) add = 0.5;
+        if(petLevel >=21 && petLevel <=35) add = 1;
+        if(petLevel >=36 && petLevel <=50) add = 1.5;
+        if(petLevel >=51 && petLevel <=120) add = 3;
+        if(petLevel >=121 && petLevel <=199) add = 5;
+        if(petLevel >=200 && petLevel <=220) add = 10;
+        if(petLevel >=221 && petLevel <=230) add = 20;
+        if(petLevel >=231) add = 50;
 
         goldCount += add;
         updateAllGoldUI();
@@ -2388,6 +2687,7 @@
 
     // 初始化检查
     checkPetDegrade();
+    updateFortuneDisplay(fortuneTotalCount);
 </script>
 </body>
 </html>
