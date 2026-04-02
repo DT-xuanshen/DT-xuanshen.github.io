@@ -1188,6 +1188,30 @@
         transform: scale(1.05);
     }
 
+    /* 答题有奖按钮 */
+    .answer-btn {
+        position: fixed;
+        bottom: 70px;
+        left: 180px;
+        width: 70px;
+        height: 40px;
+        background: #ff9800;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 999;
+        box-shadow: 0 3px 8px rgba(255,152,0,0.3);
+        transition: all 0.3s ease;
+        display: none;
+    }
+    .answer-btn:hover {
+        background: #f57c00;
+        transform: scale(1.05);
+    }
+
     .code-center-btn {
         position: fixed;
         bottom: 20px;
@@ -1765,6 +1789,7 @@
 
 <button class="gift-btn" id="bagBtn">我的背包</button>
 <button class="pet-btn-float" id="petBtnFloat">我的神兽</button>
+<button class="answer-btn" id="answerBtn">答题有奖</button>
 <button class="inbox-btn" id="inboxBtn">收件箱</button>
 <button class="code-center-btn" id="codeCenterBtn">兑换码中心</button>
 
@@ -2130,14 +2155,14 @@
     // 占卜 - 选择货币
     document.getElementById('fortuneBtn').addEventListener('click', function() {
         currentAction = 'fortune';
-        document.getElementById('chooseTitle').textContent = '占卜需消耗 1 DT币 或 8 DT券\n请选择消耗货币';
+        document.getElementById('chooseTitle').textContent = '占卜需消耗1个DT币 或 8张DT券\n请选择消耗货币';
         document.getElementById('chooseCurrencyModal').style.display = 'flex';
     });
 
     // 宝箱 - 选择货币
     document.getElementById('chestBtn').addEventListener('click', function() {
         currentAction = 'chest';
-        document.getElementById('chooseTitle').textContent = '开宝箱需消耗 10 DT币 或 88 DT券\n请选择消耗货币';
+        document.getElementById('chooseTitle').textContent = '开宝箱需消耗 10个DT币 或 88张DT券\n请选择消耗货币';
         document.getElementById('chooseCurrencyModal').style.display = 'flex';
     });
 
@@ -2164,7 +2189,7 @@
     // DT币占卜
     function doFortuneWithGold() {
         if (goldCount < 1) {
-            alert("DT币不足！");
+            alert("DT币不足，还想着当赌狗？！");
             return;
         }
         goldCount -= 1;
@@ -2175,7 +2200,7 @@
     // DT券占卜
     function doFortuneWithTicket() {
         if (ticketCount < 8) {
-            alert("DT券不足！");
+            alert("DT券不足，还想着当赌狗？！");
             return;
         }
         ticketCount -= 8;
@@ -2264,7 +2289,7 @@
     // DT币开宝箱
     function doChestWithGold() {
         if (goldCount < 10) {
-            alert('DT币不足，无法开启宝箱！');
+            alert('DT币不足，还想着当赌狗？');
             return;
         }
         goldCount -= 10;
@@ -2277,7 +2302,7 @@
     // DT券开宝箱
     function doChestWithTicket() {
         if (ticketCount < 88) {
-            alert('DT券不足，无法开启宝箱！');
+            alert('DT券不足，还想着当赌狗？');
             return;
         }
         ticketCount -= 88;
@@ -2331,7 +2356,7 @@
                 ticketCount += 100;
                 updateTicketUI();
             }else if(random < 0.5){
-                title = "再来0.5次";
+                title = "安慰奖励";
                 desc = "DT联盟祝您万事如意！";
                 timeDesc = "无需兑换，自动增加";
                 goldCount +=5;
@@ -2421,6 +2446,7 @@
     const signBtn = document.getElementById('signBtn');
     const useGoldBtn = document.getElementById('useGoldBtn');
     const bagBtn = document.getElementById('bagBtn');
+    const answerBtn = document.getElementById('answerBtn');
     const inboxBtn = document.getElementById('inboxBtn');
     const bagModal = document.getElementById('bagModal');
     const petBtnFloat = document.getElementById('petBtnFloat');
@@ -2437,11 +2463,13 @@
         if(signPanel.classList.contains('show')){
             bagBtn.style.display = 'block';
             petBtnFloat.style.display = 'block';
+            answerBtn.style.display = 'block';
             inboxBtn.style.display = 'block';
             codeCenterBtn.style.display = 'block';
         }else{
             bagBtn.style.display = 'none';
             petBtnFloat.style.display = 'none';
+            answerBtn.style.display = 'none';
             inboxBtn.style.display = 'none';
             codeCenterBtn.style.display = 'none';
         }
@@ -2451,6 +2479,7 @@
         signPanel.classList.remove('show');
         petBtnFloat.style.display = 'none';
         bagBtn.style.display = 'none';
+        answerBtn.style.display = 'none';
         inboxBtn.style.display = 'none';
         codeCenterBtn.style.display = 'none';
         bagModal.style.display = 'none';
@@ -2477,6 +2506,7 @@
         signPanel.classList.remove('show');
         petBtnFloat.style.display = 'none';
         bagBtn.style.display = 'none';
+        answerBtn.style.display = 'none';
         inboxBtn.style.display = 'none';
         codeCenterBtn.style.display = 'none';
         updateAllGoldUI();
@@ -2720,7 +2750,314 @@
         alert(`彩蛋奖励！DT币 +${add}`);
     });
 
-    // 初始化检查
+    // ==================== 答题有奖系统 ====================
+     // ==================== 答题有奖系统（新版：点击选项）====================
+answerBtn.addEventListener('click', startAnswerQuiz);
+
+function startAnswerQuiz(){
+    // 每日获得上限
+    const today = new Date().toDateString();
+    let answerDailyGet = parseInt(localStorage.getItem('answerDailyGet')) || 0;
+    
+    if(answerDailyGet >= 200){
+        alert('今日答题奖励已达上限200张DT券，明天再来吧小馋猫！');
+        return;
+    }
+
+    // 题库（已替换为你提供的全部题目）
+    const questions = [
+        {
+            title: 'DT联盟旗下所有部落被分为几个大类？',
+            options: ['5个', '8个', '32个', '4个'],
+            answer: '4个'
+        },
+        {
+            title: 'DT联盟的创建周年纪念日是哪天？',
+            options: ['6月4日', '4月6日', '12月7日', '7月12日'],
+            answer: '6月4日'
+        },
+        {
+            title: 'DT联盟始建于哪一年？',
+            options: ['2020年夏', '2020年春', '2018年秋', '2018年夏'],
+            answer: '2020年夏'
+        },
+        {
+            title: 'DT联盟共有多少个主力部落？',
+            options: ['7个', '9个', '8个', '6个'],
+            answer: '9个'
+        },
+        {
+            title: '游戏内绑定DT联盟的创作者代码是多少？',
+            options: ['dt888', 'dt88888', 'dt8888', 'dt888888'],
+            answer: 'dt8888'
+        },
+        {
+            title: 'DT联盟旗下主力部落中的第一分部名称？',
+            options: ['大唐天子', '仲谋', '神州十六号', '皮皮卡'],
+            answer: '仲谋'
+        },
+        {
+            title: '为什么点击加入部落显示被禁止加入？',
+            options: ['部落管理把我拉黑了', '部落把我拉入了黑名单', '部落有人把我踢了', '频繁加入部落'],
+            answer: '部落有人把我踢了'
+        },
+        {
+            title: '在A部落参与了部落竞赛并且完成了一项任务，在部落竞赛结束前我加入了B部落，以下哪个说法是正确的？',
+            options: ['如果不在竞赛结束前返回A部落就无法领取奖励', '可以继续在B部落参与竞赛', '如果不在竞赛结束前返回A部落依然可以在竞赛结束后领取奖励', '在竞赛结束后返回A部落无法再领取奖励'],
+            answer: '如果不在竞赛结束前返回A部落依然可以在竞赛结束后领取奖励'
+        },
+        {
+            title: '每次部落联赛可报名参与的人数最多是多少？',
+            options: ['15个', '30个', '45个', '50个'],
+            answer: '50个'
+        },
+        {
+            title: '部落联赛中每场回合可上场的人数最多是多少人？',
+            options: ['15个', '30个', '45个', '50个'],
+            answer: '30个'
+        },
+        {
+            title: '部落竞赛中如没有特别活动最多可选择几列中的奖励领取？',
+            options: ['5列', '6列', '7列', '8列'],
+            answer: '7列'
+        },
+        {
+            title: '都城铸币坊中的最大容量是多少？',
+            options: ['3.5w', '3.5k', '5w', '5k'],
+            answer: '3.5w'
+        },
+        {
+            title: '都城币的最大容量是多少？',
+            options: ['3.5w', '3.5k', '5w', '5k'],
+            answer: '5k'
+        },
+        {
+            title: '村庄中的障碍物宝箱最多可同时存在几个？',
+            options: ['1个', '2个', '3个', '5个'],
+            answer: '1个'
+        },
+        {
+            title: '大雪怪是多少本才解锁的？',
+            options: ['11本', '12本', '13本', '14本'],
+            answer: '12本'
+        },
+        {
+            title: '14本中最多可解锁几个战宠？',
+            options: ['2个', '4个', '5个', '6个'],
+            answer: '4个'
+        },
+        {
+            title: '飞龙公爵在多少本解锁的？',
+            options: ['14本', '15本', '16本', '17本'],
+            answer: '15本'
+        },
+        {
+            title: '至少多少瓶1级的地震法术可将满级满血的城墙震碎？',
+            options: ['8瓶', '6瓶', '4瓶', '2瓶'],
+            answer: '4瓶'
+        },
+        {
+            title: '一个超级兵种女武神需要占多少空间的兵营？',
+            options: ['12', '15', '20', '25'],
+            answer: '20'
+        },
+        {
+            title: '一个超级兵种巨石投手需要占多少空间的兵营？',
+            options: ['40', '20', '25', '30'],
+            answer: '30'
+        },
+        {
+            title: '一个超级兵种气球兵需要占多少空间的兵营？',
+            options: ['5', '6', '7', '8'],
+            answer: '8'
+        },
+        {
+            title: '一个超级兵种亡灵需要占多少空间的兵营？',
+            options: ['8', '10', '12', '14'],
+            answer: '12'
+        },
+        {
+            title: '商店绑定创作者代码后每过多少天会自动解绑失效需要重新绑定？',
+            options: ['3天', '5天', '7天', '15天'],
+            answer: '7天'
+        },
+        {
+            title: '购买一周护盾后的冷却时间是多久？',
+            options: ['7天', '12天', '30天', '35天'],
+            answer: '35天'
+        },
+        {
+            title: '联赛商店中兑换英雄装备需要多少联赛币？',
+            options: ['300个', '500个', '750个', '1000个'],
+            answer: '750个'
+        },
+        {
+            title: '皮卡超人神像装饰物的价格是多少？',
+            options: ['500宝石', '1000宝石', '100w金币', '1000w金币'],
+            answer: '100w金币'
+        },
+        {
+            title: '合成加农炮在多少本解锁？',
+            options: ['15本', '16本', '17本', '18本'],
+            answer: '17本'
+        },
+        {
+            title: '精制台里的武器更新时间是多久？',
+            options: ['90天', '60天', '30天', '15天'],
+            answer: '90天'
+        },
+        {
+            title: '兵种烈焰熔炉的占地空间是多少？',
+            options: ['14', '18', '20', '25'],
+            answer: '18'
+        },
+        {
+            title: '兵种掘地矿工的占地空间是多少？',
+            options: ['5', '6', '8', '10'],
+            answer: '6'
+        },
+        {
+            title: '兵种女巫的占地空间是多少？',
+            options: ['10', '12', '14', '16'],
+            answer: '12'
+        },
+        {
+            title: '皮卡超人是什么性别？',
+            options: ['男', '女', '机器'],
+            answer: '女'
+        },
+        {
+            title: '建筑工人小屋在多少本时开始可以拥有攻击性？',
+            options: ['14本', '15本', '16本', '17本'],
+            answer: '14本'
+        },
+        {
+            title: '满级防空火箭建筑上有几根火箭？',
+            options: ['3', '4', '5', '6'],
+            answer: '4'
+        },
+        {
+            title: '满级箭塔建筑上有几个小妹？',
+            options: ['1', '2', '3', '4'],
+            answer: '1'
+        },
+        {
+            title: '改装后的迫击炮的连发数量是多少？',
+            options: ['3', '4', '5', '6'],
+            answer: '3'
+        },
+        {
+            title: '玩家的匹配值可在友谊战地图的侦查中查看什么建筑获取？',
+            options: ['储金罐', '圣水罐', '黑油罐', '大本营'],
+            answer: '黑油罐'
+        },
+        {
+            title: '黑心商人右手上拿着的药水是什么颜色的？',
+            options: ['橙色', '紫色', '黄色', '绿色'],
+            answer: '紫色'
+        },
+        {
+            title: '夜世界的时光钟楼建筑中肉眼可见的转动中的齿轮有几个？',
+            options: ['1个', '2个', '3个', '4个'],
+            answer: '4个'
+        },
+        {
+            title: '夜世界中满级防空火箭建筑上有几根火箭？',
+            options: ['3', '4', '5', '6'],
+            answer: '4'
+        },
+        {
+            title: '满级宝石矿井建筑每天可生产多少颗宝石？',
+            options: ['4', '5', '6', '7'],
+            answer: '5'
+        },
+        {
+            title: '从夜世界搬到主世界的第六个建筑工人叫什么？',
+            options: ['小傅', '小度', '小美', '小博'],
+            answer: '小博'
+        },
+        {
+            title: '释放超级兵种哥布林，他用的哪只手背的钱袋子？',
+            options: ['左手', '右手'],
+            answer: '右手'
+        },
+        {
+            title: '著名台词“哈雷”是哪个英雄说的？',
+            options: ['蛮王', '女皇', '永王', '闰土'],
+            answer: '永王'
+        },
+        {
+            title: '通往都城的气球飞船上有几个热气球？',
+            options: ['2个', '3个', '4个', '5个'],
+            answer: '3个'
+        },
+        {
+            title: '建筑工人学徒的斜刘海是靠那边的？',
+            options: ['左', '右'],
+            answer: '左'
+        },
+        {
+            title: '兵种“牙签”是哪只手扛着“牙签”的？',
+            options: ['左', '右'],
+            answer: '左'
+        }
+    ];
+
+    // 随机抽题
+    const q = questions[Math.floor(Math.random() * questions.length)];
+
+    // 创建选项弹窗
+    const quizOverlay = document.createElement('div');
+    quizOverlay.style.cssText = `
+        position:fixed; top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.9); z-index:99999;
+        display:flex; justify-content:center; align-items:center;
+        flex-direction:column; gap:12px; padding:20px;
+    `;
+
+    const titleEl = document.createElement('div');
+    titleEl.style.cssText = `color:#fff; font-size:18px; margin-bottom:10px; text-align:center;`;
+    titleEl.innerText = q.title;
+
+    quizOverlay.appendChild(titleEl);
+
+    // 创建选项按钮
+    q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.innerText = opt;
+        btn.style.cssText = `
+            width:80%; max-width:300px; padding:14px;
+            border:none; border-radius:8px;
+            background:#1a237e; color:#fff; font-size:16px;
+            cursor:pointer;
+        `;
+        btn.onclick = () => {
+            // 判断答案
+            if(opt === q.answer){
+                ticketCount +=5;
+                answerDailyGet +=5;
+                updateTicketUI();
+                localStorage.setItem('answerDailyGet', answerDailyGet);
+                alert('✅ 回答正确！获得 5 张DT券！');
+            }else{
+                if(ticketCount >=3){
+                    ticketCount -=3;
+                    updateTicketUI();
+                    alert('❌ 回答错误！恭喜你扣除 3 张DT券！');
+                }else{
+                    alert('❌ 回答错误！但你券太少了，这次就不扣你的了');
+                }
+            }
+            document.body.removeChild(quizOverlay);
+        };
+        quizOverlay.appendChild(btn);
+    });
+
+    document.body.appendChild(quizOverlay);
+    quizOverlay.onclick = (e) => {
+        if(e.target === quizOverlay) document.body.removeChild(quizOverlay);
+    };
+}    // 初始化检查
     checkPetDegrade();
     updateFortuneDisplay(fortuneTotalCount);
 </script>
