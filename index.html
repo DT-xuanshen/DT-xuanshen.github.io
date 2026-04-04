@@ -1192,7 +1192,7 @@
     .answer-btn {
         position: fixed;
         bottom: 70px;
-        left: 180px;
+        left: 100px;
         width: 70px;
         height: 40px;
         background: #ff9800;
@@ -1693,8 +1693,8 @@
         </div>
         <div class="carousel-dots" id="carouselDots">
             <div class="carousel-dot active" data-index="0"></div>
-            <div class="carousel-dot" data-index="1"></div>
-            <div class="carousel-dot" data-index="2"></div>
+            <div class="carousel-dot active" data-index="1"></div>
+            <div class="carousel-dot active" data-index="2"></div>
         </div>
     </div>
 
@@ -2757,11 +2757,14 @@ answerBtn.addEventListener('click', startAnswerQuiz);
 function startAnswerQuiz(){
     // 每日获得上限
     const today = new Date().toDateString();
+    let lastAnswerDate = localStorage.getItem('lastAnswerDate') || '';
     let answerDailyGet = parseInt(localStorage.getItem('answerDailyGet')) || 0;
-    
-    if(answerDailyGet >= 200){
-        alert('今日答题奖励已达上限200张DT券，明天再来吧小馋猫！');
-        return;
+
+    // 跨天重置
+    if(lastAnswerDate !== today){
+        answerDailyGet = 0;
+        localStorage.setItem('lastAnswerDate', today);
+        localStorage.setItem('answerDailyGet', answerDailyGet);
     }
 
     // 题库（已替换为你提供的全部题目）
@@ -3034,16 +3037,23 @@ function startAnswerQuiz(){
         btn.onclick = () => {
             // 判断答案
             if(opt === q.answer){
-                ticketCount +=5;
-                answerDailyGet +=5;
-                updateTicketUI();
-                localStorage.setItem('answerDailyGet', answerDailyGet);
-                alert('✅ 回答正确！获得 5 张DT券！');
-            }else{
-                if(ticketCount >=3){
-                    ticketCount -=3;
+                // 答对：+10，上限200
+                if(answerDailyGet >= 200){
+                    alert('✅ 回答正确！但今日奖励已达上限200张，无法再获得');
+                }else{
+                    ticketCount +=10;
+                    answerDailyGet +=10;
+                    if(answerDailyGet>200) answerDailyGet=200;
                     updateTicketUI();
-                    alert('❌ 回答错误！恭喜你扣除 3 张DT券！');
+                    localStorage.setItem('answerDailyGet', answerDailyGet);
+                    alert('✅ 回答正确！获得 10 张DT券！');
+                }
+            }else{
+                // 答错：-5
+                if(ticketCount >=5){
+                    ticketCount -=5;
+                    updateTicketUI();
+                    alert('❌ 回答错误！恭喜扣除 5 张DT券！');
                 }else{
                     alert('❌ 回答错误！但你券太少了，这次就不扣你的了');
                 }
