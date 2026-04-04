@@ -2390,12 +2390,11 @@
         document.getElementById('popupCodeSupport').classList.add('show');
         document.getElementById('overlay').classList.add('show');
     });
-    document.getElementById('goLoveSupport').addEventListener('click', () => {
-        closeAllPopups();
-        closeAllPopups();
-        document.getElementById('popupLoveSupport').classList.add('show');
-        document.getElementById('overlay').classList.add('show');
-    });
+document.getElementById('goLoveSupport').addEventListener('click', () => {
+    closeAllPopups();
+    // 直接跳转到为联盟发电支持页面
+    window.open('https://docs.qq.com/doc/DUm9Iemt4Q01pS3Za', '_blank');
+});
 
     document.getElementById('assistBtn').addEventListener('click', function() {
         window.open('https://docs.qq.com/doc/DUnp4U05aYXRWRUdh', '_blank');
