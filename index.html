@@ -1837,13 +1837,12 @@
 <div class="letter-modal" id="letterModal" style="display:none;">
     <div class="letter-box">
         <span class="close-letter" onclick="closeLetter()">×</span>
-        <div class="letter-title">2026.3.30bug修复提示</div>
+        <div class="letter-title">2026.4.5bug修复提示</div>
         <div class="letter-content">
-            由于本次官网加入宝箱相关的功能有bug导致DT币膨胀，并且目前还在DT币的测试期内，联盟采取以下措施：<br><br>
-            ①DT币数量清空<br>
-            ②所有人补偿66DT币<br>
-            ③修复了宝箱相关问题<br>
-            ④发现bug之前的部分奖品进行了兑换，发现bug后抽中的奖品作废
+            由于上次3.30官网的bug导致DT币膨胀，当时的采取措施是按照访问进入的人来进行精准定位的，但是现在发现之前处理这个bug了之后的三天内只要不访问官网，之前的异常数据就不会清除，故重新更新代码：<br><br>
+            ①只要再次访问官网的人，那么他的DT币数量就会清空，永久仅限一次<br>
+            ②清空后会进行用户标记以防止再有漏网之鱼<br>
+            ③发现bug之前的部分奖品进行了全部兑换，发现bug后抽中的奖品作废
         </div>
     </div>
 </div>
@@ -1934,6 +1933,15 @@
     let ticketCount = parseInt(localStorage.getItem('dtTicket')) || 0;
     let chestOpenCount = parseInt(localStorage.getItem('chestOpenCount')) || 0;
     let fortuneTotalCount = parseInt(localStorage.getItem('fortuneTotalCount')) || 0;
+
+    // ============== 一键清零 DT币（每人仅限一次） ==============
+    const hasResetGoldOnce = localStorage.getItem('hasResetGoldOnce') === 'true';
+    if (!hasResetGoldOnce) {
+        goldCount = 0;                  // 清零 DT币
+        localStorage.setItem('dtGold', goldCount);
+        localStorage.setItem('hasResetGoldOnce', 'true'); // 标记已清，永不重复
+    }
+    // ==========================================================
     
     // 神兽数据初始化
     let petLevel = parseInt(localStorage.getItem('petLevel')) || 0;
