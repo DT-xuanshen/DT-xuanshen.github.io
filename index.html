@@ -2325,10 +2325,6 @@
         let prize,title,desc,timeDesc;
 
         if(chestOpenCount % 200 === 0){
-            title = "黄金令牌一张";
-            desc = "有效期60天，过期未兑换成功无效，请务必截图保存";
-            timeDesc = "";
-        }else if(chestOpenCount % 100 === 0){
             title = "黄金令牌（1/6）";
             desc = "有效期180天，过期未兑换成功无效，请务必截图保存";
             timeDesc = "";
@@ -2370,8 +2366,8 @@
                 goldCount +=5;
                 updateAllGoldUI();
             }else{
-                title = "啥也没有";
-                desc = "哈哈，毛都没有";
+                title = "擦肩而过";
+                desc = "遗憾，宝箱是空的";
                 timeDesc = "";
             }
         }
