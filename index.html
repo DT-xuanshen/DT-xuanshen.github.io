@@ -1662,8 +1662,7 @@
 </div>
 
 <header>
-<div id="deviceModel" style="position:absolute; top:10px; right:15px; font-size:12px; opacity:0.8;"></div>
-<h1>DT联盟</h1>
+<div id="deviceModel" style="position:absolute; top:10px; right:15px; font-size:12px; opacity:0.8; z-index:10;"></div<h1>DT联盟</h1>
 <p>海纳百川｜部落不倒｜我们不散</p></header>
 <div class="scroll-notice">
     <div class="notice-fixed">重要通知📢</div>
@@ -3061,38 +3060,55 @@ function startAnswerQuiz(){
 }    // 初始化检查
     checkPetDegrade();
     updateFortuneDisplay(fortuneTotalCount);
-// ============== 自动识别手机型号 ==============
+// ============== 精准识别手机型号（覆盖原代码） ==============
 function getDeviceModel() {
   const ua = navigator.userAgent || '';
-  let model = '未知设备';
+  const uaLower = ua.toLowerCase();
 
-  // iPhone
-  if(/iPhone/.test(ua)) model = 'iPhone';
-  // 华为
-  else if(/HUAWEI|huawei/.test(ua)) model = '华为手机';
-  // 小米
-  else if(/Mi|Redmi|Xiaomi/.test(ua)) model = '小米手机';
-  // OPPO
-  else if(/OPPO/.test(ua)) model = 'OPPO手机';
-  // vivo
-  else if(/vivo/.test(ua)) model = 'vivo手机';
-  // 荣耀
-  else if(/Honor|HONOR/.test(ua)) model = '荣耀手机';
-  // 三星
-  else if(/SAMSUNG|Samsung/.test(ua)) model = '三星手机';
-  // 一加
-  else if(/OnePlus/.test(ua)) model = '一加手机';
-  // 真我
-  else if(/realme/.test(ua)) model = 'realme手机';
-  // 电脑
-  else if(/Windows|Macintosh/.test(ua)) model = '电脑端访问';
-  // 平板
-  else if(/iPad/.test(ua)) model = 'iPad平板';
+  // ---------- iOS 精准识别 ----------
+  if (/iPhone/.test(ua)) {
+    const match = ua.match(/iPhone\s+(\d+),(\d+)/);
+    if (!match) return 'iPhone';
+    const modelMap = {
+      '14,5': 'iPhone 13 mini',
+      '14,4': 'iPhone 12 mini',
+      '14,2': 'iPhone 12 Pro Max',
+      '14,1': 'iPhone 12 Pro',
+      '13,8': 'iPhone 11 Pro Max',
+      '13,7': 'iPhone 11 Pro',
+      '13,6': 'iPhone 11',
+      '12,8': 'iPhone XS Max',
+      '12,5': 'iPhone XS',
+      '12,3': 'iPhone XR',
+      '11,8': 'iPhone X',
+    };
+    return modelMap[match[1]+','+match[2]] || 'iPhone';
+  }
 
-  return model;
+  // ---------- 安卓精准提取型号（Build/ 后面） ----------
+  let androidModel = '';
+  const buildMatch = ua.match(/Build\/([^\s;]+)/);
+  if (buildMatch) androidModel = buildMatch[1];
+
+  // ---------- 安卓品牌判断（优先级高） ----------
+  if (/HUAWEI|huawei/.test(uaLower)) return androidModel ? `华为 ${androidModel}` : '华为手机';
+  if (/Honor|honor/.test(uaLower)) return androidModel ? `荣耀 ${androidModel}` : '荣耀手机';
+  if (/Xiaomi|MI|Redmi/.test(uaLower)) return androidModel ? `小米/Redmi ${androidModel}` : '小米/Redmi手机';
+  if (/OPPO|oppo/.test(uaLower)) return androidModel ? `OPPO ${androidModel}` : 'OPPO手机';
+  if (/vivo|VIVO/.test(uaLower)) return androidModel ? `vivo ${androidModel}` : 'vivo手机';
+  if (/SAMSUNG|SM-/.test(ua)) return androidModel ? `三星 ${androidModel}` : '三星手机';
+  if (/OnePlus/.test(ua)) return androidModel ? `一加 ${androidModel}` : '一加手机';
+  if (/realme/.test(uaLower)) return androidModel ? `realme ${androidModel}` : 'realme手机';
+
+  // ---------- 其他设备 ----------
+  if (/iPad/.test(ua)) return 'iPad平板';
+  if (/Windows|Macintosh/.test(ua)) return '电脑端访问';
+
+  // 兜底：安卓通用
+  return androidModel ? `安卓设备 ${androidModel}` : '安卓手机';
 }
 
-// 页面加载后自动显示
+// 页面加载显示
 window.addEventListener('DOMContentLoaded', function(){
   const device = getDeviceModel();
   document.getElementById('deviceModel').innerText = `设备：${device}`;
