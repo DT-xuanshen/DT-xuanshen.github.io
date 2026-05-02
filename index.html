@@ -97,21 +97,6 @@
         100% { transform: scale(1.1); }
     }
 
-    .weather-icon {
-        position: fixed;
-        top: 15px;
-        right: 15px;
-        width: 50px;
-        height: 50px;
-        z-index: 90;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 2rem;
-        background: rgba(20, 30, 60, 0.8);
-        border-radius: 50%;
-        box-shadow: 0 0 15px rgba(100, 181, 246, 0.5);
-    }
 
     .menu-btn {
         position: fixed;
@@ -1526,7 +1511,6 @@
 </head>
 <body>
 <div class="page-enter"><div class="enter-logo">今天你检查联盟代码绑定情况了吗</div></div>
-<div class="weather-icon" id="weatherIcon">☀️</div>
 <div class="overlay" id="overlay"></div>
 <div class="divination-modal" id="divinationModal"><div class="bamboo-tube" id="bambooTube"></div><div class="fortune-text" id="fortuneText"></div></div>
 <div class="assist-image-modal" id="assistImageModal"><img src="https://s41.ax1x.com/2026/03/28/pe1P9W4.png" alt="辅助服务图片" class="assist-image-content" id="assistImage"></div>
@@ -1677,7 +1661,10 @@
     <a href="#contact">DT联盟官方媒体</a>
 </div>
 
-<header><h1>DT联盟</h1><p>海纳百川｜部落不倒｜我们不散</p></header>
+<header>
+<div id="deviceModel" style="position:absolute; top:10px; right:15px; font-size:12px; opacity:0.8;"></div>
+<h1>DT联盟</h1>
+<p>海纳百川｜部落不倒｜我们不散</p></header>
 <div class="scroll-notice">
     <div class="notice-fixed">重要通知📢</div>
     <div class="scroll-wrap">
@@ -2434,7 +2421,6 @@ document.getElementById('goLoveSupport').addEventListener('click', () => {
         goToSlide(currentSlide);
     }, 3000);
 
-    const weatherIcons = ['☀️', '🌤️', '⛅', '🌧️', '❄️', '🌪️'];
     setInterval(() => {
         const randomIcon = weatherIcons[Math.floor(Math.random() * weatherIcons.length)];
         document.getElementById('weatherIcon').textContent = randomIcon;
@@ -3075,6 +3061,42 @@ function startAnswerQuiz(){
 }    // 初始化检查
     checkPetDegrade();
     updateFortuneDisplay(fortuneTotalCount);
+// ============== 自动识别手机型号 ==============
+function getDeviceModel() {
+  const ua = navigator.userAgent || '';
+  let model = '未知设备';
+
+  // iPhone
+  if(/iPhone/.test(ua)) model = 'iPhone';
+  // 华为
+  else if(/HUAWEI|huawei/.test(ua)) model = '华为手机';
+  // 小米
+  else if(/Mi|Redmi|Xiaomi/.test(ua)) model = '小米手机';
+  // OPPO
+  else if(/OPPO/.test(ua)) model = 'OPPO手机';
+  // vivo
+  else if(/vivo/.test(ua)) model = 'vivo手机';
+  // 荣耀
+  else if(/Honor|HONOR/.test(ua)) model = '荣耀手机';
+  // 三星
+  else if(/SAMSUNG|Samsung/.test(ua)) model = '三星手机';
+  // 一加
+  else if(/OnePlus/.test(ua)) model = '一加手机';
+  // 真我
+  else if(/realme/.test(ua)) model = 'realme手机';
+  // 电脑
+  else if(/Windows|Macintosh/.test(ua)) model = '电脑端访问';
+  // 平板
+  else if(/iPad/.test(ua)) model = 'iPad平板';
+
+  return model;
+}
+
+// 页面加载后自动显示
+window.addEventListener('DOMContentLoaded', function(){
+  const device = getDeviceModel();
+  document.getElementById('deviceModel').innerText = `设备：${device}`;
+});
 </script>
 </body>
 </html>
