@@ -2432,7 +2432,7 @@ document.getElementById('goLoveSupport').addEventListener('click', () => {
     
     // 点击金币按钮显示面板
     goldBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
+        e.stopPropagation(); // 阻止冒泡
         signPanel.classList.toggle('show');
         
         if(signPanel.classList.contains('show')){
@@ -2447,17 +2447,28 @@ document.getElementById('goLoveSupport').addEventListener('click', () => {
             answerBtn.style.display = 'none';
             inboxBtn.style.display = 'none';
             codeCenterBtn.style.display = 'none';
+            bagModal.style.display = 'none';
         }
     });
     
-    document.addEventListener('click', () => {
-        signPanel.classList.remove('show');
-        petBtnFloat.style.display = 'none';
-        bagBtn.style.display = 'none';
-        answerBtn.style.display = 'none';
-        inboxBtn.style.display = 'none';
-        codeCenterBtn.style.display = 'none';
-        bagModal.style.display = 'none';
+    // ✅ 修复：全局点击仅空白处隐藏，不阻断按钮功能
+    document.addEventListener('click', (e) => {
+        // 排除点击的元素：金币面板、功能按钮、弹窗
+        const excludeElements = [
+            signPanel, goldBtn, bagBtn, petBtnFloat, 
+            answerBtn, inboxBtn, codeCenterBtn, bagModal,
+            petModal, letterModal, chooseCurrencyModal
+        ];
+        const isClickExcluded = excludeElements.some(el => el.contains(e.target));
+        
+        if (!isClickExcluded) {
+            signPanel.classList.remove('show');
+            petBtnFloat.style.display = 'none';
+            bagBtn.style.display = 'none';
+            answerBtn.style.display = 'none';
+            inboxBtn.style.display = 'none';
+            codeCenterBtn.style.display = 'none';
+        }
     });
     
     // 每日签到：DT币+2，DT券+15
@@ -2490,7 +2501,8 @@ document.getElementById('goLoveSupport').addEventListener('click', () => {
     });
 
     // 兑换码中心
-    codeCenterBtn.addEventListener('click', () => {
+    codeCenterBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // 阻止冒泡
         const codeUsed = localStorage.getItem('codeUsed');
         if(codeUsed){
             alert('普通兑换码已使用！');
@@ -2519,11 +2531,9 @@ document.getElementById('goLoveSupport').addEventListener('click', () => {
         }
     });
 
-    document.getElementById('ruleBtn').addEventListener('click', () => {
-        document.getElementById('ruleModal').classList.add('show');
-    });
-
-    document.getElementById('inboxBtn').addEventListener('click', () => {
+    // ✅ 修复：收件箱按钮（添加阻止冒泡）
+    document.getElementById('inboxBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
         document.getElementById('letterModal').style.display = 'flex';
     });
 
@@ -2533,7 +2543,7 @@ document.getElementById('goLoveSupport').addEventListener('click', () => {
         document.getElementById('overlay').classList.add('show');
     });
 
-    // 我的背包
+    // ✅ 修复：我的背包按钮（完善阻止冒泡）
     bagBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         bagModal.style.display = 'flex';
@@ -2545,8 +2555,9 @@ document.getElementById('goLoveSupport').addEventListener('click', () => {
         alert('可消耗DT券参与占卜、宝箱等功能');
     });
 
-    // 我的神兽悬浮按钮
-    petBtnFloat.addEventListener('click', () => {
+    // ✅ 修复：我的神兽悬浮按钮（添加阻止冒泡）
+    petBtnFloat.addEventListener('click', (e) => {
+        e.stopPropagation();
         document.getElementById('petModal').style.display = 'flex';
         renderPet();
     });
