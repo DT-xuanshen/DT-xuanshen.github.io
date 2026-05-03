@@ -8,6 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <style>
+
     * {
         margin: 0;
         padding: 0;
@@ -806,112 +807,92 @@
         margin-top: 5px;
     }
 
-    .dt-shop-modal {
-        position: fixed;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        background: #121a30;
-        border: 2px solid #64b5f6;
-        border-radius: 12px;
-        width: 90%;
-        max-width: 380px;
-        padding: 20px;
-        z-index: 300;
-        display: none;
-    }
-    .dt-shop-modal.show {
-        display: block;
-    }
-    .shop-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 15px;
-    }
-    .shop-title {
-        font-size: 18px;
-        color: #ffd700;
-        font-weight: bold;
-    }
-    .current-gold {
-        font-size: 14px;
-        color: #ffd700;
-        font-weight: bold;
-    }
-    .rule-btn {
-        background: #283593;
-        color: #fff;
-        border: none;
-        border-radius: 4px;
-        padding: 4px 8px;
-        font-size: 12px;
-        cursor: pointer;
-    }
-    .shop-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-    }
-    .shop-item {
-        background: #1a237e;
-        border-radius: 8px;
-        padding: 12px 8px;
-        text-align: center;
-        font-size: 12px;
-        color: #fff;
-        min-height: 70px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid #283593;
-        cursor: pointer;
-    }
-    .shop-item.green {
-        background: #388e3c;
-        border-color: #2e7d32;
-    }
-    .shop-item.red {
-        background: #d32f2f;
-        border-color: #b71c1c;
-    }
-    .shop-item.gray {
-        background: #616161;
-        border-color: #424242;
-    }
-    .shop-item .price {
-        margin-top: 4px;
-        font-size: 10px;
-        opacity: 0.9;
-    }
-    .rule-modal {
-        position: fixed;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        background: #1a237e;
-        border-radius: 10px;
-        padding: 20px;
-        width: 90%;
-        max-width: 340px;
-        z-index: 301;
-        display: none;
-        color: #fff;
-        line-height: 1.7;
-        font-size: 14px;
-    }
-    .rule-modal.show {
-        display: block;
-    }
-    .close-rule {
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        color: #fff;
-        cursor: pointer;
-        font-size: 18px;
-    }
+.dt-shop-modal {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #121a30;
+    border: 2px solid #64b5f6;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 380px;
+    padding: 20px;
+    z-index: 300;
+    display: none;
+}
+.dt-shop-modal.show {
+    display: block;
+}
+/* 新增：顶部图片样式 */
+.shop-top-img {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: block;
+}
+.shop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.shop-title {
+    font-size: 18px;
+    color: #ffd700;
+    font-weight: bold;
+}
+.current-gold {
+    font-size: 14px;
+    color: #ffd700;
+    font-weight: bold;
+}
+.rule-btn {
+    background: #283593;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+.shop-item {
+    background: #1a237e;
+    border-radius: 8px;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 12px;
+    color: #fff;
+    min-height: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #283593;
+    cursor: pointer;
+}
+.shop-item.green {
+    background: #388e3c;
+    border-color: #2e7d32;
+}
+.shop-item.red {
+    background: #d32f2f;
+    border-color: #b71c1c;
+}
+.shop-item.gray {
+    background: #616161;
+    border-color: #424242;
+}
+.shop-item .price {
+    margin-top: 4px;
+    font-size: 10px;
+    opacity: 0.9;
+}
 
     .card-modal {
         position: fixed;
@@ -1794,10 +1775,12 @@
 </div>
 
 <div class="dt-shop-modal" id="dtShopModal">
+    <!-- 顶部插入图片 -->
+    <img src="https://s41.ax1x.com/2026/05/03/pe7dTPA.png" class="shop-top-img">
+    
     <div class="shop-header">
         <div class="shop-title">DT币兑换中心</div>
         <div class="current-gold" id="currentGoldShop">当前：0币</div>
-        <button class="rule-btn" id="ruleBtn">规则</button>
     </div>
     <div class="shop-grid">
         <div class="shop-item green" onclick="exchangeGoods(1)">免处罚卡<span class="price">50币/张</span></div>
@@ -1810,18 +1793,18 @@
         <div class="shop-item">虚位待发</div>
         <div class="shop-item">虚位待发</div>
     </div>
-    <span class="popup-close" onclick="closeShop()">×</span>
-</div>
 
-<div class="rule-modal" id="ruleModal">
-    <span class="close-rule" onclick="closeRule()">×</span>
-    <div>
-        ①DT币兑换后不可撤销<br>
-        ②DT币兑换的红色礼品并不是无限有货的，并非使用DT币兑换后就能无限兑换成功的，具体可兑换时请见DT联盟官方部落群内的部落管理通知<br>
-        ③参与本活动需时刻保持DT联盟的创作者代码在绑定期间，不能是未绑或兑换时刻再绑，否则联盟将会实行包括但不限于剥夺活动资格，DT币作废等措施<br>
-        ④本活动从2026.3.29日开始实行，在2026.4.15日前均为测试期，在测试期间DT币的获得途径，获得数量，兑换规则，兑换礼品等均有可能更改<br>
-        ⑤活动的最终解释权归DT联盟所有
+    <!-- 👇 新增：底部图片按钮（不重叠、自适应、居中） -->
+    <div style="text-align:center; margin-top:18px;">
+        <img 
+            src="https://s41.ax1x.com/2026/05/03/pe70s6x.png" 
+            style="width:100%; max-width:93px; border-radius:8px; cursor:pointer;"
+            onclick="window.open('https://docs.qq.com/doc/DUmZSb1dGcmlySnNo','_blank')"
+            alt="兑换记录查询"
+        >
     </div>
+
+    <span class="popup-close" onclick="closeShop()">×</span>
 </div>
 
 <div class="letter-modal" id="letterModal" style="display:none;">
