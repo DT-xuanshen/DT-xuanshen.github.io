@@ -1506,10 +1506,16 @@
 }
 .medal-name {
     font-size: 12px;
-    color: #ffd700;
     margin-top: 2px;
     white-space: nowrap;
     animation: blink 2s step-end infinite;
+    font-family: "KaiTi", "楷体", serif;
+    background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+    background-size: 500% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: colorChange 3s linear infinite, blink 2s step-end infinite;
 }
 @keyframes blink {
     0% { opacity: 1; }
@@ -1908,7 +1914,6 @@
         </div>
 <!-- 背包内勋章 -->
 <div class="medal-bag-item">
-    <div class="medal-bag-text">我的勋章</div>
     <img src="" id="medalBagImg" class="medal-bag-img">
 </div>
     </div>
