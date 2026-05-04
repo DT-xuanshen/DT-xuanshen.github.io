@@ -1488,6 +1488,55 @@
         background: #64b5f6;
         color: #fff;
     }
+/* ==================== 勋章系统样式 ==================== */
+/* 右上角勋章 */
+.medal-top {
+    position: fixed;
+    top: 12px;
+    right: 15px;
+    z-index: 1000;
+    text-align: center;
+}
+.medal-img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+}
+.medal-name {
+    font-size: 12px;
+    color: #ffd700;
+    margin-top: 2px;
+    white-space: nowrap;
+    animation: blink 2s step-end infinite;
+}
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* 背包内勋章展示条 */
+.medal-bag-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #283593;
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin-top: 12px;
+}
+.medal-bag-text {
+    font-size: 18px;
+    color: #fff;
+    font-weight: bold;
+}
+.medal-bag-img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+}
 </style>
 </head>
 <body>
@@ -1624,6 +1673,11 @@
 </div>
 
 <div class="menu-btn" id="menuBtn"><span></span><span></span><span></span></div>
+<!-- 右上角勋章 -->
+<div class="medal-top">
+    <img src="" id="medalTopImg" class="medal-img">
+    <div id="medalTopName" class="medal-name"></div>
+</div>
 <div class="pen-btn" id="penBtn">📋</div>
 <div class="new-message-bubble" id="newMessageBubble">新留言</div>
 
@@ -1743,15 +1797,14 @@
         <h2>✨联盟好运宝箱
             <button class="chest-rule-btn" id="chestRuleBtn">规则</button>
         </h2>
-        <div class="chest-container">
-            <div class="chest" id="chestBtn">
-                <div class="chest-light"></div>
-                <div class="chest-lid"></div>
-                <div class="chest-body"></div>
-                <div class="chest-lock"></div>
-            </div>
-            <div class="chest-text">10DT币/次 或 88DT券/次</div>
-        </div>
+<div class="chest-container">
+    <div class="chest" id="chestBtn">
+        <!-- 直接用图片宝箱，尺寸和原来一致 -->
+        <img src="https://s41.ax1x.com/2026/05/04/peHVUSI.png" 
+             style="width:140px; height:110px; object-fit:contain; border-radius:8px;">
+    </div>
+    <div class="chest-text">10DT币/次 或 88DT券/次</div>
+</div>
     </div>
 
     <div class="section" id="contact">
@@ -1853,6 +1906,11 @@
             <div class="ticket-icon">🎟️</div>
             <div class="ticket-text" id="ticketText">DT券：0 张</div>
         </div>
+<!-- 背包内勋章 -->
+<div class="medal-bag-item">
+    <div class="medal-bag-text">我的勋章</div>
+    <img src="" id="medalBagImg" class="medal-bag-img">
+</div>
     </div>
 </div>
 
@@ -1937,11 +1995,12 @@
     // 当前操作类型：fortune / chest
     let currentAction = '';
 
-    function updateAllGoldUI() {
-        document.getElementById('goldCount').textContent = `DT币数量：${goldCount.toFixed(1)}`;
-        document.getElementById('currentGoldShop').textContent = `当前：${goldCount.toFixed(1)}币`;
-        localStorage.setItem('dtGold', goldCount);
-    }
+function updateAllGoldUI() {
+    document.getElementById('goldCount').textContent = `DT币数量：${goldCount.toFixed(1)}`;
+    document.getElementById('currentGoldShop').textContent = `当前：${goldCount.toFixed(1)}币`;
+    localStorage.setItem('dtGold', goldCount);
+    updateMedalUI(); // 实时刷新勋章
+}
 
     function updateTicketUI() {
         document.getElementById('ticketText').textContent = `DT券：${ticketCount} 张`;
@@ -3117,6 +3176,37 @@ function getDeviceModel() {
 window.addEventListener('DOMContentLoaded', function(){
   const device = getDeviceModel();
   document.getElementById('deviceModel').innerText = `设备：${device}`;
+});
+// ==================== 勋章系统核心 ====================
+function getMedalInfo(gold) {
+    if (gold <= 10) {
+        return { name: "市井小民", img: "https://s41.ax1x.com/2026/05/04/peHkqpt.png" };
+    } else if (gold <= 100) {
+        return { name: "奔走行商", img: "https://s41.ax1x.com/2026/05/04/peHkvnS.png" };
+    } else if (gold <= 300) {
+        return { name: "银资渐丰", img: "https://s41.ax1x.com/2026/05/04/peHkL1P.png" };
+    } else if (gold <= 800) {
+        return { name: "乡里富户", img: "https://s41.ax1x.com/2026/05/04/peHkx0g.png" };
+    } else if (gold <= 2000) {
+        return { name: "一方乡绅", img: "https://s41.ax1x.com/2026/05/04/peHkO6f.png" };
+    } else if (gold <= 5000) {
+        return { name: "豪商巨贾", img: "https://s41.ax1x.com/2026/05/04/peHkz7Q.png" };
+    } else {
+        return { name: "天下财尊", img: "https://s41.ax1x.com/2026/05/04/peHkXX8.png" };
+    }
+}
+
+// 更新所有勋章显示
+function updateMedalUI() {
+    const medal = getMedalInfo(goldCount);
+    document.getElementById("medalTopImg").src = medal.img;
+    document.getElementById("medalTopName").innerText = medal.name;
+    document.getElementById("medalBagImg").src = medal.img;
+}
+
+// 页面加载时初始化勋章
+window.addEventListener('DOMContentLoaded', function() {
+    updateMedalUI();
 });
 </script>
 </body>
