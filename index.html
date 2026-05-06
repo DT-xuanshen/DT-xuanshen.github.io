@@ -1921,26 +1921,27 @@
 
 <!-- 货币选择弹窗 -->
 <div class="choose-currency-modal" id="chooseCurrencyModal">
+  <div style="width:100%; display:flex; flex-direction:column; align-items:center;">
     <div class="choose-box">
-        <!-- 新增：右上角关闭按钮 -->
-        <span class="close-choose-modal" onclick="closeAllPopups()" style="
-            position: absolute;
-            top: 12px;
-            right: 15px;
-            font-size: 20px;
-            color: #fff;
-            cursor: pointer;
-            z-index: 10;
-        ">×</span>
-        
-        <div class="choose-title" id="chooseTitle">请选择消耗货币</div>
-        <div class="currency-btns">
-            <button class="currency-btn gold-btn-choose" id="useGoldCurrency">DT币</button>
-            <button class="currency-btn ticket-btn-choose" id="useTicketCurrency">DT券</button>
-        </div>
+      <div class="choose-title" id="chooseTitle">请选择消耗货币</div>
+      <div class="currency-btns">
+        <button class="currency-btn gold-btn-choose" id="useGoldCurrency">DT币</button>
+        <button class="currency-btn ticket-btn-choose" id="useTicketCurrency">DT券</button>
+      </div>
     </div>
+    <!-- 取消按钮：独立在弹窗正下方 -->
+    <div onclick="closeAllPopups()" style="
+      width:80px; height:38px;
+      background:#ff4757; color:#fff;
+      border-radius:6px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:22px; font-weight:bold;
+      cursor:pointer;
+      box-shadow:0 0 10px rgba(255,71,87,0.6);
+      margin-top:20px;
+    ">×</div>
+  </div>
 </div>
-
 <script>
     const firebaseConfig = {
         apiKey: "YOUR_REAL_API_KEY",
