@@ -3335,7 +3335,7 @@ function hasUserName() {
 // 首次设置名字（永久不可改）
 function promptSetUserName() {
     if (hasUserName()) return true;
-    const name = prompt("📛 请设置你的【数据主体名称】\n用于标识你的数据，永久不可更改！");
+    const name = prompt("📛 请设置你的【数据主体名称】\n如是恢复数据，请输入您的原用名称！");
     if (!name || name.trim() === "") {
         alert("❌ 名称不能为空！");
         return false;
