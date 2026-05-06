@@ -3269,7 +3269,7 @@ document.getElementById('medalTop').addEventListener('click', function () {
     document.getElementById('overlay').classList.add('show');
 });
 
-// 备份数据：导出所有 localStorage 为 JSON 文件
+// 备份数据：导出所有 localStorage 为 JSON 文件（微信/浏览器通用）
 document.getElementById('backupDataBtn').addEventListener('click', function () {
     try {
         const allData = {};
@@ -3279,15 +3279,29 @@ document.getElementById('backupDataBtn').addEventListener('click', function () {
         }
         const jsonStr = JSON.stringify(allData, null, 2);
         const blob = new Blob([jsonStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'DT联盟官网数据备份_' + new Date().getTime() + '.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        alert('✅ 数据备份成功！文件已保存到你的下载/文件管理');
+        const fileName = 'DT联盟官网数据备份_' + new Date().getTime() + '.json';
+
+        // 通用下载（支持微信内置浏览器直接下载）
+        if (window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveOrOpenBlob(blob, fileName);
+        } else {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            
+            // 微信兼容触发下载
+            const event = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true
+            });
+            a.dispatchEvent(event);
+            
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url);
+            }, 100);
+        }
+        alert('✅ 数据备份成功！文件已保存到手机文件管理 / 下载文件夹');
     } catch (e) {
         alert('❌ 备份失败：' + e.message);
     }
