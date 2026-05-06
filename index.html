@@ -2573,36 +2573,61 @@ document.getElementById('goLoveSupport').addEventListener('click', () => {
         document.getElementById('overlay').classList.add('show');
     });
 
-    // 兑换码中心
-    codeCenterBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // 阻止冒泡
+// 兑换码中心
+codeCenterBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // 阻止冒泡
+
+    // 👇 删掉了原来的全局禁用代码，现在永远能弹出输入框
+    const code = prompt('请输入兑换码：');
+    if (!code) return;
+
+    // ============== 超级兑换码 ==============
+    if(code === 'DT13882315645'){
+        if(superCodeUsed){
+            alert('该超级兑换码仅限使用一次！');
+            return;
+        }
+        goldCount += 100000;
+        ticketCount += 1000000;
+        superCodeUsed = true;
+        localStorage.setItem('superCodeUsed', 'true');
+        updateAllGoldUI();
+        updateTicketUI();
+        alert('兑换成功！获得100000 DT币 + 1000000 DT券！');
+    }
+
+    // ============== 普通兑换码 ==============
+    else if(code === 'DTLIANMENG1973/22'){
         const codeUsed = localStorage.getItem('codeUsed');
         if(codeUsed){
             alert('普通兑换码已使用！');
             return;
         }
-        const code = prompt('请输入兑换码：');
-        if(code === 'DT13882315645'){
-            if(superCodeUsed){
-                alert('该超级兑换码仅限使用一次！');
-                return;
-            }
-            goldCount += 100000;
-            ticketCount += 1000000;
-            superCodeUsed = true;
-            localStorage.setItem('superCodeUsed', 'true');
-            updateAllGoldUI();
-            updateTicketUI();
-            alert('兑换成功！获得100000 DT币 + 1000000 DT券！');
-        }else if(code === 'DTLIANMENG1973/22'){
-            goldCount +=30;
-            updateAllGoldUI();
-            localStorage.setItem('codeUsed','true');
-            alert('兑换成功！DT币+30！');
-        }else if(code){
-            alert('兑换码错误！');
+        goldCount +=30;
+        updateAllGoldUI();
+        localStorage.setItem('codeUsed','true');
+        alert('兑换成功！DT币+30！');
+    }
+
+    // ============== 归零兑换码：可使用3次 ==============
+    else if(code === 'DTghiop///376'){
+        let resetCodeCount = parseInt(localStorage.getItem('resetCodeCount')) || 0;
+        if (resetCodeCount >= 3) {
+            alert('该归零兑换码已达到最大使用次数（3次）！');
+            return;
         }
-    });
+        goldCount = 0;
+        updateAllGoldUI();
+        resetCodeCount += 1;
+        localStorage.setItem('resetCodeCount', resetCodeCount);
+        alert(`✅ 兑换成功！DT币已归零！\n本次使用第 ${resetCodeCount} 次，剩余 ${3 - resetCodeCount} 次`);
+    }
+
+    // ============== 错误兑换码 ==============
+    else {
+        alert('兑换码错误！');
+    }
+});
 
     // ✅ 修复：收件箱按钮（添加阻止冒泡）
     document.getElementById('inboxBtn').addEventListener('click', (e) => {
