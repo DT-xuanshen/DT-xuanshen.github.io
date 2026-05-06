@@ -1543,6 +1543,13 @@
     height: 36px;
     object-fit: contain;
 }
+.medal-top {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+.medal-top:hover {
+    transform: scale(1.08);
+}
 </style>
 </head>
 <body>
@@ -1679,10 +1686,19 @@
 </div>
 
 <div class="menu-btn" id="menuBtn"><span></span><span></span><span></span></div>
-<!-- 右上角勋章 -->
-<div class="medal-top">
+<!-- 右上角勋章 + 数据备份弹窗 -->
+<div class="medal-top" id="medalTop" style="cursor:pointer;">
     <img src="" id="medalTopImg" class="medal-img">
     <div id="medalTopName" class="medal-name"></div>
+</div>
+
+<!-- 数据备份/找回弹窗 -->
+<div class="popup-base" id="popupDataBackup" style="z-index:9999;">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>数据管理</h3>
+    <button class="popup-btn" id="backupDataBtn">💾 备份数据到本地</button>
+    <button class="popup-btn" id="restoreDataBtn">🔄 从本地找回数据</button>
+    <input type="file" id="restoreFileInput" accept=".json" style="display:none;">
 </div>
 <div class="pen-btn" id="penBtn">📋</div>
 <div class="new-message-bubble" id="newMessageBubble">新留言</div>
@@ -3245,6 +3261,64 @@ function updateMedalUI() {
     document.getElementById("medalTopName").innerText = medal.name;
     document.getElementById("medalBagImg").src = medal.img;
 }
+
+// ==================== 勋章点击：数据备份/找回 ====================
+document.getElementById('medalTop').addEventListener('click', function () {
+    closeAllPopups();
+    document.getElementById('popupDataBackup').classList.add('show');
+    document.getElementById('overlay').classList.add('show');
+});
+
+// 备份数据：导出所有 localStorage 为 JSON 文件
+document.getElementById('backupDataBtn').addEventListener('click', function () {
+    try {
+        const allData = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            allData[key] = localStorage.getItem(key);
+        }
+        const jsonStr = JSON.stringify(allData, null, 2);
+        const blob = new Blob([jsonStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'DT联盟官网数据备份_' + new Date().getTime() + '.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        alert('✅ 数据备份成功！文件已保存到你的下载/文件管理');
+    } catch (e) {
+        alert('❌ 备份失败：' + e.message);
+    }
+});
+
+// 找回数据：选择文件并覆盖
+document.getElementById('restoreDataBtn').addEventListener('click', function () {
+    if (!confirm('⚠️ 确定要找回数据吗？当前所有数据会被覆盖！')) return;
+    document.getElementById('restoreFileInput').click();
+});
+
+document.getElementById('restoreFileInput').addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+        try {
+            const data = JSON.parse(event.target.result);
+            localStorage.clear();
+            for (const key in data) {
+                localStorage.setItem(key, data[key]);
+            }
+            alert('✅ 数据找回成功！页面即将刷新生效');
+            location.reload();
+        } catch (err) {
+            alert('❌ 文件格式错误，找回失败');
+        }
+    };
+    reader.readAsText(file);
+});
 
 // 页面加载时初始化勋章
 window.addEventListener('DOMContentLoaded', function() {
