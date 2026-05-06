@@ -3426,68 +3426,102 @@ async function exportDataCode() {
 async function importDataCode() {
     await promptSetUserName();
 
-    const code = prompt("请粘贴DT数据码：");
-    if (!code) return;
+    // 👇 手机浏览器专用输入弹窗（替换原来的 prompt）
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position:fixed; top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.95); z-index:999999;
+        display:flex; justify-content:center; align-items:center;
+        flex-direction:column; gap:15px; padding:20px;
+    `;
 
-    if (!code.startsWith("DT") || !code.endsWith("CODE")) {
-        alert("❌ 数据码格式错误！");
-        return;
-    }
+    const title = document.createElement('div');
+    title.style.color = '#fff';
+    title.style.fontSize = '18px';
+    title.style.textAlign = 'center';
+    title.innerText = '📥 请粘贴你的 DT 数据码';
 
-    const encrypted = code.slice(2, -4);
-    const json = decrypt(encrypted);
-    if (!json) {
-        alert("❌ 数据码已损坏！");
-        return;
-    }
+    const input = document.createElement('input');
+    input.style.cssText = `
+        width:85%; max-width:320px; padding:14px;
+        border:none; border-radius:8px; font-size:16px;
+    `;
+    input.placeholder = '粘贴 DT 开头 CODE 结尾的数据码';
 
-    try {
-        const data = JSON.parse(json);
-        const dataUserName = data.userName || "未知用户";
-        const localUserName = getUserName();
+    const btn = document.createElement('button');
+    btn.style.cssText = `
+        padding:12px 30px; border:none; border-radius:8px;
+        background:#64b5f6; color:#fff; font-size:16px; font-weight:bold;
+    `;
+    btn.innerText = '确认恢复';
 
-        // 保存导入来源名称
-        localStorage.setItem("lastImportUserName", dataUserName);
+    modal.append(title, input, btn);
+    document.body.appendChild(modal);
 
-        if (dataUserName !== localUserName) {
-            const confirmReplace = confirm(
-                "⚠️ 数据归属不一致！\n" +
-                "你的主体：" + localUserName + "\n" +
-                "数据主体：" + dataUserName + "\n\n" +
-                "是否强行恢复？（可能覆盖他人数据）"
-            );
-            if (!confirmReplace) {
-                alert("❌ 已取消恢复");
-                return;
-            }
+    btn.onclick = async () => {
+        const code = input.value.trim();
+        if (!code) {
+            alert('❌ 请输入数据码！');
+            return;
         }
 
-        // ======================
-        // 【关键】只有走到这里，才算真正成功恢复
-        // ======================
-        if (!checkAndUseLimit("data_code_import")) return;
+        document.body.removeChild(modal);
 
-        // 恢复数据
-        localStorage.setItem("dtGold", data.dtGold || "0");
-        localStorage.setItem("dtTicket", data.dtTicket || "0");
-        localStorage.setItem("petLevel", data.petLevel || "0");
-        localStorage.setItem("petFeedCount", data.petFeedCount || "0");
-        localStorage.setItem("lastFeedDate", data.lastFeedDate || "");
-        localStorage.setItem("todayEggGot", data.todayEggGot || "false");
-        localStorage.setItem("superCodeUsed", data.superCodeUsed || "false");
-        localStorage.setItem("codeUsed", data.codeUsed || "false");
-        localStorage.setItem("resetCodeCount", data.resetCodeCount || "0");
-        localStorage.setItem("chestOpenCount", data.chestOpenCount || "0");
-        localStorage.setItem("fortuneTotalCount", data.fortuneTotalCount || "0");
-        localStorage.setItem("dtLastSign", data.dtLastSign || "");
-        localStorage.setItem("hasResetGoldOnce", data.hasResetGoldOnce || "false");
+        if (!code.startsWith("DT") || !code.endsWith("CODE")) {
+            alert("❌ 数据码格式错误！");
+            return;
+        }
 
-        localStorage.setItem("lastImportTime", new Date().toLocaleString());
-        alert("✅ 数据恢复成功！页面即将刷新");
-        location.reload();
-    } catch (e) {
-        alert("❌ 数据解析失败！");
-    }
+        const encrypted = code.slice(2, -4);
+        const json = decrypt(encrypted);
+        if (!json) {
+            alert("❌ 数据码已损坏！");
+            return;
+        }
+
+        try {
+            const data = JSON.parse(json);
+            const dataUserName = data.userName || "未知用户";
+            const localUserName = getUserName();
+
+            localStorage.setItem("lastImportUserName", dataUserName);
+
+            if (dataUserName !== localUserName) {
+                const confirmReplace = confirm(
+                    "⚠️ 数据归属不一致！\n" +
+                    "你的主体：" + localUserName + "\n" +
+                    "数据主体：" + dataUserName + "\n\n" +
+                    "是否强行恢复？（可能覆盖他人数据）"
+                );
+                if (!confirmReplace) {
+                    alert("❌ 已取消恢复");
+                    return;
+                }
+            }
+
+            if (!checkAndUseLimit("data_code_import")) return;
+
+            localStorage.setItem("dtGold", data.dtGold || "0");
+            localStorage.setItem("dtTicket", data.dtTicket || "0");
+            localStorage.setItem("petLevel", data.petLevel || "0");
+            localStorage.setItem("petFeedCount", data.petFeedCount || "0");
+            localStorage.setItem("lastFeedDate", data.lastFeedDate || "");
+            localStorage.setItem("todayEggGot", data.todayEggGot || "false");
+            localStorage.setItem("superCodeUsed", data.superCodeUsed || "false");
+            localStorage.setItem("codeUsed", data.codeUsed || "false");
+            localStorage.setItem("resetCodeCount", data.resetCodeCount || "0");
+            localStorage.setItem("chestOpenCount", data.chestOpenCount || "0");
+            localStorage.setItem("fortuneTotalCount", data.fortuneTotalCount || "0");
+            localStorage.setItem("dtLastSign", data.dtLastSign || "");
+            localStorage.setItem("hasResetGoldOnce", data.hasResetGoldOnce || "false");
+
+            localStorage.setItem("lastImportTime", new Date().toLocaleString());
+            alert("✅ 数据恢复成功！页面即将刷新");
+            location.reload();
+        } catch (e) {
+            alert("❌ 数据解析失败！");
+        }
+    };
 }
 
 // ============== 刷新展示信息 ==============
