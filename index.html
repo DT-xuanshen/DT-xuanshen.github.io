@@ -1692,13 +1692,16 @@
     <div id="medalTopName" class="medal-name"></div>
 </div>
 
-<!-- 数据备份/找回弹窗 -->
-<div class="popup-base" id="popupDataBackup" style="z-index:9999;">
+<!-- DT数据码 导出/恢复 弹窗 -->
+<div class="popup-base" id="popupDataCode" style="z-index:9999;">
     <span class="popup-close" onclick="closeAllPopups()">×</span>
-    <h3>数据管理</h3>
-    <button class="popup-btn" id="backupDataBtn">💾 备份数据到本地</button>
-    <button class="popup-btn" id="restoreDataBtn">🔄 从本地找回数据</button>
-    <input type="file" id="restoreFileInput" accept=".json" style="display:none;">
+    <h3>DT数据码管理</h3>
+    <button class="popup-btn" id="exportDataCodeBtn">📤 导出DT数据码</button>
+    <button class="popup-btn" id="importDataCodeBtn">📥 恢复DT数据码</button>
+<div style="margin-top:15px; padding:10px; background:#283593; border-radius:6px; font-size:12px; line-height:1.8;">
+    <div id="lastExportInfo">上次导出：无</div>
+    <div id="lastImportInfo">上次恢复：无</div>
+</div>
 </div>
 <div class="pen-btn" id="penBtn">📋</div>
 <div class="new-message-bubble" id="newMessageBubble">新留言</div>
@@ -3262,68 +3265,268 @@ function updateMedalUI() {
     document.getElementById("medalBagImg").src = medal.img;
 }
 
-// ==================== 勋章点击：数据备份/找回 ====================
+
+// ==========================================
+// DT数据码 加密导出 / 恢复 系统（30天3次限制 + 主体名永久绑定）
+// ==========================================
+const DATA_CODE_KEY = "DT_ALLIANCE_SECURE_KEY_2025";
+
+// 通用加密
+function encrypt(text) {
+    try {
+        return btoa(unescape(encodeURIComponent(text)));
+    } catch (e) {
+        return "";
+    }
+}
+
+// 通用解密
+function decrypt(text) {
+    try {
+        return decodeURIComponent(escape(atob(text)));
+    } catch (e) {
+        return "";
+    }
+}
+
+// 获取当前30天周期的key
+function get30DayKey(prefix) {
+    const now = Date.now();
+    const month = Math.floor(now / (30 * 24 * 60 * 60 * 1000));
+    return prefix + "_" + month;
+}
+
+// 检查次数：导出10次/30天，恢复5次/30天
+function checkAndUseLimit(prefix) {
+    const key = get30DayKey(prefix);
+    let count = parseInt(localStorage.getItem(key) || "0");
+    
+    // 导出：10次限制
+    if(prefix === "data_code_export"){
+        if (count >= 10) {
+            alert("❌ 30天内仅限导出10次，已达上限！");
+            return false;
+        }
+    }
+    // 恢复：5次限制
+    else if(prefix === "data_code_import"){
+        if (count >= 5) {
+            alert("❌ 30天内仅限恢复5次，已达上限！");
+            return false;
+        }
+    }
+    
+    count++;
+    localStorage.setItem(key, count);
+    return true;
+}
+
+// ============== 主体名永久绑定 ==============
+function getUserName() {
+    return localStorage.getItem("dt_data_user_name") || "";
+}
+function setUserName(name) {
+    localStorage.setItem("dt_data_user_name", name);
+}
+function hasUserName() {
+    return !!getUserName();
+}
+
+// 首次设置名字（永久不可改）
+function promptSetUserName() {
+    if (hasUserName()) return true;
+    const name = prompt("📛 请设置你的【数据主体名称】\n用于标识你的数据，永久不可更改！");
+    if (!name || name.trim() === "") {
+        alert("❌ 名称不能为空！");
+        return false;
+    }
+    if (name.length > 12) {
+        alert("❌ 名称最长12个字符！");
+        return false;
+    }
+    setUserName(name.trim());
+    alert("✅ 名称设置成功！永久生效：" + name.trim());
+    refreshDataCodeInfo();
+    return true;
+}
+
+// ============== 导出数据码 ==============
+function exportDataCode() {
+    if (!promptSetUserName()) return;
+    if (!checkAndUseLimit("data_code_export")) return;
+
+    const data = {
+        userName: getUserName(),
+        dtGold: localStorage.getItem("dtGold") || "0",
+        dtTicket: localStorage.getItem("dtTicket") || "0",
+        petLevel: localStorage.getItem("petLevel") || "0",
+        petFeedCount: localStorage.getItem("petFeedCount") || "0",
+        lastFeedDate: localStorage.getItem("lastFeedDate") || "",
+        todayEggGot: localStorage.getItem("todayEggGot") || "false",
+        superCodeUsed: localStorage.getItem("superCodeUsed") || "false",
+        codeUsed: localStorage.getItem("codeUsed") || "false",
+        resetCodeCount: localStorage.getItem("resetCodeCount") || "0",
+        chestOpenCount: localStorage.getItem("chestOpenCount") || "0",
+        fortuneTotalCount: localStorage.getItem("fortuneTotalCount") || "0",
+        dtLastSign: localStorage.getItem("dtLastSign") || "",
+        hasResetGoldOnce: localStorage.getItem("hasResetGoldOnce") || "false",
+        exportDevice: getDeviceModel(),
+        exportTime: new Date().toLocaleString()
+    };
+
+    const json = JSON.stringify(data);
+    const encrypted = encrypt(json);
+    const code = "DT" + encrypted + "CODE";
+
+    navigator.clipboard.writeText(code).then(() => {
+        alert("✅ 数据码已复制！\n【主体】" + getUserName() + "\n" + code);
+    });
+
+    localStorage.setItem("lastExportTime", new Date().toLocaleString());
+    localStorage.setItem("lastExportDevice", data.exportDevice);
+    refreshDataCodeInfo();
+}
+
+// ============== 恢复数据码 ==============
+function importDataCode() {
+    if (!promptSetUserName()) return;
+    if (!checkAndUseLimit("data_code_import")) return;
+
+    const code = prompt("请粘贴DT数据码：");
+    if (!code) return;
+
+    if (!code.startsWith("DT") || !code.endsWith("CODE")) {
+        alert("❌ 数据码格式错误！");
+        return;
+    }
+
+    const encrypted = code.slice(2, -4);
+    const json = decrypt(encrypted);
+    if (!json) {
+        alert("❌ 数据码已损坏！");
+        return;
+    }
+
+    try {
+        const data = JSON.parse(json);
+        const dataUserName = data.userName || "未知用户";
+        const localUserName = getUserName();
+
+        // 保存导入来源名称
+        localStorage.setItem("lastImportUserName", dataUserName);
+
+        if (dataUserName !== localUserName) {
+            const confirmReplace = confirm(
+                "⚠️ 数据归属不一致！\n" +
+                "你的主体：" + localUserName + "\n" +
+                "数据主体：" + dataUserName + "\n\n" +
+                "是否强行恢复？（可能覆盖他人数据）"
+            );
+            if (!confirmReplace) {
+                alert("❌ 已取消恢复");
+                return;
+            }
+        }
+
+        // 恢复数据
+        localStorage.setItem("dtGold", data.dtGold || "0");
+        localStorage.setItem("dtTicket", data.dtTicket || "0");
+        localStorage.setItem("petLevel", data.petLevel || "0");
+        localStorage.setItem("petFeedCount", data.petFeedCount || "0");
+        localStorage.setItem("lastFeedDate", data.lastFeedDate || "");
+        localStorage.setItem("todayEggGot", data.todayEggGot || "false");
+        localStorage.setItem("superCodeUsed", data.superCodeUsed || "false");
+        localStorage.setItem("codeUsed", data.codeUsed || "false");
+        localStorage.setItem("resetCodeCount", data.resetCodeCount || "0");
+        localStorage.setItem("chestOpenCount", data.chestOpenCount || "0");
+        localStorage.setItem("fortuneTotalCount", data.fortuneTotalCount || "0");
+        localStorage.setItem("dtLastSign", data.dtLastSign || "");
+        localStorage.setItem("hasResetGoldOnce", data.hasResetGoldOnce || "false");
+
+        localStorage.setItem("lastImportTime", new Date().toLocaleString());
+        alert("✅ 数据恢复成功！页面即将刷新");
+        location.reload();
+    } catch (e) {
+        alert("❌ 数据解析失败！");
+    }
+}
+
+// ============== 刷新展示信息 ==============
+function refreshDataCodeInfo() {
+    const userName = getUserName() || "未设置";
+    const lastImportUserName = localStorage.getItem("lastImportUserName") || "无";
+
+    document.getElementById("lastExportInfo").innerText =
+        "上次导出：" + (localStorage.getItem("lastExportTime") || "无") +
+        "｜设备：" + (localStorage.getItem("lastExportDevice") || "无");
+
+    document.getElementById("lastImportInfo").innerText =
+        "上次恢复：" + (localStorage.getItem("lastImportTime") || "无") +
+        "｜来源主体：" + lastImportUserName;
+
+    document.getElementById("currentDeviceInfo").innerText =
+        "当前登录设备：" + getDeviceModel() +
+        "｜我的主体：" + userName;
+}
+// 刷新信息展示（按你要求的顺序 + 每行单独显示 + 主体不一致检测）
+function refreshDataCodeInfo() {
+    const currentUserName = getUserName() || "未设置";
+    const lastImportUserName = localStorage.getItem("lastImportUserName") || "无";
+    const lastExportTime = localStorage.getItem("lastExportTime") || "无";
+    const lastExportDevice = localStorage.getItem("lastExportDevice") || "无";
+    const lastImportTime = localStorage.getItem("lastImportTime") || "无";
+    const currentDevice = getDeviceModel();
+
+    // 按你要求的顺序，每行单独显示
+    document.getElementById("lastExportInfo").innerText = "上次导出时间：" + lastExportTime;
+    document.getElementById("lastExportInfo").innerHTML += "<br>上次导出设备：" + lastExportDevice;
+    document.getElementById("lastExportInfo").innerHTML += "<br>当前登录设备：" + currentDevice;
+    
+    document.getElementById("lastImportInfo").innerText = "上次恢复时间：" + lastImportTime;
+    document.getElementById("lastImportInfo").innerHTML += "<br>来源主体：" + lastImportUserName;
+    document.getElementById("lastImportInfo").innerHTML += "<br>目前主体：" + currentUserName;
+
+    // 清空警告
+    const warningEl = document.getElementById("userWarning");
+    if (warningEl) warningEl.remove();
+
+    // 检测：来源主体 != 目前主体
+    if (lastImportUserName !== "无" && lastImportUserName !== currentUserName) {
+        // 红色警告
+        const warn = document.createElement("div");
+        warn.id = "userWarning";
+        warn.style.color = "#ff4757";
+        warn.style.fontWeight = "bold";
+        warn.style.marginTop = "10px";
+        warn.innerText = "警告！您的实际主体与恢复数据的来源主体不一致！";
+        document.getElementById("popupDataCode").appendChild(warn);
+
+        // 自动重置 DT币 & DT券 为 10
+        goldCount = 10;
+        ticketCount = 10;
+        localStorage.setItem("dtGold", goldCount);
+        localStorage.setItem("dtTicket", ticketCount);
+        updateAllGoldUI();
+        updateTicketUI();
+    }
+}
+
+// 勋章点击打开弹窗
 document.getElementById('medalTop').addEventListener('click', function () {
     closeAllPopups();
-    document.getElementById('popupDataBackup').classList.add('show');
+    refreshDataCodeInfo();
+    document.getElementById('popupDataCode').classList.add('show');
     document.getElementById('overlay').classList.add('show');
 });
 
-// 备份数据：微信内置浏览器直接下载，不跳转、数据不变
-document.getElementById('backupDataBtn').addEventListener('click', function () {
-    try {
-        const allData = {};
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            allData[key] = localStorage.getItem(key);
-        }
-        const jsonStr = JSON.stringify(allData, null, 2);
-        const fileName = 'DT联盟官网数据备份_' + new Date().getTime() + '.json';
-
-        // ✅ 微信专用 Base64 下载（不会拦截，直接保存到文件管理）
-        const a = document.createElement('a');
-        a.href = 'data:application/json;base64,' + btoa(unescape(encodeURIComponent(jsonStr)));
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        alert('✅ 微信备份成功！文件已保存到：\n手机文件管理 → 下载 / Download 文件夹');
-    } catch (e) {
-        alert('❌ 备份失败：' + e.message);
-    }
-});
-
-// 找回数据：选择文件并覆盖
-document.getElementById('restoreDataBtn').addEventListener('click', function () {
-    if (!confirm('⚠️ 确定要找回数据吗？当前所有数据会被覆盖！')) return;
-    document.getElementById('restoreFileInput').click();
-});
-
-document.getElementById('restoreFileInput').addEventListener('change', function (e) {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function (event) {
-        try {
-            const data = JSON.parse(event.target.result);
-            localStorage.clear();
-            for (const key in data) {
-                localStorage.setItem(key, data[key]);
-            }
-            alert('✅ 数据找回成功！页面即将刷新生效');
-            location.reload();
-        } catch (err) {
-            alert('❌ 文件格式错误，找回失败');
-        }
-    };
-    reader.readAsText(file);
-});
+// 按钮绑定
+document.getElementById("exportDataCodeBtn").onclick = exportDataCode;
+document.getElementById("importDataCodeBtn").onclick = importDataCode;
 
 // 页面加载时初始化勋章
 window.addEventListener('DOMContentLoaded', function() {
     updateMedalUI();
+    refreshDataCodeInfo();
 });
 </script>
 </body>
