@@ -1922,6 +1922,17 @@
 <!-- 货币选择弹窗 -->
 <div class="choose-currency-modal" id="chooseCurrencyModal">
     <div class="choose-box">
+        <!-- 新增：右上角关闭按钮 -->
+        <span class="close-choose-modal" onclick="closeAllPopups()" style="
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            font-size: 20px;
+            color: #fff;
+            cursor: pointer;
+            z-index: 10;
+        ">×</span>
+        
         <div class="choose-title" id="chooseTitle">请选择消耗货币</div>
         <div class="currency-btns">
             <button class="currency-btn gold-btn-choose" id="useGoldCurrency">DT币</button>
@@ -2984,7 +2995,7 @@ function startAnswerQuiz(){
             answer: '100w金币'
         },
         {
-            title: '复合机械塔在多少本解锁？',
+            title: '合成加农炮在多少本解锁？',
             options: ['15本', '16本', '17本', '18本'],
             answer: '17本'
         },
