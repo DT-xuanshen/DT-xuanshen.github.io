@@ -2122,7 +2122,12 @@ function addGoldLog(changeCount, reason) {
 
     let logList = JSON.parse(localStorage.getItem("dtGoldLog") || "[]");
     logList.unshift(logItem);
-    if (logList.length > 100) logList = logList.slice(0, 100);
+    
+    // 👇 新增：最多保留最近100条记录
+    if (logList.length > 100) {
+        logList = logList.slice(0, 100);
+    }
+    
     localStorage.setItem("dtGoldLog", JSON.stringify(logList));
 }
 
