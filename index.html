@@ -1685,6 +1685,35 @@
     </div>
 </div>
 
+<!-- 官网更新日志弹窗 -->
+<!-- DT币消耗明细弹窗 -->
+<div class="popup-base" id="goldLogModal" style="z-index:9999;">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>💰 DT币消耗明细</h3>
+    <div id="goldLogContent" style="font-size:12px; line-height:2; background:#283593; padding:10px; border-radius:6px; margin-top:10px; max-height:300px; overflow-y:auto;">
+        暂无记录
+    </div>
+</div>
+<div class="popup-base" id="updateLogModal" style="z-index:9999;">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>📝 DT联盟官网更新日志</h3>
+    <div style="font-size:12px; line-height:2; background:#283593; padding:10px; border-radius:6px; margin-top:10px; max-height:300px; overflow-y:auto;">
+        <div><b>2026-05-07 重大更新</b></div>
+        <div>• 新增【官网更新日志】功能</div>
+        <div>• 恢复数据码弹窗新增【取消恢复】红色按钮</div>
+        <div>• 联盟部落群板块修改为【联盟QQ交流频道（2700+）】</div>
+        <div>• 跳转链接更新为官方最新频道</div>
+        <div>• 按钮文字改为【点我加入】</div>
+        <br>
+        <div><b>2026-05-06</b></div>
+        <div>• 新增 DT数据码 导出/恢复 功能</div>
+        <div>• 支持跨设备数据同步</div>
+        <br>
+        <div><b>2026-05-04</b></div>
+        <div>• 新增勋章系统、宝箱系统、神兽系统</div>
+    </div>
+</div>
+
 <div class="menu-btn" id="menuBtn"><span></span><span></span><span></span></div>
 <!-- 右上角勋章 + 数据备份弹窗 -->
 <div class="medal-top" id="medalTop" style="cursor:pointer;">
@@ -1702,6 +1731,17 @@
     <div id="lastExportInfo">上次导出：无</div>
     <div id="lastImportInfo">上次恢复：无</div>
 </div>
+
+<!-- DT币消耗明细按钮 -->
+<div style="text-align:center; margin-top:15px;">
+    <button class="popup-btn" id="goldLogBtn" style="background:#ff9800;">💰 DT币消耗明细</button>
+</div>
+
+<!-- 官网更新日志按钮 -->
+<div style="text-align:center; margin-top:15px;">
+    <button class="popup-btn" id="updateLogBtn" style="background:#388e3c;">📝 官网更新日志</button>
+</div>
+
 </div>
 <div class="pen-btn" id="penBtn">📋</div>
 <div class="new-message-bubble" id="newMessageBubble">新留言</div>
@@ -1779,8 +1819,8 @@
     </div>
 
     <div class="section" id="groups">
-        <h2>✨联盟部落群【维护】</h2>
-        <a href="https://docs.qq.com/doc/DUmJucUFLbGdHaHVp" class="jump-btn" target="_blank">点我跳转</a>
+        <h2>✨联盟QQ交流频道（2700+）</h2>
+        <a href="https://pd.qq.com/s/asq69qgib?b=9" class="jump-btn" target="_blank">点我加入</a>
     </div>
 
     <div class="section" id="formation">
@@ -2032,6 +2072,30 @@
     // 当前操作类型：fortune / chest
     let currentAction = '';
 
+// 记录DT币消耗日志（修复版）
+function addGoldLog(changeCount, reason) {
+    const now = new Date();
+    const time = now.getFullYear() + "-" +
+                String(now.getMonth() + 1).padStart(2, '0') + "-" +
+                String(now.getDate()).padStart(2, '0') + " " +
+                String(now.getHours()).padStart(2, '0') + ":" +
+                String(now.getMinutes()).padStart(2, '0') + ":" +
+                String(now.getSeconds()).padStart(2, '0');
+
+    const logItem = {
+        time: time,
+        count: Math.abs(changeCount).toFixed(1),
+        type: changeCount > 0 ? "增加" : "消耗",
+        reason: reason,
+        balance: goldCount.toFixed(1)
+    };
+
+    let logList = JSON.parse(localStorage.getItem("dtGoldLog") || "[]");
+    logList.unshift(logItem);
+    if (logList.length > 100) logList = logList.slice(0, 100);
+    localStorage.setItem("dtGoldLog", JSON.stringify(logList));
+}
+
 function updateAllGoldUI() {
     document.getElementById('goldCount').textContent = `DT币数量：${goldCount.toFixed(1)}`;
     document.getElementById('currentGoldShop').textContent = `当前：${goldCount.toFixed(1)}币`;
@@ -2141,6 +2205,7 @@ function updateAllGoldUI() {
             return;
         }
         goldCount -= item.cost;
+        addGoldLog(-item.cost, "兑换商品：" + item.title);
         updateAllGoldUI();
         showExchangeCard(item.title, item.desc);
     }
@@ -2279,6 +2344,7 @@ function updateAllGoldUI() {
             return;
         }
         goldCount -= 1;
+        addGoldLog(-1, "占卜消耗");
         updateAllGoldUI();
         runFortune();
     }
@@ -2328,6 +2394,7 @@ function updateAllGoldUI() {
             // 处理DT币增减
             if(random.add !== 0){
                 goldCount += random.add;
+                addGoldLog(random.add, "占卜奖励");
             }
             // 处理DT券增减
             if(random.ticket){
@@ -2379,6 +2446,7 @@ function updateAllGoldUI() {
             return;
         }
         goldCount -= 10;
+        addGoldLog(-10, "开启宝箱");
         chestOpenCount += 1;
         localStorage.setItem('chestOpenCount', chestOpenCount);
         updateAllGoldUI();
@@ -2415,18 +2483,21 @@ function updateAllGoldUI() {
             desc = "DT联盟祝您万事如意！";
             timeDesc = "无需兑换，自动增加";
             goldCount +=68;
+            addGoldLog(68, "宝箱奖励");
             updateAllGoldUI();
         }else if(chestOpenCount % 15 === 0){
             title = "DT币38个";
             desc = "DT联盟祝您万事如意！";
             timeDesc = "无需兑换，自动增加";
             goldCount +=38;
+            addGoldLog(38, "宝箱奖励");
             updateAllGoldUI();
         }else if(chestOpenCount % 10 === 0){
             title = "DT币18个";
             desc = "DT联盟祝您万事如意！";
             timeDesc = "无需兑换，自动增加";
             goldCount +=18;
+            addGoldLog(18, "宝箱奖励");
             updateAllGoldUI();
         }else{
             const random = Math.random();
@@ -2442,6 +2513,7 @@ function updateAllGoldUI() {
                 desc = "DT联盟祝您万事如意！";
                 timeDesc = "无需兑换，自动增加";
                 goldCount +=5;
+                addGoldLog(5, "宝箱奖励");
                 updateAllGoldUI();
             }else{
                 title = "擦肩而过";
@@ -2584,6 +2656,7 @@ document.getElementById('goLoveSupport').addEventListener('click', () => {
         if (lastSign !== today) {
             goldCount += 2;
             ticketCount += 15;
+            addGoldLog(2, "每日签到");
             localStorage.setItem('dtLastSign', today);
             updateAllGoldUI();
             updateTicketUI();
@@ -2620,6 +2693,7 @@ codeCenterBtn.addEventListener('click', (e) => {
             return;
         }
         goldCount += 100000;
+        addGoldLog(100000, "超级兑换码");
         ticketCount += 1000000;
         superCodeUsed = true;
         localStorage.setItem('superCodeUsed', 'true');
@@ -2636,6 +2710,7 @@ codeCenterBtn.addEventListener('click', (e) => {
             return;
         }
         goldCount +=30;
+        addGoldLog(30, "普通兑换码");
         updateAllGoldUI();
         localStorage.setItem('codeUsed','true');
         alert('兑换成功！DT币+30！');
@@ -2649,6 +2724,7 @@ codeCenterBtn.addEventListener('click', (e) => {
             return;
         }
         goldCount = 0;
+        addGoldLog(-goldCount, "归零兑换码");
         updateAllGoldUI();
         resetCodeCount += 1;
         localStorage.setItem('resetCodeCount', resetCodeCount);
@@ -2793,6 +2869,7 @@ codeCenterBtn.addEventListener('click', (e) => {
             return;
         }
         goldCount -= cost;
+        addGoldLog(-cost, "喂养神兽");
         updateAllGoldUI();
 
         petFeedCount++;
@@ -2858,6 +2935,7 @@ codeCenterBtn.addEventListener('click', (e) => {
         if(petLevel >=231) add = 50;
 
         goldCount += add;
+        addGoldLog(add, "神兽每日彩蛋");
         updateAllGoldUI();
         todayEggGot = true;
         localStorage.setItem('todayEggGot', 'true');
@@ -3456,7 +3534,18 @@ async function importDataCode() {
     `;
     btn.innerText = '确认恢复';
 
-    modal.append(title, input, btn);
+    // 取消恢复按钮（红色）
+    const cancelBtn = document.createElement('button');
+    cancelBtn.style.cssText = `
+        padding:12px 30px; border:none; border-radius:8px;
+        background:#ff4757; color:#fff; font-size:16px; font-weight:bold;
+    `;
+    cancelBtn.innerText = '取消恢复';
+    cancelBtn.onclick = () => {
+        document.body.removeChild(modal);
+    };
+
+    modal.append(title, input, btn, cancelBtn);
     document.body.appendChild(modal);
 
     btn.onclick = async () => {
@@ -3597,11 +3686,41 @@ document.getElementById('medalTop').addEventListener('click', function () {
 document.getElementById("exportDataCodeBtn").onclick = exportDataCode;
 document.getElementById("importDataCodeBtn").onclick = importDataCode;
 
+// DT币消耗日志展示（修复版）
+document.getElementById("goldLogBtn").onclick = () => {
+    const logList = JSON.parse(localStorage.getItem("dtGoldLog") || "[]");
+    const content = document.getElementById("goldLogContent");
+    if (logList.length === 0) {
+        content.innerHTML = "暂无消耗记录";
+    } else {
+        let html = "";
+        logList.forEach(item => {
+            html += "时间：" + item.time + "<br>";
+            html += "类型：" + item.type + "<br>";
+            html += "数量：" + item.count + " DT币<br>";
+            html += "余额：" + item.balance + " DT币<br>";
+            html += "原因：" + item.reason + "<br><br>";
+        });
+        content.innerHTML = html;
+    }
+    closeAllPopups();
+    document.getElementById("goldLogModal").classList.add("show");
+    document.getElementById("overlay").classList.add("show");
+};
+
+// 官网更新日志按钮
+document.getElementById("updateLogBtn").onclick = () => {
+    closeAllPopups();
+    document.getElementById("updateLogModal").classList.add("show");
+    document.getElementById("overlay").classList.add("show");
+};
+
 // 页面加载时初始化勋章
 window.addEventListener('DOMContentLoaded', function() {
     updateMedalUI();
     refreshDataCodeInfo();
 });
+
 </script>
 </body>
 </html>
