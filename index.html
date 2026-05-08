@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DT联盟官网</title>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://kkgithub.com/extdomains/www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://kkgithub.com/extdomains/www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://kkgithub.com/extdomains/cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <style>
 
     * {
@@ -3469,24 +3469,25 @@ async function exportDataCode() {
     await promptSetUserName();
     if (!checkAndUseLimit("data_code_export")) return;
 
-    const data = {
-        userName: getUserName(),
-        dtGold: localStorage.getItem("dtGold") || "0",
-        dtTicket: localStorage.getItem("dtTicket") || "0",
-        petLevel: localStorage.getItem("petLevel") || "0",
-        petFeedCount: localStorage.getItem("petFeedCount") || "0",
-        lastFeedDate: localStorage.getItem("lastFeedDate") || "",
-        todayEggGot: localStorage.getItem("todayEggGot") || "false",
-        superCodeUsed: localStorage.getItem("superCodeUsed") || "false",
-        codeUsed: localStorage.getItem("codeUsed") || "false",
-        resetCodeCount: localStorage.getItem("resetCodeCount") || "0",
-        chestOpenCount: localStorage.getItem("chestOpenCount") || "0",
-        fortuneTotalCount: localStorage.getItem("fortuneTotalCount") || "0",
-        dtLastSign: localStorage.getItem("dtLastSign") || "",
-        hasResetGoldOnce: localStorage.getItem("hasResetGoldOnce") || "false",
-        exportDevice: getDeviceModel(),
-        exportTime: new Date().toLocaleString()
-    };
+const data = {
+    userName: getUserName(),
+    dtGold: localStorage.getItem("dtGold") || "0",
+    dtTicket: localStorage.getItem("dtTicket") || "0",
+    petLevel: localStorage.getItem("petLevel") || "0",
+    petFeedCount: localStorage.getItem("petFeedCount") || "0",
+    lastFeedDate: localStorage.getItem("lastFeedDate") || "",
+    todayEggGot: localStorage.getItem("todayEggGot") || "false",
+    superCodeUsed: localStorage.getItem("superCodeUsed") || "false",
+    codeUsed: localStorage.getItem("codeUsed") || "false",
+    resetCodeCount: localStorage.getItem("resetCodeCount") || "0",
+    chestOpenCount: localStorage.getItem("chestOpenCount") || "0",
+    fortuneTotalCount: localStorage.getItem("fortuneTotalCount") || "0",
+    dtLastSign: localStorage.getItem("dtLastSign") || "",
+    hasResetGoldOnce: localStorage.getItem("hasResetGoldOnce") || "false",
+    exportDevice: getDeviceModel(),
+    exportTime: new Date().toLocaleString(),
+    dtGoldLog: localStorage.getItem("dtGoldLog") || "[]"
+};
 
     const json = JSON.stringify(data);
     const encrypted = encrypt(json);
@@ -3591,19 +3592,20 @@ async function importDataCode() {
 
             if (!checkAndUseLimit("data_code_import")) return;
 
-            localStorage.setItem("dtGold", data.dtGold || "0");
-            localStorage.setItem("dtTicket", data.dtTicket || "0");
-            localStorage.setItem("petLevel", data.petLevel || "0");
-            localStorage.setItem("petFeedCount", data.petFeedCount || "0");
-            localStorage.setItem("lastFeedDate", data.lastFeedDate || "");
-            localStorage.setItem("todayEggGot", data.todayEggGot || "false");
-            localStorage.setItem("superCodeUsed", data.superCodeUsed || "false");
-            localStorage.setItem("codeUsed", data.codeUsed || "false");
-            localStorage.setItem("resetCodeCount", data.resetCodeCount || "0");
-            localStorage.setItem("chestOpenCount", data.chestOpenCount || "0");
-            localStorage.setItem("fortuneTotalCount", data.fortuneTotalCount || "0");
-            localStorage.setItem("dtLastSign", data.dtLastSign || "");
-            localStorage.setItem("hasResetGoldOnce", data.hasResetGoldOnce || "false");
+localStorage.setItem("dtGold", data.dtGold || "0");
+localStorage.setItem("dtTicket", data.dtTicket || "0");
+localStorage.setItem("petLevel", data.petLevel || "0");
+localStorage.setItem("petFeedCount", data.petFeedCount || "0");
+localStorage.setItem("lastFeedDate", data.lastFeedDate || "");
+localStorage.setItem("todayEggGot", data.todayEggGot || "false");
+localStorage.setItem("superCodeUsed", data.superCodeUsed || "false");
+localStorage.setItem("codeUsed", data.codeUsed || "false");
+localStorage.setItem("resetCodeCount", data.resetCodeCount || "0");
+localStorage.setItem("chestOpenCount", data.chestOpenCount || "0");
+localStorage.setItem("fortuneTotalCount", data.fortuneTotalCount || "0");
+localStorage.setItem("dtLastSign", data.dtLastSign || "");
+localStorage.setItem("hasResetGoldOnce", data.hasResetGoldOnce || "false");
+localStorage.setItem("dtGoldLog", data.dtGoldLog || "[]");
 
             localStorage.setItem("lastImportTime", new Date().toLocaleString());
             alert("✅ 数据恢复成功！页面即将刷新");
@@ -3653,25 +3655,30 @@ function refreshDataCodeInfo() {
     const warningEl = document.getElementById("userWarning");
     if (warningEl) warningEl.remove();
 
-    // 检测：来源主体 != 目前主体
-    if (lastImportUserName !== "无" && lastImportUserName !== currentUserName) {
-        // 红色警告
-        const warn = document.createElement("div");
-        warn.id = "userWarning";
-        warn.style.color = "#ff4757";
-        warn.style.fontWeight = "bold";
-        warn.style.marginTop = "10px";
-        warn.innerText = "警告！您的实际主体与恢复数据的来源主体不一致！";
-        document.getElementById("popupDataCode").appendChild(warn);
+// 检测：来源主体 != 目前主体
+if (lastImportUserName !== "无" && lastImportUserName !== currentUserName) {
+    // 红色警告
+    const warn = document.createElement("div");
+    warn.id = "userWarning";
+    warn.style.color = "#ff4757";
+    warn.style.fontWeight = "bold";
+    warn.style.marginTop = "10px";
+    warn.innerText = "警告！您的实际主体与恢复数据的来源主体不一致！";
+    document.getElementById("popupDataCode").appendChild(warn);
 
-        // 自动重置 DT币 & DT券 为 10
-        goldCount = 10;
-        ticketCount = 10;
-        localStorage.setItem("dtGold", goldCount);
-        localStorage.setItem("dtTicket", ticketCount);
-        updateAllGoldUI();
-        updateTicketUI();
-    }
+    // 自动重置 DT币 & DT券 为 10
+    const oldGold = goldCount;
+    goldCount = 10;
+    ticketCount = 10;
+    localStorage.setItem("dtGold", goldCount);
+    localStorage.setItem("dtTicket", ticketCount);
+    
+    // 记录日志
+    addGoldLog(goldCount - oldGold, "主体不一致，系统自动重置为10DT币");
+    
+    updateAllGoldUI();
+    updateTicketUI();
+}
 }
 
 // 勋章点击打开弹窗
