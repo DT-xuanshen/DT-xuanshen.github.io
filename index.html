@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DT联盟官网</title>
-<script src="https://kkgithub.com/extdomains/www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://kkgithub.com/extdomains/www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script src="https://kkgithub.com/extdomains/cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <style>
 
     * {
@@ -1550,6 +1550,14 @@
 .medal-top:hover {
     transform: scale(1.08);
 }
+@keyframes blink2s {
+    0% { opacity:1; }
+    50% { opacity:0; }
+    100% { opacity:1; }
+}
+#wechatTip {
+    animation: blink2s 2s step-end infinite;
+}
 </style>
 </head>
 <body>
@@ -1792,8 +1800,19 @@
         </div>
     </div>
 
-    <!-- 设备型号展示区域（已移动到轮播和关于板块中间） -->
-    <div style="text-align:right; font-size:12px; opacity:0.8; margin-bottom:15px; padding-right:5px;" id="deviceModel"></div>
+<!-- 设备型号展示区域（已移动到轮播和关于板块中间） -->
+<div style="
+    font-size:12px;
+    opacity:0.8;
+    margin-bottom:15px;
+    padding:0 5px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+" id="deviceModel">
+    <span id="wechatTip" style="color:#ff9800; font-weight:bold;"></span>
+    <span id="deviceText"></span>
+</div>
 
     <div class="section" id="about">
         <h2>✨关于DT联盟</h2>
@@ -3315,7 +3334,20 @@ function getDeviceModel() {
 // 页面加载显示
 window.addEventListener('DOMContentLoaded', function(){
   const device = getDeviceModel();
-  document.getElementById('deviceModel').innerText = `设备：${device}`;
+  const deviceTextEl = document.getElementById('deviceText');
+  const wechatTipEl = document.getElementById('wechatTip');
+
+  // 永远显示设备型号（靠右）
+  deviceTextEl.innerText = `设备：${device}`;
+
+  // 判断是否微信
+  const isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+  if (!isWeChat) {
+    wechatTipEl.innerText = '建议使用微信访问';
+    wechatTipEl.style.display = 'inline-block';
+  } else {
+    wechatTipEl.style.display = 'none';
+  }
 });
 // ==================== 勋章系统核心 ====================
 function getMedalInfo(gold) {
@@ -3722,10 +3754,20 @@ document.getElementById("updateLogBtn").onclick = () => {
     document.getElementById("overlay").classList.add("show");
 };
 
-// 页面加载时初始化勋章
+// 页面加载时初始化勋章 + 显示微信提示
 window.addEventListener('DOMContentLoaded', function() {
     updateMedalUI();
     refreshDataCodeInfo();
+
+    // 判断是否为微信浏览器
+    const isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+    const wechatTip = document.getElementById('wechatTip');
+    
+    // 非微信才显示橙色闪烁提示
+    if (!isWeChat) {
+        wechatTip.innerText = '建议使用微信访问';
+        wechatTip.style.display = 'inline-block';
+    }
 });
 
 </script>
