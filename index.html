@@ -1701,6 +1701,17 @@
     <div id="goldLogContent" style="font-size:12px; line-height:2; background:#283593; padding:10px; border-radius:6px; margin-top:10px; max-height:300px; overflow-y:auto;">
         暂无记录
     </div>
+
+    <!-- 👇 在这里添加下方注释（已按你要求：最小号、红色、楷体、居中） -->
+    <div style="
+        text-align:center; 
+        margin-top:8px; 
+        font-size:10px; 
+        color:red; 
+        font-family:'KaiTi','楷体',serif;
+    ">
+        注：至多会保留最新的100条记录…
+    </div>
 </div>
 <div class="popup-base" id="updateLogModal" style="z-index:9999;">
     <span class="popup-close" onclick="closeAllPopups()">×</span>
@@ -1820,9 +1831,10 @@
     display:flex;
     justify-content:space-between;
     align-items:center;
+    width:100%;
 " id="deviceModel">
-    <span id="wechatTip" style="color:#ff9800; font-weight:bold;"></span>
-    <span id="deviceText"></span>
+    <span id="wechatTip" style="color:#ff9800; font-weight:bold; text-align:left;"></span>
+    <span id="deviceText" style="text-align:right; flex:1;"></span>
 </div>
 
     <div class="section" id="about">
