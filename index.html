@@ -1761,8 +1761,10 @@
     <div id="lastExportInfo">上次导出：无</div>
     <div id="lastImportInfo">上次恢复：无</div>
 </div>
-
 <!-- DT币消耗明细按钮 -->
+<div style="text-align:center; margin-top:15px;">
+    <button class="popup-btn" id="adminCheckBtn" style="background:#d32f2f;">🔒 管理员校验专用</button>
+</div>
 <div style="text-align:center; margin-top:15px;">
     <button class="popup-btn" id="goldLogBtn" style="background:#ff9800;">💰 DT币消耗明细</button>
 </div>
@@ -1927,11 +1929,126 @@
 
 <footer><p>&copy; 2026 DT联盟. All Rights Reserved.</p></footer>
 
-<button class="gift-btn" id="bagBtn">我的背包</button>
-<button class="pet-btn-float" id="petBtnFloat">我的神兽</button>
-<button class="answer-btn" id="answerBtn">答题有奖</button>
-<button class="inbox-btn" id="inboxBtn">收件箱</button>
-<button class="code-center-btn" id="codeCenterBtn">兑换码中心</button>
+<!-- 修复：我的背包 按钮 -->
+<button class="bag-btn" id="bagBtn" style="
+    position: fixed;
+    bottom: 170px;
+    left: 20px;
+    width: 70px;
+    height: 40px;
+    background: #64b5f6;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 3px 8px rgba(100,181,246,0.3);
+    transition: all 0.3s ease;
+    display: none;
+">我的背包</button>
+
+<button class="bank-btn" id="bankBtn" style="
+    position: fixed;
+    bottom: 120px;
+    left: 20px;
+    width: 70px;
+    height: 40px;
+    background: #ffd700;
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 3px 8px rgba(255,215,0,0.3);
+    transition: all 0.3s ease;
+    display: none;
+">联盟银行</button>
+
+<!-- 联盟银行按钮（已移动到背包下方） -->
+
+<button class="pet-btn-float" id="petBtnFloat" style="
+    position: fixed;
+    bottom: 70px;
+    left: 20px;
+    width: 70px;
+    height: 40px;
+    background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+    background-size: 500% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: colorChange 3s linear infinite;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 3px 8px rgba(102,102,102,0.3);
+    transition: all 0.3s ease;
+    display: none;
+">我的神兽</button>
+
+<button class="answer-btn" id="answerBtn" style="
+    position: fixed;
+    bottom: 70px;
+    left: 100px;
+    width: 70px;
+    height: 40px;
+    background: #ff9800;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 3px 8px rgba(255,152,0,0.3);
+    transition: all 0.3s ease;
+    display: none;
+">答题有奖</button>
+
+<button class="inbox-btn" id="inboxBtn" style="
+    position: fixed;
+    bottom: 20px;
+    left: 100px;
+    width: 70px;
+    height: 40px;
+    background: #64b5f6;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 3px 8px rgba(100,181,246,0.3);
+    transition: all 0.3s ease;
+    display: none;
+">收件箱</button>
+
+<button class="code-center-btn" id="codeCenterBtn" style="
+    position: fixed;
+    bottom: 20px;
+    left: 180px;
+    width: 70px;
+    height: 40px;
+    background: #388e3c;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 3px 8px rgba(56,142,60,0.3);
+    transition: all 0.3s ease;
+    display: none;
+">兑换码中心</button>
 
 <button class="report-btn" id="reportBtn" onclick="window.open('https://wj.qq.com/s2/25486960/0107/','_blank')">举报/建议</button>
 
@@ -2004,6 +2121,36 @@
         <button class="pet-rule-btn" id="petRuleBtn">神兽规则</button>
         <div class="pet-egg-btn" id="petEggBtn">🥚</div>
     </div>
+</div>
+
+<!-- 联盟银行弹窗 -->
+<div class="choose-currency-modal" id="bankModal">
+  <div style="width:100%; display:flex; flex-direction:column; align-items:center;">
+    <div class="choose-box">
+      <div class="choose-title">🏦 联盟银行</div>
+      <div class="currency-btns">
+        <button class="currency-btn gold-btn-choose" id="depositBtn">存DT币</button>
+        <button class="currency-btn ticket-btn-choose" id="withdrawBtn">取DT币</button>
+      </div>
+      <div id="bankInfoText" style="margin-top:15px; font-size:12px; line-height:1.5; background:#283593; padding:10px; border-radius:6px; text-align:left;">
+        银行余额：<span id="bankTotal">0</span> DT币<br>
+        定期存款：<span id="bankFixed">0</span> DT币（<span id="bankFixedEnd">无</span>到期）<br>
+        活期存款：<span id="bankCurrent">0</span> DT币<br>
+        本月已获利息：<span id="bankInterestMonth">0</span> DT币（上限100）
+      </div>
+    </div>
+    <!-- 关闭按钮 -->
+    <div onclick="closeAllPopups()" style="
+      width:80px; height:38px;
+      background:#ff4757; color:#fff;
+      border-radius:6px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:22px; font-weight:bold;
+      cursor:pointer;
+      box-shadow:0 0 10px rgba(255,71,87,0.6);
+      margin-top:20px;
+    ">×</div>
+  </div>
 </div>
 
 <!-- 我的背包 -->
@@ -2238,24 +2385,30 @@ function updateAllGoldUI() {
         danmuCount = 0;
     }
 
-    function exchangeGoods(type) {
-        const goods = [
-            { cost: 50, title: "免处罚卡", time: "3天", desc: "有效期3天，过期无效，请务必截图保存" },
-            { cost: 1688, title: "黄金令牌", time: "30天", desc: "有效期30天，过期未兑换成功无效，请务必截图保存" },
-            { cost: 358, title: "实物礼品", time: "30天", desc: "有效期30天，过期未兑换成功无效，请务必截图保存" },
-            { cost: 188, title: "3元红包", time: "15天", desc: "有效期15天，过期未兑换成功无效，请务必截图保存" },
-            { cost: 0.1, title: "测试专用", time: "7天", desc: "有效期7天，过期未兑换成功无效，请务必截图保存" }
-        ];
-        const item = goods[type - 1];
-        if (goldCount < item.cost) {
-            alert("DT币不足，无法兑换！");
-            return;
-        }
-        goldCount -= item.cost;
-        addGoldLog(-item.cost, "兑换商品：" + item.title);
-        updateAllGoldUI();
-        showExchangeCard(item.title, item.desc);
+function exchangeGoods(type) {
+    const goods = [
+        { cost: 50, title: "免处罚卡", time: "3天", desc: "有效期3天，过期无效，请务必截图保存" },
+        { cost: 1688, title: "黄金令牌", time: "30天", desc: "有效期30天，过期未兑换成功无效，请务必截图保存" },
+        { cost: 358, title: "实物礼品", time: "30天", desc: "有效期30天，过期未兑换成功无效，请务必截图保存" },
+        { cost: 188, title: "3元红包", time: "15天", desc: "有效期15天，过期未兑换成功无效，请务必截图保存" },
+        { cost: 0.1, title: "测试专用", time: "7天", desc: "有效期7天，过期未兑换成功无效，请务必截图保存" }
+    ];
+    const item = goods[type - 1];
+    if (goldCount < item.cost) {
+        alert("DT币不足，无法兑换！");
+        return;
     }
+    goldCount -= item.cost;
+    addGoldLog(-item.cost, "兑换商品：" + item.title);
+    updateAllGoldUI();
+    
+    // 统计兑换次数
+    let exchangeCount = parseInt(localStorage.getItem("exchangeTotalCount") || 0);
+    exchangeCount++;
+    localStorage.setItem("exchangeTotalCount", exchangeCount);
+    
+    showExchangeCard(item.title, item.desc);
+}
 
     function showExchangeCard(title, desc, timeDesc = "") {
         const now = new Date();
@@ -2640,78 +2793,120 @@ document.getElementById('goLoveSupport').addEventListener('click', () => {
         closeRule();
     });
 
-    const goldBtn = document.getElementById('goldBtn');
-    const signPanel = document.getElementById('signPanel');
-    const signBtn = document.getElementById('signBtn');
-    const useGoldBtn = document.getElementById('useGoldBtn');
-    const bagBtn = document.getElementById('bagBtn');
-    const answerBtn = document.getElementById('answerBtn');
-    const inboxBtn = document.getElementById('inboxBtn');
-    const bagModal = document.getElementById('bagModal');
-    const petBtnFloat = document.getElementById('petBtnFloat');
-    const codeCenterBtn = document.getElementById('codeCenterBtn');
+const goldBtn = document.getElementById('goldBtn');
+const signPanel = document.getElementById('signPanel');
+const signBtn = document.getElementById('signBtn');
+const useGoldBtn = document.getElementById('useGoldBtn');
+const bagBtn = document.getElementById('bagBtn'); // 现在有了
+const answerBtn = document.getElementById('answerBtn');
+const inboxBtn = document.getElementById('inboxBtn');
+const bagModal = document.getElementById('bagModal');
+const petBtnFloat = document.getElementById('petBtnFloat');
+const codeCenterBtn = document.getElementById('codeCenterBtn');
+const medalTop = document.getElementById('medalTop');
+const bankBtn = document.getElementById('bankBtn');
+const bankModal = document.getElementById('bankModal');
+
+// 银行按钮点击打开
+bankBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    initBankData();
+    calcBankInterest();
+    updateBankUI();
+    bankModal.style.display = 'flex';
+});
+
+// 👇 修复空值不崩溃
+if(!bagBtn) console.warn('bagBtn 未加载');
+if(!bankBtn) console.warn('bankBtn 未加载');
     
     updateAllGoldUI();
     updateTicketUI();
     
     // 点击金币按钮显示面板
-    goldBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // 阻止冒泡
-        signPanel.classList.toggle('show');
-        
-        if(signPanel.classList.contains('show')){
-            bagBtn.style.display = 'block';
-            petBtnFloat.style.display = 'block';
-            answerBtn.style.display = 'block';
-            inboxBtn.style.display = 'block';
-            codeCenterBtn.style.display = 'block';
-        }else{
-            bagBtn.style.display = 'none';
-            petBtnFloat.style.display = 'none';
-            answerBtn.style.display = 'none';
-            inboxBtn.style.display = 'none';
-            codeCenterBtn.style.display = 'none';
-            bagModal.style.display = 'none';
-        }
-    });
+goldBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    signPanel.classList.toggle('show');
     
-    // ✅ 修复：全局点击仅空白处隐藏，不阻断按钮功能
-    document.addEventListener('click', (e) => {
-        // 排除点击的元素：金币面板、功能按钮、弹窗
-        const excludeElements = [
-            signPanel, goldBtn, bagBtn, petBtnFloat, 
-            answerBtn, inboxBtn, codeCenterBtn, bagModal,
-            petModal, letterModal, chooseCurrencyModal
-        ];
-        const isClickExcluded = excludeElements.some(el => el.contains(e.target));
-        
-        if (!isClickExcluded) {
-            signPanel.classList.remove('show');
-            petBtnFloat.style.display = 'none';
-            bagBtn.style.display = 'none';
-            answerBtn.style.display = 'none';
-            inboxBtn.style.display = 'none';
-            codeCenterBtn.style.display = 'none';
-        }
-    });
+    if(signPanel.classList.contains('show')){
+        if(bagBtn) bagBtn.style.display = 'block';
+        if(petBtnFloat) petBtnFloat.style.display = 'block';
+        if(answerBtn) answerBtn.style.display = 'block';
+        if(inboxBtn) inboxBtn.style.display = 'block';
+        if(codeCenterBtn) codeCenterBtn.style.display = 'block';
+        if(bankBtn) bankBtn.style.display = 'block'; // 👈 显示银行
+    }else{
+        if(bagBtn) bagBtn.style.display = 'none';
+        if(petBtnFloat) petBtnFloat.style.display = 'none';
+        if(answerBtn) answerBtn.style.display = 'none';
+        if(inboxBtn) inboxBtn.style.display = 'none';
+        if(codeCenterBtn) codeCenterBtn.style.display = 'none';
+        if(bankBtn) bankBtn.style.display = 'none'; // 👈 隐藏银行
+        if(bagModal) bagModal.style.display = 'none';
+    }
+});
     
-    // 每日签到：DT币+2，DT券+15
-    signBtn.addEventListener('click', () => {
-        const today = new Date().toDateString();
-        const lastSign = localStorage.getItem('dtLastSign');
-        
-        if (lastSign !== today) {
-            goldCount += 2;
-            ticketCount += 15;
-            addGoldLog(2, "每日签到");
-            localStorage.setItem('dtLastSign', today);
-            updateAllGoldUI();
-            updateTicketUI();
-            alert('签到成功！DT币+2，DT券+15！');
+// ✅ 修复：全局点击空白隐藏面板（不阻断按钮）
+document.addEventListener('click', (e) => {
+// 关闭银行
+if (bankModal.style.display === 'flex') {
+    bankModal.style.display = 'none';
+}
+if (bankModal.style.display === 'flex') {
+    bankModal.style.display = 'none';
+}
+    const isGoldBtn = e.target === goldBtn || goldBtn.contains(e.target);
+    const isSignPanel = signPanel.contains(e.target);
+    const isPetBtn = e.target === petBtnFloat || petBtnFloat.contains(e.target);
+    const isBagBtn = e.target === bagBtn || bagBtn.contains(e.target);
+    const isAnswerBtn = e.target === answerBtn || answerBtn.contains(e.target);
+    const isInboxBtn = e.target === inboxBtn || inboxBtn.contains(e.target);
+    const isCodeBtn = e.target === codeCenterBtn || codeCenterBtn.contains(e.target);
+    const isModalOpen = 
+        bagModal.style.display === 'flex' ||
+        petModal.style.display === 'flex' ||
+        letterModal.style.display === 'flex' ||
+        chooseCurrencyModal.style.display === 'flex';
+
+    if (!isGoldBtn && !isSignPanel && !isPetBtn && !isBagBtn && !isAnswerBtn && !isInboxBtn && !isCodeBtn && !isModalOpen) {
+        signPanel.classList.remove('show');
+        petBtnFloat.style.display = 'none';
+        bagBtn.style.display = 'none';
+        answerBtn.style.display = 'none';
+        inboxBtn.style.display = 'none';
+        codeCenterBtn.style.display = 'none';
+        bankBtn.style.display = 'none';
+    }
+});
+    
+// 每日签到：随机DT币1.0-3.0（70%概率1.0-1.5，30%概率1.5-3.0），DT券+15不变
+signBtn.addEventListener('click', () => {
+    const today = new Date().toDateString();
+    const lastSign = localStorage.getItem('dtLastSign');
+    
+    if (lastSign !== today) {
+        let signGold;
+        const rand = Math.random();
+        if (rand < 0.7) {
+            // 70%概率：1.0-1.5
+            signGold = 1.0 + Math.random() * 0.5;
         } else {
-            alert('今日已签到，明天再来吧！');
+            // 30%概率：1.5-3.0
+            signGold = 1.5 + Math.random() * 1.5;
         }
-    });
+        signGold = parseFloat(signGold.toFixed(1)); // 保留1位小数
+
+        goldCount += signGold;
+        ticketCount += 15;
+        addGoldLog(signGold, "每日签到");
+        localStorage.setItem('dtLastSign', today);
+        updateAllGoldUI();
+        updateTicketUI();
+        alert(`签到成功！DT币+${signGold}，DT券+15！`);
+    } else {
+        alert('今日已签到，明天再来吧！');
+    }
+});
 
     useGoldBtn.addEventListener('click', () => {
         signPanel.classList.remove('show');
@@ -3279,12 +3474,12 @@ function startAnswerQuiz(){
             // 判断答案
             if(opt === q.answer){
                 // 答对：+10，上限200
-                if(answerDailyGet >= 200){
-                    alert('✅ 回答正确！但今日奖励已达上限200张，无法再获得');
-                }else{
-                    ticketCount +=10;
-                    answerDailyGet +=10;
-                    if(answerDailyGet>200) answerDailyGet=200;
+if(answerDailyGet >= 80){
+    alert('✅ 回答正确！但今日奖励已达上限80张，无法再获得');
+}else{
+    ticketCount +=10;
+    answerDailyGet +=10;
+    if(answerDailyGet>80) answerDailyGet=80;
                     updateTicketUI();
                     localStorage.setItem('answerDailyGet', answerDailyGet);
                     alert('✅ 回答正确！获得 10 张DT券！');
@@ -3359,23 +3554,27 @@ function getDeviceModel() {
   return androidModel ? `安卓设备 ${androidModel}` : '安卓手机';
 }
 
-// 页面加载显示
+// 页面加载显示（修复消失问题）
 window.addEventListener('DOMContentLoaded', function(){
-  const device = getDeviceModel();
-  const deviceTextEl = document.getElementById('deviceText');
-  const wechatTipEl = document.getElementById('wechatTip');
+    // 立即显示，不延迟、不消失
+    const device = getDeviceModel();
+    const deviceTextEl = document.getElementById('deviceText');
+    const wechatTipEl = document.getElementById('wechatTip');
 
-  // 永远显示设备型号（靠右）
-  deviceTextEl.innerText = `设备：${device}`;
+    if (deviceTextEl) {
+      deviceTextEl.innerText = `设备：${device}`;
+      deviceTextEl.style.display = 'block';
+    }
 
-  // 判断是否微信
-  const isWeChat = /MicroMessenger/i.test(navigator.userAgent);
-  if (!isWeChat) {
-    wechatTipEl.innerText = '建议使用微信访问';
-    wechatTipEl.style.display = 'inline-block';
-  } else {
-    wechatTipEl.style.display = 'none';
-  }
+    const isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+    if (wechatTipEl) {
+      if (!isWeChat) {
+        wechatTipEl.innerText = '建议使用微信访问';
+        wechatTipEl.style.display = 'inline-block';
+      } else {
+        wechatTipEl.style.display = 'none';
+      }
+    }
 });
 // ==================== 勋章系统核心 ====================
 function getMedalInfo(gold) {
@@ -3542,6 +3741,7 @@ const data = {
     resetCodeCount: localStorage.getItem("resetCodeCount") || "0",
     chestOpenCount: localStorage.getItem("chestOpenCount") || "0",
     fortuneTotalCount: localStorage.getItem("fortuneTotalCount") || "0",
+    exchangeTotalCount: localStorage.getItem("exchangeTotalCount") || "0",
     dtLastSign: localStorage.getItem("dtLastSign") || "",
     hasResetGoldOnce: localStorage.getItem("hasResetGoldOnce") || "false",
     exportDevice: getDeviceModel(),
@@ -3565,6 +3765,7 @@ const data = {
 // ============== 恢复数据码 ==============
 async function importDataCode() {
     await promptSetUserName();
+localStorage.setItem("exchangeTotalCount", data.exchangeTotalCount || "0");
 
     // 👇 手机浏览器专用输入弹窗（替换原来的 prompt）
     const modal = document.createElement('div');
@@ -3680,69 +3881,56 @@ localStorage.setItem("dtGoldLog", data.dtGoldLog || "[]");
 function refreshDataCodeInfo() {
     const userName = getUserName() || "未设置";
     const lastImportUserName = localStorage.getItem("lastImportUserName") || "无";
-
-    document.getElementById("lastExportInfo").innerText =
-        "上次导出：" + (localStorage.getItem("lastExportTime") || "无") +
-        "｜设备：" + (localStorage.getItem("lastExportDevice") || "无");
-
-    document.getElementById("lastImportInfo").innerText =
-        "上次恢复：" + (localStorage.getItem("lastImportTime") || "无") +
-        "｜来源主体：" + lastImportUserName;
-
-    document.getElementById("currentDeviceInfo").innerText =
-        "当前登录设备：" + getDeviceModel() +
-        "｜我的主体：" + userName;
-}
-// 刷新信息展示（按你要求的顺序 + 每行单独显示 + 主体不一致检测）
-function refreshDataCodeInfo() {
-    const currentUserName = getUserName() || "未设置";
-    const lastImportUserName = localStorage.getItem("lastImportUserName") || "无";
     const lastExportTime = localStorage.getItem("lastExportTime") || "无";
     const lastExportDevice = localStorage.getItem("lastExportDevice") || "无";
     const lastImportTime = localStorage.getItem("lastImportTime") || "无";
     const currentDevice = getDeviceModel();
 
-    // 按你要求的顺序，每行单独显示
-    document.getElementById("lastExportInfo").innerText = "上次导出时间：" + lastExportTime;
-    document.getElementById("lastExportInfo").innerHTML += "<br>上次导出设备：" + lastExportDevice;
-    document.getElementById("lastExportInfo").innerHTML += "<br>当前登录设备：" + currentDevice;
-    
-    document.getElementById("lastImportInfo").innerText = "上次恢复时间：" + lastImportTime;
-    document.getElementById("lastImportInfo").innerHTML += "<br>来源主体：" + lastImportUserName;
-    document.getElementById("lastImportInfo").innerHTML += "<br>目前主体：" + currentUserName;
+    // 统计数据
+    const fortuneCount = localStorage.getItem("fortuneTotalCount") || "0";
+    const chestCount = localStorage.getItem("chestOpenCount") || "0";
+    const exchangeCount = localStorage.getItem("exchangeTotalCount") || "0";
+    const gold = localStorage.getItem("dtGold") || "0";
+
+document.getElementById("lastExportInfo").innerText =
+    "上次导出时间：" + lastExportTime +
+    "\n上次导出设备：" + lastExportDevice +
+    "\n当前登录设备：" + currentDevice;
+
+document.getElementById("lastImportInfo").innerText =
+    "上次恢复时间：" + lastImportTime +
+    "\n来源主体：" + lastImportUserName +
+    "\n目前主体：" + userName;
+// 显示 4 项统计（修复：从本地实时读取，保证准确）
 
     // 清空警告
     const warningEl = document.getElementById("userWarning");
     if (warningEl) warningEl.remove();
 
-// 检测：来源主体 != 目前主体
-if (lastImportUserName !== "无" && lastImportUserName !== currentUserName) {
-    // 红色警告
-    const warn = document.createElement("div");
-    warn.id = "userWarning";
-    warn.style.color = "#ff4757";
-    warn.style.fontWeight = "bold";
-    warn.style.marginTop = "10px";
-    warn.innerText = "警告！您的实际主体与恢复数据的来源主体不一致！";
-    document.getElementById("popupDataCode").appendChild(warn);
+    if (lastImportUserName !== "无" && lastImportUserName !== userName) {
+        const warn = document.createElement("div");
+        warn.id = "userWarning";
+        warn.style.color = "#ff4757";
+        warn.style.fontWeight = "bold";
+        warn.style.marginTop = "10px";
+        warn.innerText = "警告！您的实际主体与恢复数据的来源主体不一致！";
+        document.getElementById("popupDataCode").appendChild(warn);
 
-    // 自动重置 DT币 & DT券 为 10
-    const oldGold = goldCount;
-    goldCount = 10;
-    ticketCount = 10;
-    localStorage.setItem("dtGold", goldCount);
-    localStorage.setItem("dtTicket", ticketCount);
-    
-    // 记录日志
-    addGoldLog(goldCount - oldGold, "主体不一致，系统自动重置为10DT币");
-    
-    updateAllGoldUI();
-    updateTicketUI();
-}
+        const oldGold = parseFloat(localStorage.getItem("dtGold")) || 0;
+        goldCount = 10;
+        ticketCount = 10;
+        localStorage.setItem("dtGold", 10);
+        localStorage.setItem("dtTicket", 10);
+        addGoldLog(10 - oldGold, "主体不一致，系统自动重置为10DT币");
+        updateAllGoldUI();
+        updateTicketUI();
+    }
 }
 
-// 勋章点击打开弹窗
-document.getElementById('medalTop').addEventListener('click', function () {
+// 勋章点击打开弹窗（修复点击无反应）
+document.getElementById('medalTop').addEventListener('click', async function (e) {
+    e.stopPropagation();
+    await promptSetUserName();
     closeAllPopups();
     refreshDataCodeInfo();
     document.getElementById('popupDataCode').classList.add('show');
@@ -3776,22 +3964,473 @@ document.getElementById("goldLogBtn").onclick = () => {
 };
 
 // 官网更新日志按钮
+// ==================== 管理员校验专用功能 ====================
+let adminCheckFailCount = parseInt(localStorage.getItem('adminCheckFailCount') || 0);
+let isAdminBlocked = localStorage.getItem('adminCheckBlocked') === 'true';
+
+document.getElementById('adminCheckBtn').onclick = function(){
+    if(isAdminBlocked){
+        alert('❌ 该设备已被永久禁止使用管理员校验功能！');
+        return;
+    }
+    if(adminCheckFailCount >=3){
+        isAdminBlocked = true;
+        localStorage.setItem('adminCheckBlocked','true');
+        alert('❌ 密码错误次数过多，该设备已永久禁止使用此功能！');
+        return;
+    }
+
+    const pwd = prompt('请输入管理员校验密码：');
+    if(!pwd) return;
+
+    if(pwd === '258079'){
+        alert('✅ 密码正确！');
+        openAdminCheckModal();
+    }else{
+        adminCheckFailCount++;
+        localStorage.setItem('adminCheckFailCount',adminCheckFailCount);
+        if(adminCheckFailCount >=3){
+            isAdminBlocked = true;
+            localStorage.setItem('adminCheckBlocked','true');
+            alert('❌ 密码错误！已累计3次，永久禁止使用！');
+        }else{
+            alert('❌ 密码错误！已错误 '+adminCheckFailCount+' 次，3次永久禁用！');
+        }
+    }
+};
+
+function openAdminCheckModal(){
+    closeAllPopups();
+    let m = document.getElementById('adminCheckMainModal');
+    if(!m){
+        m = document.createElement('div');
+        m.className = 'popup-base';
+        m.id = 'adminCheckMainModal';
+        m.style.zIndex = 99999;
+        m.innerHTML = `
+            <span class="popup-close" onclick="closeAllPopups()">×</span>
+            <h3>🔒 管理员校验中心</h3>
+            <button class="popup-btn" id="importCheckDataBtn">📥 导入查询校验</button>
+            <div id="adminCheckResult" style="margin-top:15px; font-size:12px; line-height:1.8; background:#283593; padding:10px; border-radius:6px; max-height:400px; overflow-y:auto;"></div>
+        `;
+        document.body.appendChild(m);
+        document.getElementById('importCheckDataBtn').onclick = doAdminImportCheck;
+    }
+    m.classList.add('show');
+    document.getElementById('overlay').classList.add('show');
+    document.getElementById('adminCheckResult').innerHTML = '请点击【导入查询校验】并粘贴用户DT数据码';
+}
+
+function doAdminImportCheck(){
+    const code = prompt('📥 请粘贴要查询的用户 DT 数据码：');
+    if(!code) return;
+    if(!code.startsWith('DT') || !code.endsWith('CODE')){
+        alert('❌ 数据码格式错误！');
+        return;
+    }
+
+    try {
+        const encrypted = code.slice(2, -4);
+        const json = decrypt(encrypted);
+        const data = JSON.parse(json);
+
+const logStr = data.dtGoldLog
+  ? JSON.parse(data.dtGoldLog).map(item => `
+时间：${item.time}
+类型：${item.type}
+数量：${item.count} DT币
+原因：${item.reason}
+余额：${item.balance} DT币
+------------------------`).join('')
+  : '无记录';
+
+const res = `
+【导出时设备】：${data.exportDevice || '未知'}
+【上次恢复时间】：${localStorage.getItem('lastImportTime') || '无'}
+【账号主体名称】：${data.userName || '无'}
+【占卜总次数】：${data.fortuneTotalCount || 0}
+【宝箱总次数】：${data.chestOpenCount || 0}
+【兑换总次数】：${data.exchangeTotalCount || 0}
+【DT币余额】：${data.dtGold || 0}
+【DT币消耗明细】：
+${logStr}
+        `.trim();
+
+        document.getElementById('adminCheckResult').innerText = res;
+    }catch(e){
+        alert('❌ 数据解析失败：'+e.message);
+    }
+}
 document.getElementById("updateLogBtn").onclick = () => {
     closeAllPopups();
     document.getElementById("updateLogModal").classList.add("show");
     document.getElementById("overlay").classList.add("show");
 };
 
-// 页面加载时初始化勋章 + 显示微信提示
+// ==================== 联盟银行系统 ====================
+function initBankData() {
+    if (!localStorage.getItem('bankFixed')) localStorage.setItem('bankFixed', 0);
+    if (!localStorage.getItem('bankFixedEnd')) localStorage.setItem('bankFixedEnd', '');
+    if (!localStorage.getItem('bankCurrent')) localStorage.setItem('bankCurrent', 0);
+    if (!localStorage.getItem('bankInterestMonth')) localStorage.setItem('bankInterestMonth', 0);
+    if (!localStorage.getItem('bankLastInterestDate')) localStorage.setItem('bankLastInterestDate', '');
+}
+
+function getBankData() {
+    return {
+        fixed: parseFloat(localStorage.getItem('bankFixed')) || 0,
+        fixedEnd: localStorage.getItem('bankFixedEnd') || '',
+        current: parseFloat(localStorage.getItem('bankCurrent')) || 0,
+        interestMonth: parseFloat(localStorage.getItem('bankInterestMonth')) || 0,
+        lastDate: localStorage.getItem('bankLastInterestDate') || ''
+    };
+}
+
+function calcBankInterest() {
+    const today = new Date().toDateString();
+    const bank = getBankData();
+    if (bank.lastDate === today) return;
+    localStorage.setItem('bankLastInterestDate', today);
+
+    let add = 0;
+    const max = 100;
+    if (bank.interestMonth >= max) return;
+
+    const rateCurrent = 0.0008;
+    const addCurrent = bank.current * rateCurrent;
+    if (addCurrent > 0) {
+        let realAdd = Math.min(addCurrent, max - bank.interestMonth);
+        if (realAdd > 0) {
+            const newCurrent = bank.current + realAdd;
+            localStorage.setItem('bankCurrent', newCurrent);
+            add += realAdd;
+            bank.interestMonth += realAdd;
+            localStorage.setItem('bankInterestMonth', bank.interestMonth);
+            addGoldLog(realAdd, "银行活期利息");
+        }
+    }
+
+    const rateFixed = 0.0012;
+    const addFixed = bank.fixed * rateFixed;
+    if (addFixed > 0) {
+        let realAdd = Math.min(addFixed, max - bank.interestMonth);
+        if (realAdd > 0) {
+            const newCurrent = bank.current + realAdd;
+            localStorage.setItem('bankCurrent', newCurrent);
+            add += realAdd;
+            bank.interestMonth += realAdd;
+            localStorage.setItem('bankInterestMonth', bank.interestMonth);
+            addGoldLog(realAdd, "银行定期利息");
+        }
+    }
+
+    if (bank.fixed > 0 && bank.fixedEnd) {
+        const end = new Date(bank.fixedEnd).getTime();
+        const now = Date.now();
+        if (now >= end) {
+            const total = bank.fixed;
+            const newCurrent = bank.current + total;
+            localStorage.setItem('bankCurrent', newCurrent);
+            localStorage.setItem('bankFixed', 0);
+            localStorage.setItem('bankFixedEnd', '');
+            addGoldLog(total, "定期到期自动转入活期");
+        }
+    }
+}
+
+function updateBankUI() {
+    const bank = getBankData();
+    document.getElementById('bankTotal').innerText = (bank.fixed + bank.current).toFixed(1);
+    document.getElementById('bankFixed').innerText = bank.fixed.toFixed(1);
+    document.getElementById('bankFixedEnd').innerText = bank.fixedEnd || '无';
+    document.getElementById('bankCurrent').innerText = bank.current.toFixed(1);
+    document.getElementById('bankInterestMonth').innerText = bank.interestMonth.toFixed(1);
+}
+
+document.getElementById('bankBtnFromBag').addEventListener('click', () => {
+    initBankData();
+    calcBankInterest();
+    updateBankUI();
+    document.getElementById('bagModal').style.display = 'none';
+    document.getElementById('bankModal').style.display = 'flex';
+});
+
+document.getElementById('depositBtn').addEventListener('click', () => {
+    const type = prompt('选择存储类型：1=定期 2=活期');
+    if (type !== '1' && type !== '2') return alert('输入错误');
+    const numStr = prompt('输入存入DT币数量：');
+    const num = parseFloat(numStr);
+    if (isNaN(num) || num <= 0) return alert('输入无效');
+    if (goldCount < num) return alert('DT币不足');
+
+    goldCount -= num;
+    addGoldLog(-num, type === '1' ? '存入定期' : '存入活期');
+    updateAllGoldUI();
+
+    const bank = getBankData();
+    if (type === '1') {
+        const end = new Date(Date.now() + 30 * 86400000);
+        const endStr = end.getFullYear() + '-' + String(end.getMonth() + 1).padStart(2, '0') + '-' + String(end.getDate()).padStart(2, '0');
+        localStorage.setItem('bankFixed', (bank.fixed + num).toFixed(1));
+        localStorage.setItem('bankFixedEnd', endStr);
+    } else {
+        localStorage.setItem('bankCurrent', (bank.current + num).toFixed(1));
+    }
+    calcBankInterest();
+    updateBankUI();
+    alert('存入成功！');
+});
+
+document.getElementById('withdrawBtn').addEventListener('click', () => {
+    const bank = getBankData();
+    if (bank.current <= 0) return alert('无可取DT币');
+    const numStr = prompt('可取余额：' + bank.current.toFixed(1) + '\n输入取出数量：');
+    const num = parseFloat(numStr);
+    if (isNaN(num) || num <= 0) return alert('输入无效');
+    if (num > bank.current) return alert('超出可取余额');
+
+    localStorage.setItem('bankCurrent', (bank.current - num).toFixed(1));
+    goldCount += num;
+    addGoldLog(num, "银行取出");
+    updateAllGoldUI();
+    calcBankInterest();
+    updateBankUI();
+    alert('取出成功！');
+});
+
+// ==================== 管理员查询增加银行信息 ====================
+function doAdminImportCheck(){
+    const code = prompt('📥 请粘贴要查询的用户 DT 数据码：');
+    if(!code) return;
+    if(!code.startsWith('DT') || !code.endsWith('CODE')){
+        alert('❌ 数据码格式错误！');
+        return;
+    }
+
+    try {
+        const encrypted = code.slice(2, -4);
+        const json = decrypt(encrypted);
+        const data = JSON.parse(json);
+
+        const logStr = data.dtGoldLog
+          ? JSON.parse(data.dtGoldLog).map(item => `
+时间：${item.time}
+类型：${item.type}
+数量：${item.count} DT币
+原因：${item.reason}
+余额：${item.balance} DT币
+------------------------`).join('')
+          : '无记录';
+
+        const bankFixed = data.bankFixed || '0';
+        const bankFixedEnd = data.bankFixedEnd || '无';
+        const bankCurrent = data.bankCurrent || '0';
+        const bankInterest = data.bankInterestMonth || '0';
+
+        const res = `
+【导出时设备】：${data.exportDevice || '未知'}
+【上次恢复时间】：${localStorage.getItem('lastImportTime') || '无'}
+【账号主体名称】：${data.userName || '无'}
+【占卜总次数】：${data.fortuneTotalCount || 0}
+【宝箱总次数】：${data.chestOpenCount || 0}
+【兑换总次数】：${data.exchangeTotalCount || 0}
+【DT币余额】：${data.dtGold || 0}
+🏦 银行定期：${bankFixed}
+🏦 定期到期：${bankFixedEnd}
+🏦 银行活期：${bankCurrent}
+🏦 本月利息：${bankInterest}
+【DT币消耗明细】：
+${logStr}
+        `.trim();
+
+        document.getElementById('adminCheckResult').innerText = res;
+        sessionStorage.setItem('lastAdminCheckResult', res);
+    }catch(e){
+        alert('❌ 数据解析失败：'+e.message);
+    }
+}
+
+// ==================== 查看上次查询结果 ====================
+function addLastQueryButton() {
+    const btn = document.createElement('button');
+    btn.className = 'popup-btn';
+    btn.innerText = '📄 查看上次查询结果';
+    btn.style.marginTop = '8px';
+    btn.onclick = () => {
+        const last = sessionStorage.getItem('lastAdminCheckResult') || '无上次记录';
+        document.getElementById('adminCheckResult').innerText = last;
+    };
+    const target = document.getElementById('importCheckDataBtn');
+    if (target) target.parentNode.insertBefore(btn, target.nextSibling);
+}
+
+// ==================== 数据码导出增加银行 ====================
+async function exportDataCode() {
+    await promptSetUserName();
+    if (!checkAndUseLimit("data_code_export")) return;
+
+    const data = {
+        userName: getUserName(),
+        dtGold: localStorage.getItem("dtGold") || "0",
+        dtTicket: localStorage.getItem("dtTicket") || "0",
+        petLevel: localStorage.getItem("petLevel") || "0",
+        petFeedCount: localStorage.getItem("petFeedCount") || "0",
+        lastFeedDate: localStorage.getItem("lastFeedDate") || "",
+        todayEggGot: localStorage.getItem("todayEggGot") || "false",
+        superCodeUsed: localStorage.getItem("superCodeUsed") || "false",
+        codeUsed: localStorage.getItem("codeUsed") || "false",
+        resetCodeCount: localStorage.getItem("resetCodeCount") || "0",
+        chestOpenCount: localStorage.getItem("chestOpenCount") || "0",
+        fortuneTotalCount: localStorage.getItem("fortuneTotalCount") || "0",
+        exchangeTotalCount: localStorage.getItem("exchangeTotalCount") || "0",
+        dtLastSign: localStorage.getItem("dtLastSign") || "",
+        hasResetGoldOnce: localStorage.getItem("hasResetGoldOnce") || "false",
+        exportDevice: getDeviceModel(),
+        exportTime: new Date().toLocaleString(),
+        dtGoldLog: localStorage.getItem("dtGoldLog") || "[]",
+        bankFixed: localStorage.getItem("bankFixed") || "0",
+        bankFixedEnd: localStorage.getItem("bankFixedEnd") || "",
+        bankCurrent: localStorage.getItem("bankCurrent") || "0",
+        bankInterestMonth: localStorage.getItem("bankInterestMonth") || "0"
+    };
+
+    const json = JSON.stringify(data);
+    const encrypted = encrypt(json);
+    const code = "DT" + encrypted + "CODE";
+
+    navigator.clipboard.writeText(code).then(() => {
+        alert("✅ 数据码已复制！\n【主体】" + getUserName() + "\n" + code);
+    });
+
+    localStorage.setItem("lastExportTime", new Date().toLocaleString());
+    localStorage.setItem("lastExportDevice", data.exportDevice);
+    refreshDataCodeInfo();
+}
+
+// ==================== 数据码恢复增加银行 ====================
+async function importDataCode() {
+    await promptSetUserName();
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position:fixed; top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.95); z-index:999999;
+        display:flex; justify-content:center; align-items:center;
+        flex-direction:column; gap:15px; padding:20px;
+    `;
+
+    const title = document.createElement('div');
+    title.style.color = '#fff';
+    title.style.fontSize = '18px';
+    title.style.textAlign = 'center';
+    title.innerText = '📥 请粘贴你的 DT 数据码';
+
+    const input = document.createElement('input');
+    input.style.cssText = `
+        width:85%; max-width:320px; padding:14px;
+        border:none; border-radius:8px; font-size:16px;
+    `;
+    input.placeholder = '粘贴 DT 开头 CODE 结尾的数据码';
+
+    const btn = document.createElement('button');
+    btn.style.cssText = `
+        padding:12px 30px; border:none; border-radius:8px;
+        background:#64b5f6; color:#fff; font-size:16px; font-weight:bold;
+    `;
+    btn.innerText = '确认恢复';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.style.cssText = `
+        padding:12px 30px; border:none; border-radius:8px;
+        background:#ff4757; color:#fff; font-size:16px; font-weight:bold;
+    `;
+    cancelBtn.innerText = '取消恢复';
+    cancelBtn.onclick = () => {
+        document.body.removeChild(modal);
+    };
+
+    modal.append(title, input, btn, cancelBtn);
+    document.body.appendChild(modal);
+
+    btn.onclick = async () => {
+        const code = input.value.trim();
+        if (!code) {
+            alert('❌ 请输入数据码！');
+            return;
+        }
+        document.body.removeChild(modal);
+
+        if (!code.startsWith("DT") || !code.endsWith("CODE")) {
+            alert("❌ 数据码格式错误！");
+            return;
+        }
+
+        const encrypted = code.slice(2, -4);
+        const json = decrypt(encrypted);
+        if (!json) {
+            alert("❌ 数据码已损坏！");
+            return;
+        }
+
+        try {
+            const data = JSON.parse(json);
+            const dataUserName = data.userName || "未知用户";
+            const localUserName = getUserName();
+
+            localStorage.setItem("lastImportUserName", dataUserName);
+
+            if (dataUserName !== localUserName) {
+                const confirmReplace = confirm(
+                    "⚠️ 数据归属不一致！\n" +
+                    "你的主体：" + localUserName + "\n" +
+                    "数据主体：" + dataUserName + "\n\n" +
+                    "是否强行恢复？（可能覆盖他人数据）"
+                );
+                if (!confirmReplace) {
+                    alert("❌ 已取消恢复");
+                    return;
+                }
+            }
+
+            if (!checkAndUseLimit("data_code_import")) return;
+
+            localStorage.setItem("dtGold", data.dtGold || "0");
+            localStorage.setItem("dtTicket", data.dtTicket || "0");
+            localStorage.setItem("petLevel", data.petLevel || "0");
+            localStorage.setItem("petFeedCount", data.petFeedCount || "0");
+            localStorage.setItem("lastFeedDate", data.lastFeedDate || "");
+            localStorage.setItem("todayEggGot", data.todayEggGot || "false");
+            localStorage.setItem("superCodeUsed", data.superCodeUsed || "false");
+            localStorage.setItem("codeUsed", data.codeUsed || "false");
+            localStorage.setItem("resetCodeCount", data.resetCodeCount || "0");
+            localStorage.setItem("chestOpenCount", data.chestOpenCount || "0");
+            localStorage.setItem("fortuneTotalCount", data.fortuneTotalCount || "0");
+            localStorage.setItem("dtLastSign", data.dtLastSign || "");
+            localStorage.setItem("hasResetGoldOnce", data.hasResetGoldOnce || "false");
+            localStorage.setItem("dtGoldLog", data.dtGoldLog || "[]");
+            localStorage.setItem("bankFixed", data.bankFixed || "0");
+            localStorage.setItem("bankFixedEnd", data.bankFixedEnd || "");
+            localStorage.setItem("bankCurrent", data.bankCurrent || "0");
+            localStorage.setItem("bankInterestMonth", data.bankInterestMonth || "0");
+
+            localStorage.setItem("lastImportTime", new Date().toLocaleString());
+            alert("✅ 数据恢复成功！页面即将刷新");
+            location.reload();
+        } catch (e) {
+            alert("❌ 数据解析失败！");
+        }
+    };
+}
+
+// 页面加载时初始化
 window.addEventListener('DOMContentLoaded', function() {
     updateMedalUI();
     refreshDataCodeInfo();
+    initBankData();
+    calcBankInterest();
+    addLastQueryButton();
 
-    // 判断是否为微信浏览器
     const isWeChat = /MicroMessenger/i.test(navigator.userAgent);
     const wechatTip = document.getElementById('wechatTip');
-    
-    // 非微信才显示橙色闪烁提示
     if (!isWeChat) {
         wechatTip.innerText = '建议使用微信访问';
         wechatTip.style.display = 'inline-block';
