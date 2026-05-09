@@ -1936,7 +1936,7 @@
     left: 20px;
     width: 70px;
     height: 40px;
-    background: #64b5f6;
+    background: #666;
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -1944,7 +1944,7 @@
     font-weight: bold;
     cursor: pointer;
     z-index: 999;
-    box-shadow: 0 3px 8px rgba(100,181,246,0.3);
+    box-shadow: 0 3px 8px rgba(102,102,102,0.3);
     transition: all 0.3s ease;
     display: none;
 ">我的背包</button>
@@ -2129,8 +2129,8 @@
     <div class="choose-box">
       <div class="choose-title">🏦 联盟银行</div>
       <div class="currency-btns">
-        <button class="currency-btn gold-btn-choose" id="depositBtn">存DT币</button>
-        <button class="currency-btn ticket-btn-choose" id="withdrawBtn">取DT币</button>
+        <button class="currency-btn gold-btn-choose" onclick="depositGold()">存DT币</button>
+        <button class="currency-btn ticket-btn-choose" onclick="withdrawGold()">取DT币</button>
       </div>
       <div id="bankInfoText" style="margin-top:15px; font-size:12px; line-height:1.5; background:#283593; padding:10px; border-radius:6px; text-align:left;">
         银行余额：<span id="bankTotal">0</span> DT币<br>
@@ -2815,6 +2815,50 @@ bankBtn.addEventListener('click', (e) => {
     updateBankUI();
     bankModal.style.display = 'flex';
 });
+// 存DT币
+function depositGold() {
+    const type = prompt('选择存储类型：1=定期 2=活期');
+    if (type !== '1' && type !== '2') return alert('输入错误');
+    const numStr = prompt('输入存入DT币数量：');
+    const num = parseFloat(numStr);
+    if (isNaN(num) || num <= 0) return alert('输入无效');
+    if (goldCount < num) return alert('DT币不足');
+
+    goldCount -= num;
+    addGoldLog(-num, type === '1' ? '存入定期' : '存入活期');
+    updateAllGoldUI();
+
+    const bank = getBankData();
+    if (type === '1') {
+        const end = new Date(Date.now() + 30 * 86400000);
+        const endStr = end.getFullYear() + '-' + String(end.getMonth() + 1).padStart(2, '0') + '-' + String(end.getDate()).padStart(2, '0');
+        localStorage.setItem('bankFixed', (bank.fixed + num).toFixed(1));
+        localStorage.setItem('bankFixedEnd', endStr);
+    } else {
+        localStorage.setItem('bankCurrent', (bank.current + num).toFixed(1));
+    }
+    calcBankInterest();
+    updateBankUI();
+    alert('存入成功！');
+}
+
+// 取DT币
+function withdrawGold() {
+    const bank = getBankData();
+    if (bank.current <= 0) return alert('无可取DT币');
+    const numStr = prompt('可取余额：' + bank.current.toFixed(1) + '\n输入取出数量：');
+    const num = parseFloat(numStr);
+    if (isNaN(num) || num <= 0) return alert('输入无效');
+    if (num > bank.current) return alert('超出可取余额');
+
+    localStorage.setItem('bankCurrent', (bank.current - num).toFixed(1));
+    goldCount += num;
+    addGoldLog(num, "银行取出");
+    updateAllGoldUI();
+    calcBankInterest();
+    updateBankUI();
+    alert('取出成功！');
+}
 
 // 👇 修复空值不崩溃
 if(!bagBtn) console.warn('bagBtn 未加载');
@@ -2908,17 +2952,18 @@ signBtn.addEventListener('click', () => {
     }
 });
 
-    useGoldBtn.addEventListener('click', () => {
-        signPanel.classList.remove('show');
-        petBtnFloat.style.display = 'none';
-        bagBtn.style.display = 'none';
-        answerBtn.style.display = 'none';
-        inboxBtn.style.display = 'none';
-        codeCenterBtn.style.display = 'none';
-        updateAllGoldUI();
-        document.getElementById('dtShopModal').classList.add('show');
-        document.getElementById('overlay').classList.add('show');
-    });
+useGoldBtn.addEventListener('click', () => {
+    signPanel.classList.remove('show');
+    petBtnFloat.style.display = 'none';
+    bagBtn.style.display = 'none';
+    answerBtn.style.display = 'none';
+    inboxBtn.style.display = 'none';
+    codeCenterBtn.style.display = 'none';
+    bankBtn.style.display = 'none';
+    updateAllGoldUI();
+    document.getElementById('dtShopModal').classList.add('show');
+    document.getElementById('overlay').classList.add('show');
+});
 
 // 兑换码中心
 codeCenterBtn.addEventListener('click', (e) => {
@@ -4155,7 +4200,7 @@ document.getElementById('bankBtnFromBag').addEventListener('click', () => {
     document.getElementById('bankModal').style.display = 'flex';
 });
 
-document.getElementById('depositBtn').addEventListener('click', () => {
+document.getElementById('depositBtn').onclick = function() {
     const type = prompt('选择存储类型：1=定期 2=活期');
     if (type !== '1' && type !== '2') return alert('输入错误');
     const numStr = prompt('输入存入DT币数量：');
@@ -4179,9 +4224,9 @@ document.getElementById('depositBtn').addEventListener('click', () => {
     calcBankInterest();
     updateBankUI();
     alert('存入成功！');
-});
+};
 
-document.getElementById('withdrawBtn').addEventListener('click', () => {
+document.getElementById('withdrawBtn').onclick = function() {
     const bank = getBankData();
     if (bank.current <= 0) return alert('无可取DT币');
     const numStr = prompt('可取余额：' + bank.current.toFixed(1) + '\n输入取出数量：');
@@ -4196,8 +4241,7 @@ document.getElementById('withdrawBtn').addEventListener('click', () => {
     calcBankInterest();
     updateBankUI();
     alert('取出成功！');
-});
-
+};
 // ==================== 管理员查询增加银行信息 ====================
 function doAdminImportCheck(){
     const code = prompt('📥 请粘贴要查询的用户 DT 数据码：');
