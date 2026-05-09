@@ -4098,17 +4098,63 @@ function openAdminCheckModal(){
 }
 
 function doAdminImportCheck(){
-    const code = prompt('📥 请粘贴要查询的用户 DT 数据码：');
-    if(!code) return;
-    if(!code.startsWith('DT') || !code.endsWith('CODE')){
-        alert('❌ 数据码格式错误！');
-        return;
-    }
+    // 创建无长度限制的大输入框弹窗
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position:fixed; top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.95); z-index:999999;
+        display:flex; justify-content:center; align-items:center;
+        flex-direction:column; gap:15px; padding:20px;
+    `;
 
-    try {
-        const encrypted = code.slice(2, -4);
-        const json = decrypt(encrypted);
-        const data = JSON.parse(json);
+    const title = document.createElement('div');
+    title.style.color = '#fff';
+    title.style.fontSize = '18px';
+    title.style.textAlign = 'center';
+    title.innerText = '📥 请粘贴要查询的用户 DT 数据码';
+
+    const input = document.createElement('textarea');
+    input.style.cssText = `
+        width:85%; max-width:380px; height:180px; padding:14px;
+        border:none; border-radius:8px; font-size:14px;
+        resize:none;
+    `;
+    input.placeholder = '请在这里粘贴完整的 DT 数据码（无长度限制）';
+
+    const btn = document.createElement('button');
+    btn.style.cssText = `
+        padding:12px 30px; border:none; border-radius:8px;
+        background:#64b5f6; color:#fff; font-size:16px; font-weight:bold;
+    `;
+    btn.innerText = '确认查询';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.style.cssText = `
+        padding:12px 30px; border:none; border-radius:8px;
+        background:#ff4757; color:#fff; font-size:16px; font-weight:bold;
+    `;
+    cancelBtn.innerText = '取消';
+    cancelBtn.onclick = () => {
+        document.body.removeChild(modal);
+    };
+
+    modal.append(title, input, btn, cancelBtn);
+    document.body.appendChild(modal);
+
+    btn.onclick = () => {
+        const code = input.value.trim();
+        document.body.removeChild(modal);
+
+        if(!code) return;
+        if(!code.startsWith('DT') || !code.endsWith('CODE')){
+            alert('❌ 数据码格式错误！');
+            return;
+        }
+
+        try {
+            const encrypted = code.slice(2, -4);
+            const json = decrypt(encrypted);
+            const data = JSON.parse(json);
 
 const logStr = data.dtGoldLog
   ? JSON.parse(data.dtGoldLog).map(item => `
@@ -4128,14 +4174,20 @@ const res = `
 【宝箱总次数】：${data.chestOpenCount || 0}
 【兑换总次数】：${data.exchangeTotalCount || 0}
 【DT币余额】：${data.dtGold || 0}
+🏦 银行定期：${data.bankFixed || 0}
+🏦 定期到期：${data.bankFixedEnd || '无'}
+🏦 银行活期：${data.bankCurrent || 0}
+🏦 本月利息：${data.bankInterestMonth || 0}
 【DT币消耗明细】：
 ${logStr}
         `.trim();
 
-        document.getElementById('adminCheckResult').innerText = res;
-    }catch(e){
-        alert('❌ 数据解析失败：'+e.message);
-    }
+            document.getElementById('adminCheckResult').innerText = res;
+            sessionStorage.setItem('lastAdminCheckResult', res);
+        }catch(e){
+            alert('❌ 数据解析失败：'+e.message);
+        }
+    };
 }
 document.getElementById("updateLogBtn").onclick = () => {
     closeAllPopups();
