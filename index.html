@@ -1,1 +1,4513 @@
-维护中。。。。。。
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DT联盟官网</title>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<style>
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: "Microsoft Yahei", sans-serif;
+        background: #0b0f1a;
+        color: #fff;
+        line-height: 1.6;
+        overflow-x: hidden;
+    }
+
+    .carousel-container {
+        width: 100%;
+        overflow: hidden;
+        position: relative;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+    .carousel-slide {
+        display: flex;
+        transition: transform 0.5s ease;
+        width: 100%;
+    }
+    .carousel-item {
+        flex: 0 0 100%;
+        width: 100%;
+    }
+    .carousel-item img {
+        width: 100%;
+        display: block;
+        object-fit: contain;
+    }
+    .carousel-dots {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+    }
+    .carousel-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    .carousel-dot.active {
+        background: #64b5f6;
+    }
+
+    .page-enter {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #1a237e;
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        animation: pageFadeOut 1.5s ease forwards;
+    }
+    .enter-logo {
+        font-size: 2rem;
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+        background-size: 500% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: colorChange 3s linear infinite, logoPulse 1s ease infinite alternate;
+        text-align: center;
+        padding: 0 20px;
+        line-height: 1.4;
+    }
+    @keyframes pageFadeOut {
+        0% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { opacity: 0; visibility: hidden; }
+    }
+    @keyframes logoPulse {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.1); }
+    }
+
+
+    .menu-btn {
+        position: fixed;
+        top: 12px;
+        left: 15px;
+        width: 30px;
+        height: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        cursor: pointer;
+        z-index: 100;
+        transition: transform 0.3s ease;
+    }
+    .menu-btn span {
+        width: 100%;
+        height: 3px;
+        background: #fff;
+        border-radius: 2px;
+    }
+    .menu-btn.active {
+        transform: rotate(90deg);
+    }
+
+    .pen-btn {
+        position: fixed;
+        top: 50px;
+        left: 15px;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        z-index: 100;
+        font-size: 1.2rem;
+        background: rgba(26, 35, 126, 0.8);
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+    .pen-btn:hover {
+        background: #64b5f6;
+        transform: scale(1.1);
+    }
+    .pen-btn.active {
+        transform: rotate(180deg);
+    }
+
+    .new-message-bubble {
+        position: fixed;
+        top: 85px;
+        left: 12px;
+        background: #ff4757;
+        color: #fff;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        z-index: 101;
+    }
+    .new-message-bubble::after {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 0 5px 5px 5px;
+        border-style: solid;
+        border-color: transparent transparent #ff4757 transparent;
+    }
+
+    .message-board {
+        position: fixed;
+        top: 0;
+        right: -320px;
+        width: 320px;
+        height: 100vh;
+        background: #121a30;
+        z-index: 95;
+        transition: right 0.5s ease;
+        display: flex;
+        flex-direction: column;
+        border-left: 2px solid #64b5f6;
+        box-shadow: -3px 0 15px rgba(0,0,0,0.3);
+    }
+    .message-board.show {
+        right: 0;
+    }
+    .message-board-header {
+        padding: 15px;
+        background: #1a237e;
+        text-align: center;
+        font-weight: bold;
+        font-size: 1.1rem;
+        border-bottom: 1px solid #283593;
+    }
+    .message-container {
+        flex: 1;
+        padding: 10px;
+        overflow: hidden;
+        position: relative;
+        background: rgba(0,0,0,0.2);
+    }
+    .message-jump-btn {
+        padding: 15px;
+        background: #1a237e;
+        border-top: 1px solid #283593;
+    }
+    .jump-to-message {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        background: #64b5f6;
+        color: #fff;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        font-size: 1rem;
+    }
+    .jump-to-message:hover {
+        background: #42a5f5;
+    }
+    .danmu {
+        position: absolute;
+        white-space: nowrap;
+        padding: 5px 10px;
+        border-radius: 20px;
+        color: #fff;
+        font-size: 0.8rem;
+        animation: danmuMove linear;
+        z-index: 1;
+        pointer-events: none;
+    }
+    @keyframes danmuMove {
+        from { left: 100%; transform: translateX(0); }
+        to { left: 0; transform: translateX(-100%); }
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -220px;
+        width: 220px;
+        height: 100vh;
+        background: #121a30;
+        padding: 60px 20px 20px;
+        transition: left 0.3s ease;
+        z-index: 99;
+    }
+    .sidebar.show {
+        left: 0;
+    }
+    .sidebar a {
+        display: block;
+        color: #fff;
+        text-decoration: none;
+        padding: 12px 0;
+        font-size: 16px;
+        border-bottom: 1px solid #2a3a5a;
+    }
+    .sidebar a:hover {
+        color: #64b5f6;
+    }
+
+    .scroll-notice {
+        display: flex;
+        align-items: center;
+        background: #000;
+        height: 24px;
+        overflow: hidden;
+        position: relative;
+        margin-top: 0;
+    }
+    .notice-fixed {
+        color: #dc3545;
+        font-weight: bold;
+        padding: 0 10px;
+        background: #000;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+        z-index: 2;
+        font-family: "SimHei", sans-serif;
+        font-size: 14px;
+    }
+    .scroll-wrap {
+        flex: 1;
+        background: #fff;
+        height: 100%;
+        overflow: hidden;
+        position: relative;
+    }
+    .scroll-notice-content {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #007bff;
+        white-space: nowrap;
+        animation: scroll 20s linear infinite;
+        padding-left: 10px;
+        font-family: "SimHei", sans-serif;
+        font-size: 14px;
+        font-weight: 900;
+        letter-spacing: 1px;
+    }
+    @keyframes scroll {
+        0% { transform: translate(0, -50%); }
+        100% { transform: translate(-100%, -50%); }
+    }
+
+    header {
+        background: linear-gradient(90deg, #1a237e, #283593);
+        padding: 20px 20px 25px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        animation: headerSlideDown 0.8s ease forwards;
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    @keyframes headerSlideDown {
+        0% { opacity: 0; transform: translateY(-50px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    header h1 {
+        font-size: 2rem;
+        margin-bottom: 8px;
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+        background-size: 500% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: colorChange 3s linear infinite;
+    }
+    @keyframes colorChange {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    header p {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+
+    .container {
+        max-width: 100%;
+        margin: 15px auto;
+        padding: 0 15px;
+        animation: containerFadeIn 1s ease forwards 0.5s;
+        opacity: 0;
+    }
+    @keyframes containerFadeIn {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .section {
+        background: #121a30;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .section:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    }
+    .section h2 {
+        color: #64b5f6;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+        font-family: "KaiTi", serif;
+        font-weight: normal;
+        border-bottom: 2px solid #283593;
+        padding-bottom: 8px;
+    }
+    .section p {
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    #about p {
+        font-size: 0.75rem;
+    }
+
+    .tribe-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    .tribe-button {
+        background: linear-gradient(135deg, #1a237e, #283593);
+        border: none;
+        border-radius: 12px;
+        padding: 15px 10px;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 1.2rem;
+        font-family: "Microsoft Yahei", sans-serif;
+        text-align: center;
+        line-height: 1.4;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .tribe-button:hover {
+        background: linear-gradient(135deg, #283593, #3949ab);
+        transform: translateY(-3px);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 4px 8px rgba(0,0,0,0.3);
+    }
+    .tribe-button small {
+        display: block;
+        font-size: 0.75rem;
+        opacity: 0.8;
+        margin-top: 5px;
+        font-weight: normal;
+    }
+
+    .jump-btn {
+        display: block;
+        width: 100%;
+        padding: 14px;
+        background: #1a237e;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        transition: background 0.3s;
+    }
+    .jump-btn:hover {
+        background: #283593;
+    }
+
+    .divination-btn {
+        display: block;
+        width: 100%;
+        padding: 20px;
+        background: linear-gradient(45deg, #d4af37, #ffd700);
+        color: #000;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        margin-bottom: 10px;
+    }
+    .divination-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        background: linear-gradient(45deg, #ffd700, #fffacd);
+    }
+
+    .fortune-count {
+        text-align: right;
+        font-size: 0.9rem;
+        color: #64b5f6;
+        margin-top: 5px;
+    }
+
+    .divination-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+    .divination-modal.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+    .bamboo-tube {
+        width: 100px;
+        height: 200px;
+        background: #8b4513;
+        border-radius: 10px;
+        position: relative;
+        animation: tube-shake 1s ease-in-out;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-shadow: 0 0 5px #000;
+        opacity: 1;
+        transition: opacity 0.5s ease;
+    }
+    @keyframes tube-shake {
+        0% { transform: rotate(0deg); }
+        25% { transform: rotate(15deg); }
+        50% { transform: rotate(-15deg); }
+        75% { transform: rotate(15deg); }
+        100% { transform: rotate(0deg); }
+    }
+    .fortune-text {
+        position: absolute;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #ffd700;
+        text-shadow: 0 0 10px #000;
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        z-index: 1001;
+    }
+    .fortune-text.show {
+        opacity: 1;
+    }
+
+    .overlay {
+        position: fixed;
+        left: 0; top: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.6);
+        z-index: 199;
+        display: none;
+        backdrop-filter: blur(5px);
+    }
+    .overlay.show {
+        display: block;
+        animation: overlayFadeIn 0.3s ease forwards;
+    }
+    @keyframes overlayFadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+    }
+
+    .popup-base {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background: #1a237e;
+        border-radius: 10px;
+        padding: 25px;
+        width: 280px;
+        z-index: 200;
+        display: none;
+        animation: popupScaleIn 0.3s ease forwards;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+    }
+    .popup-base.show {
+        display: block;
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    @keyframes popupScaleIn {
+        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+        100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+    .popup-close {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        color: #fff;
+        transition: color 0.3s ease, transform 0.3s ease;
+    }
+    .popup-close:hover {
+        color: #64b5f6;
+        transform: rotate(90deg);
+    }
+    .popup-btn {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background: #283593;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        margin: 8px 0;
+        cursor: pointer;
+        transition: background 0.3s;
+        text-align: center;
+    }
+    .popup-btn:hover {
+        background: #3949ab;
+    }
+
+    #popupMainTribeTags .tag-content {
+        font-size: 14px;
+        color: #000;
+        line-height: 1.8;
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 10px;
+    }
+
+    .fund-item {
+        padding: 12px;
+        background: #283a5a;
+        border-radius: 6px;
+        text-align: center;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+    }
+    .more-btn {
+        display: block;
+        width: 180px;
+        margin: 20px auto 0;
+        padding: 12px;
+        background: #1a237e;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-align: center;
+        text-decoration: none;
+        transition: background 0.3s;
+    }
+    .fund-btn {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background: #1a237e;
+        color: #fff;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: background 0.3s, transform 0.3s ease;
+    }
+    .support-fund-text {
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+        background-size: 500% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: colorChange 3s linear infinite;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    .recruit-img {
+        width: 100%;
+        border-radius: 8px;
+        margin-top: 15px;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+    }
+    footer {
+        background: #121a30;
+        text-align: center;
+        padding: 15px;
+        margin-top: 20px;
+        opacity: 0.7;
+        font-size: 0.85rem;
+        animation: footerFadeIn 1s ease forwards 1s;
+        opacity: 0;
+    }
+    @keyframes footerFadeIn {
+        0% { opacity: 0; }
+        100% { opacity: 0.7; }
+    }
+    .assist-image-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        z-index: 2000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+    .assist-image-modal.active {
+        opacity: 1;
+        pointer-events: all;
+    }
+    .assist-image-content {
+        max-width: 90%;
+        max-height: 90%;
+        border-radius: 8px;
+    }
+
+.gold-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 55px;
+    height: 55px;
+    background: transparent;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 999;
+    transition: transform 0.3s ease;
+    border: none;
+    padding:0;
+    overflow:hidden;
+}
+    .gold-btn:hover {
+        transform: scale(1.1);
+    }
+    .report-btn {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        width: 70px;
+        height: 40px;
+        background: #ff4757;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 999;
+        box-shadow: 0 3px 8px rgba(255,71,87,0.3);
+        transition: all 0.3s ease;
+    }
+    .report-btn:hover {
+        background: #e03a46;
+        transform: scale(1.05);
+    }
+    .sign-panel {
+        position: fixed;
+        bottom: 85px;
+        right: 20px;
+        width: 180px;
+        background: #1a237e;
+        border-radius: 10px;
+        padding: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        z-index: 998;
+        display: none;
+        border: 2px solid #64b5f6;
+    }
+    .sign-panel.show {
+        display: block;
+        animation: panelUp 0.3s ease;
+    }
+    @keyframes panelUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .pet-btn {
+        width: 100%;
+        padding: 10px;
+        background: #666;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-bottom: 8px;
+    }
+    .sign-btn {
+        width: 100%;
+        padding: 10px;
+        background: #ffd700;
+        color: #000;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-bottom: 8px;
+    }
+    .use-gold-btn {
+        width: 100%;
+        padding: 10px;
+        background: #64b5f6;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-bottom: 8px;
+    }
+    .gold-count {
+        text-align: center;
+        color: #ffd700;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    .get-gold-tip {
+        text-align: right;
+        font-size: 11px;
+        color: #ccc;
+        margin-top: 5px;
+    }
+
+.dt-shop-modal {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #121a30;
+    border: 2px solid #64b5f6;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 380px;
+    padding: 20px;
+    z-index: 300;
+    display: none;
+}
+.dt-shop-modal.show {
+    display: block;
+}
+/* 新增：顶部图片样式 */
+.shop-top-img {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    display: block;
+}
+.shop-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.shop-title {
+    font-size: 18px;
+    color: #ffd700;
+    font-weight: bold;
+}
+.current-gold {
+    font-size: 14px;
+    color: #ffd700;
+    font-weight: bold;
+}
+.rule-btn {
+    background: #283593;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.shop-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+.shop-item {
+    background: #1a237e;
+    border-radius: 8px;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 12px;
+    color: #fff;
+    min-height: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #283593;
+    cursor: pointer;
+}
+.shop-item.green {
+    background: #388e3c;
+    border-color: #2e7d32;
+}
+.shop-item.red {
+    background: #d32f2f;
+    border-color: #b71c1c;
+}
+.shop-item.gray {
+    background: #616161;
+    border-color: #424242;
+}
+.shop-item .price {
+    margin-top: 4px;
+    font-size: 10px;
+    opacity: 0.9;
+}
+
+    .card-modal {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.85);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+    .exchange-card {
+        width: 85%;
+        max-width: 320px;
+        height: 180px;
+        background: #1a237e;
+        border: 3px solid #64b5f6;
+        border-radius: 12px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        box-shadow: 0 0 20px rgba(100, 181, 246, 0.5);
+    }
+    .card-title {
+        font-size: 26px;
+        font-weight: bold;
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+        background-size: 500% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: colorChange 3s linear infinite;
+        margin-bottom: 10px;
+    }
+    .card-time {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        font-size: 12px;
+        color: #fff;
+        opacity: 0.9;
+    }
+    .card-desc {
+        position: absolute;
+        bottom: 15px;
+        left: 15px;
+        font-size: 11px;
+        color: #fff;
+        opacity: 0.85;
+        line-height: 1.3;
+    }
+    .close-card {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 18px;
+    }
+
+    .chest-container {
+        text-align: center;
+        margin: 25px 0;
+        position: relative;
+    }
+    .chest {
+        width: 140px;
+        height: 110px;
+        margin: 0 auto;
+        position: relative;
+        cursor: pointer;
+        filter: drop-shadow(0 8px 12px rgba(255,215,0,0.4));
+        transition: transform 0.3s ease;
+    }
+    .chest:hover {
+        transform: scale(1.05);
+    }
+    .chest-body {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 70px;
+        background: linear-gradient(180deg, #8B4513, #5D2906);
+        border-radius: 8px;
+        border: 3px solid #D2B48C;
+        box-shadow: 
+            inset 0 4px 8px rgba(0,0,0,0.5),
+            0 4px 0 #4b2304;
+    }
+    .chest-lid {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 126px;
+        height: 35px;
+        background: linear-gradient(180deg, #A0522D, #7c3f14);
+        border-radius: 10px 10px 0 0;
+        border: 3px solid #D2B48C;
+        border-bottom: none;
+        box-shadow: inset 0 -3px 6px rgba(0,0,0,0.4);
+        transform-origin: bottom center;
+        animation: chestLid 3.2s ease-in-out infinite;
+    }
+    .chest-lock {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 18px;
+        height: 22px;
+        background: linear-gradient(45deg, #FFD700, #FFA500);
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        z-index: 2;
+    }
+    .chest-lock::after {
+        content: '';
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 8px;
+        height: 10px;
+        background: #1a1a1a;
+        border-radius: 2px;
+    }
+    .chest-light {
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 50px;
+        background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, transparent 65%);
+        opacity: 0;
+        animation: chestLight 3.2s ease-in-out infinite;
+        z-index: -1;
+    }
+    @keyframes chestLid {
+        0%,100% { transform: translateX(-50%) rotateX(0deg); top:20px; }
+        50% { transform: translateX(-50%) rotateX(-25deg); top:10px; }
+    }
+    @keyframes chestLight {
+        0%,100% { opacity: 0; }
+        50% { opacity: 1; }
+    }
+    .chest-text {
+        margin-top: 15px;
+        color: #ffd700;
+        font-weight: bold;
+        font-size: 1.1rem;
+        text-shadow: 0 0 8px rgba(255,215,0,0.6);
+    }
+    .chest-rule-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #283593;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+    .code-btn {
+        width: 100%;
+        padding: 10px;
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+        background-size: 500% 100%;
+        color: #000;
+        font-weight: bold;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-bottom: 15px;
+        animation: colorChange 3s linear infinite;
+    }
+
+    .gift-btn {
+        position: fixed;
+        bottom: 120px;
+        left: 20px;
+        width: 70px;
+        height: 40px;
+        background: #ffd700;
+        color: #000;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 999;
+        box-shadow: 0 3px 8px rgba(255,215,0,0.3);
+        transition: all 0.3s ease;
+        display: none;
+    }
+    .gift-btn:hover {
+        background: #ffaf00;
+        transform: scale(1.05);
+    }
+
+    .pet-btn-float {
+        position: fixed;
+        bottom: 70px;
+        left: 20px;
+        width: 70px;
+        height: 40px;
+        background: #666;
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+        background-size: 500% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: colorChange 3s linear infinite;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 999;
+        box-shadow: 0 3px 8px rgba(102,102,102,0.3);
+        transition: all 0.3s ease;
+        display: none;
+    }
+    .pet-btn-float:hover {
+        background: #888;
+        transform: scale(1.05);
+    }
+
+    .inbox-btn {
+        position: fixed;
+        bottom: 20px;
+        left: 100px;
+        width: 70px;
+        height: 40px;
+        background: #64b5f6;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 999;
+        box-shadow: 0 3px 8px rgba(100,181,246,0.3);
+        transition: all 0.3s ease;
+        display: none;
+    }
+    .inbox-btn:hover {
+        background: #42a5f5;
+        transform: scale(1.05);
+    }
+
+    /* 答题有奖按钮 */
+    .answer-btn {
+        position: fixed;
+        bottom: 70px;
+        left: 100px;
+        width: 70px;
+        height: 40px;
+        background: #ff9800;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 999;
+        box-shadow: 0 3px 8px rgba(255,152,0,0.3);
+        transition: all 0.3s ease;
+        display: none;
+    }
+    .answer-btn:hover {
+        background: #f57c00;
+        transform: scale(1.05);
+    }
+
+    .code-center-btn {
+        position: fixed;
+        bottom: 20px;
+        left: 180px;
+        width: 70px;
+        height: 40px;
+        background: #388e3c;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 999;
+        box-shadow: 0 3px 8px rgba(56,142,60,0.3);
+        transition: all 0.3s ease;
+        display: none;
+    }
+    .code-center-btn:hover {
+        background: #2e7d32;
+        transform: scale(1.05);
+    }
+
+    .letter-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.9);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .letter-box {
+        width: 90%;
+        max-width: 350px;
+        background: #fff;
+        color: #000;
+        border-radius: 12px;
+        padding: 25px;
+        position: relative;
+        box-shadow: 0 0 20px rgba(100,181,246,0.5);
+    }
+    .letter-title {
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 20px;
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+        background-size: 500% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: colorChange 3s linear infinite;
+    }
+    .letter-content {
+        line-height: 1.8;
+        font-size: 15px;
+        margin-bottom: 20px;
+    }
+    .close-letter {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 20px;
+        cursor: pointer;
+        color: #333;
+    }
+
+    /* 神兽弹窗样式 */
+    .pet-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.85);
+        z-index: 8888;
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+    .pet-box {
+        width: 320px;
+        height: 380px;
+        background: #1a237e;
+        border: 3px solid #64b5f6;
+        border-radius: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        position: relative;
+        box-shadow: 0 0 30px rgba(100,181,246,0.4);
+    }
+    .pet-level-bar {
+        position: absolute;
+        top: 20px;
+        width: 80%;
+        height: 8px;
+        background: #2a3a5a;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .pet-level-progress {
+        height: 100%;
+        background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+        width: 0%;
+        transition: width 0.5s ease;
+        border-radius: 4px;
+    }
+    .pet-level-text {
+        position: absolute;
+        top: 35px;
+        color: #ffd700;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    .pet-body {
+        width: 160px;
+        height: 160px;
+        margin-top: 30px;
+        position: relative;
+        animation: petFloat 2s ease-in-out infinite;
+    }
+    @keyframes petFloat {
+        0%,100% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+    }
+    .pet-shape {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 80px;
+        transition: all 0.6s ease;
+    }
+    .pet-feed-btn {
+        margin-top: 20px;
+        padding: 10px 25px;
+        background: linear-gradient(45deg, #ffd700, #ffaf00);
+        color: #000;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 15px;
+        transition: transform 0.2s ease;
+    }
+    .pet-feed-btn:active {
+        transform: scale(0.95);
+    }
+    .pet-rule-btn {
+        margin-top: 8px;
+        padding: 6px 18px;
+        background: #64b5f6;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        cursor: pointer;
+    }
+    .pet-egg {
+        background: radial-gradient(circle, #fff 0%, #ffd700 60%);
+        box-shadow: 0 0 20px #ffd700;
+    }
+    .pet-lv1 {
+        background: radial-gradient(circle, #e3f2fd 0%, #64b5f6 70%);
+        box-shadow: 0 0 25px #64b5f6;
+    }
+    .pet-lv5 {
+        background: radial-gradient(circle, #fce4ec 0%, #f48fb1 70%);
+        box-shadow: 0 0 30px #f48fb1;
+        font-size: 95px;
+    }
+    .pet-lv10 {
+        background: radial-gradient(circle, #fff3e0 0%, #ffb74d 70%);
+        box-shadow: 0 0 35px #ffb74d;
+        font-size: 110px;
+    }
+    .pet-lv20 {
+        background: radial-gradient(circle, #e8f5e8 0%, #81c784 70%);
+        box-shadow: 0 0 40px #81c784;
+        font-size: 125px;
+    }
+    .pet-lv50 {
+        background: radial-gradient(circle, #f3e5f5 0%, #ce93d8 70%);
+        box-shadow: 0 0 50px #ce93d8;
+        font-size: 140px;
+    }
+    .pet-egg-btn {
+        position: absolute;
+        bottom: 25px;
+        right: 25px;
+        width: 45px;
+        height: 45px;
+        background: #ffd700;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 0 15px #ffd700;
+        display: none;
+    }
+
+    /* 我的背包样式 */
+    .bag-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.85);
+        z-index: 9998;
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+    .bag-box {
+        width: 90%;
+        max-width: 350px;
+        background: #1a237e;
+        border: 3px solid #64b5f6;
+        border-radius: 15px;
+        padding: 30px 20px;
+        text-align: center;
+        position: relative;
+    }
+    .bag-title {
+        font-size: 22px;
+        color: #ffd700;
+        font-weight: bold;
+        margin-bottom: 30px;
+    }
+    .ticket-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        font-size: 24px;
+        padding: 15px;
+        background: #283593;
+        border-radius: 10px;
+        cursor: pointer;
+    }
+    .ticket-icon {
+        font-size: 32px;
+    }
+    .ticket-text {
+        font-size: 18px;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    /* 货币选择弹窗 */
+    .choose-currency-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 9999;
+        display: none;
+        justify-content: center;
+        align-items: center;
+    }
+    .choose-box {
+        width: 85%;
+        max-width: 320px;
+        background: #1a237e;
+        border: 2px solid #64b5f6;
+        border-radius: 12px;
+        padding: 30px 20px;
+        text-align: center;
+    }
+    .choose-title {
+        font-size: 18px;
+        color: #fff;
+        margin-bottom: 25px;
+        line-height: 1.5;
+    }
+    .currency-btns {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+    .currency-btn {
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        border: none;
+        font-size: 16px;
+    }
+    .gold-btn-choose {
+        background: #ffd700;
+        color: #000;
+    }
+    .ticket-btn-choose {
+        background: #64b5f6;
+        color: #fff;
+    }
+/* ==================== 勋章系统样式 ==================== */
+/* 右上角勋章 */
+.medal-top {
+    position: fixed;
+    top: 12px;
+    right: 15px;
+    z-index: 1000;
+    text-align: center;
+}
+.medal-img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+}
+.medal-name {
+    font-size: 12px;
+    margin-top: 2px;
+    white-space: nowrap;
+    animation: blink 2s step-end infinite;
+    font-family: "KaiTi", "楷体", serif;
+    background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+    background-size: 500% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: colorChange 3s linear infinite, blink 2s step-end infinite;
+}
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* 背包内勋章展示条 */
+.medal-bag-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #283593;
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin-top: 12px;
+}
+.medal-bag-text {
+    font-size: 18px;
+    color: #fff;
+    font-weight: bold;
+}
+.medal-bag-img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+}
+.medal-top {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+.medal-top:hover {
+    transform: scale(1.08);
+}
+@keyframes blink2s {
+    0% { opacity:1; }
+    50% { opacity:0; }
+    100% { opacity:1; }
+}
+#wechatTip {
+    animation: blink2s 2s step-end infinite;
+}
+</style>
+</head>
+<body>
+<div class="page-enter"><div class="enter-logo">今天你检查联盟代码绑定情况了吗</div></div>
+<div class="overlay" id="overlay"></div>
+<div class="divination-modal" id="divinationModal"><div class="bamboo-tube" id="bambooTube"></div><div class="fortune-text" id="fortuneText"></div></div>
+<div class="assist-image-modal" id="assistImageModal"><img src="https://s41.ax1x.com/2026/03/28/pe1P9W4.png" alt="辅助服务图片" class="assist-image-content" id="assistImage"></div>
+
+<div class="popup-base" id="popupMainTribe">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>主力部落</h3>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmpUUE9YR2VvV2Vt', '_blank')">部落招人门槛</button>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmxranNYTkRkcmRL', '_blank')">部落相应规则</button>
+    <button class="popup-btn" onclick="showMainTribeTags()">主力部落标签</button>
+</div>
+
+<div class="popup-base" id="popupMainTribeTags">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>主力部落标签</h3>
+    <div class="tag-content">
+        1️⃣国服总部『大唐天子』#2L0UJ8L8Y<br>
+        2️⃣国服第一分部『仲谋』#2YY2VC29L<br>
+        3️⃣国服第二分部『神州十六号』#2YJYP9JJY<br>
+        4️⃣国服第三分部『皮皮卡』#2Q8RY80JR<br>
+        5️⃣国服第四分部『联盟之家』#2QVU9RLCP<br>
+        6️⃣国服第五分部『DT辰逸阁』#2QLL88JJ8<br>
+        7️⃣国服第六分部『九霄盟』#2QY0CGR00<br>
+        8️⃣国服第七分部『青墨书阁』#2Q99UL90J<br>
+        9️⃣国服第八分部『预备营』#2QU0LLUV0
+    </div>
+</div>
+
+<div class="popup-base" id="popupSeries">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>系列扩张部落</h3>
+    <button class="popup-btn" onclick="showSeriesPopup('qiangsheng')">强盛系列</button>
+    <button class="popup-btn" onclick="showSeriesPopup('beidou')">北斗系列</button>
+    <button class="popup-btn" onclick="showSeriesPopup('shanhaijing')">山海经系列</button>
+    <button class="popup-btn" onclick="showSeriesPopup('jianghu')">江湖系列</button>
+</div>
+
+<div class="popup-base" id="popupQiangSheng">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>强盛系列</h3>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmpUUE9YR2VvV2Vt', '_blank')">强盛招人门槛</button>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmxranNYTkRkcmRL', '_blank')">强盛部落规则</button>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUktQWWFVZm9YWUxZ', '_blank')">强盛部落标签</button>
+</div>
+
+<div class="popup-base" id="popupBeiDou">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>北斗系列</h3>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmpUUE9YR2VvV2Vt', '_blank')">北斗招人门槛</button>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmxranNYTkRkcmRL', '_blank')">北斗部落规则</button>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmFCaHdQUHB0cmVX', '_blank')">北斗部落标签</button>
+</div>
+
+<div class="popup-base" id="popupShanHaiJing">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>山海经系列</h3>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmpUUE9YR2VvV2Vt', '_blank')">山海经招人门槛</button>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmxranNYTkRkcmRL', '_blank')">山海经部落规则</button>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUnFqc2Z3UEVLbUxi', '_blank')">山海经部落标签</button>
+</div>
+
+<div class="popup-base" id="popupJiangHu">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>江湖系列</h3>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmpUUE9YR2VvV2Vt', '_blank')">江湖招人门槛</button>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmxranNYTkRkcmRL', '_blank')">江湖部落规则</button>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmpwRmt5QXpHTnhP', '_blank')">江湖部落标签</button>
+</div>
+
+<div class="popup-base" id="popupJoinCoop">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>加盟合作部落</h3>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmpUUE9YR2VvV2Vt', '_blank')">部落招人门槛</button>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmxranNYTkRkcmRL', '_blank')">部落相应规则</button>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmN2cXB0R2JUbmNO', '_blank')">加盟合作部落标签</button>
+</div>
+
+<div class="popup-base" id="popupFuncAssist">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>辅助型部落</h3>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmpUUE9YR2VvV2Vt', '_blank')">部落招人门槛</button>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUmxranNYTkRkcmRL', '_blank')">部落相应规则</button>
+    <button class="popup-btn" onclick="window.open('https://docs.qq.com/doc/DUk1td09Md2xtUk92', '_blank')">辅助型部落标签</button>
+</div>
+
+<div class="popup-base" id="popupFundStructure">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>联盟基金来源</h3>
+    <div>DT联盟的专属创作者代码提成收入<br>DT联盟的官方公众号流量广告费<br>DT联盟总首领自掏腰包补缺<br>偶尔有老板在官网为联盟的充电支持</div>
+</div>
+<div class="popup-base" id="popupFundUse">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>联盟基金用途</h3>
+    <div>主要用于：DT联盟旗下部落的招人脚本支出、奶号支出、每月抽奖支出、节日福利支出、官网DT币的兑换支出、联盟官方比赛奖励支出……</div>
+</div>
+<div class="popup-base" id="popupSupportChoose">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>联盟基金</h3>
+    <div class="fund-item" id="goCodeSupport">绑定联盟代码支持</div>
+    <div class="fund-item" id="goLoveSupport">为联盟发电支持</div>
+</div>
+<div class="popup-base" id="popupCodeSupport">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>绑定联盟代码支持</h3>
+    <div>每周在游戏内商店绑定联盟的创作者代码：dt8888<br>绑定后无论是否充值都是对联盟的支持<br>DT联盟因为有我们而更加强大<br><br>●请记得每周检查代码是否有过期需要重新绑定哦</div>
+</div>
+<div class="popup-base" id="popupLoveSupport">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>为联盟发电支持</h3>
+    <div>在DT联盟官方微信公众号【轩神辅助coc】的主页置顶文章中的“DT联盟详情介绍”这篇文章滑至末尾点击“喜欢作者”即可为DT联盟发电<br><br>温馨提示：请量力而行，即使再普通的成员，DT联盟仍然一样欢迎您！</div>
+</div>
+
+<div class="popup-base" id="chestRuleModal">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>宝箱规则</h3>
+    <div style="line-height:1.8;">
+        ①消耗DT币/DT券可开启“联盟好运宝箱”<br>
+        ②宝箱内可以开出的物品和概率详情如下：<br>
+         黄金令牌：0.12%<br>
+         黄金令牌碎片：1.65%<br>
+         现金红包：3.22%<br>
+         DT币：8.78%<br>
+         DT券：15.12％<br>
+         安慰奖：21.11％<br>
+         ⭐综合中奖率：50%<br>
+        ③抽到 黄金令牌/红包 的兑换方式同“DT币兑换中心”的兑换规则一样<br>
+        ④非DT联盟内成员不予兑换<br>
+        ⑤DT联盟总首领对该活动拥有最终解释权<br>
+    </div>
+</div>
+
+<!-- 官网更新日志弹窗 -->
+<!-- DT币消耗明细弹窗 -->
+<div class="popup-base" id="goldLogModal" style="z-index:9999;">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>💰 DT币消耗明细</h3>
+    <div id="goldLogContent" style="font-size:12px; line-height:2; background:#283593; padding:10px; border-radius:6px; margin-top:10px; max-height:300px; overflow-y:auto;">
+        暂无记录
+    </div>
+
+    <!-- 👇 在这里添加下方注释（已按你要求：最小号、红色、楷体、居中） -->
+    <div style="
+        text-align:center; 
+        margin-top:8px; 
+        font-size:10px; 
+        color:red; 
+        font-family:'KaiTi','楷体',serif;
+    ">
+        注：至多会保留最新的100条记录…
+    </div>
+</div>
+<div class="popup-base" id="updateLogModal" style="z-index:9999;">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>📝 DT联盟官网更新日志</h3>
+    <div style="font-size:12px; line-height:2; background:#283593; padding:10px; border-radius:6px; margin-top:10px; max-height:300px; overflow-y:auto;">
+        <div><b>2026-05-07</b></div>
+        <div>• 新增【官网更新日志】功能</div>
+        <div>• 恢复数据码弹窗新增【取消恢复】红色按钮</div>
+        <div>• 联盟部落群板块修改为【联盟QQ交流频道】板块</div>
+        <div>• 新增【DT币消耗明细】功能</div>
+        <div>• “新增非微信端访问”会提示“建议使用微信访问”以确保页面UI更流畅舒适</div>
+        <br>
+        <div><b>2026-05-06</b></div>
+        <div>• 勋章系统里新增 DT数据码 导出/恢复 功能</div>
+        <div>• 支持跨设备数据同步</div>
+        <div>• 采取投稿建议给 占卜/宝箱 开启页面新增取消按钮</div>
+        <br>
+        <div><b>2026-05-03</b></div>
+        <div>• 官网右上角新增“勋章系统”</div>
+        <br>
+        <div><b>2026-04-13</b></div>
+        <div>• 官网最底端新增官方抖音关注</div>
+        <div>• 新增投稿有奖项目入口</div>
+        <br>
+        <div><b>2026-04-04</b></div>
+        <div>• 新增：占卜系统、宝箱系统、神兽系统、DT币兑换系统</div>
+        <br>
+        <div><b>2026-03-20</b></div>
+        <div>• DT联盟官网正式审批通过投入使用！</div>
+    </div>
+</div>
+
+<div class="menu-btn" id="menuBtn"><span></span><span></span><span></span></div>
+<!-- 右上角勋章 + 数据备份弹窗 -->
+<div class="medal-top" id="medalTop" style="cursor:pointer;">
+    <img src="" id="medalTopImg" class="medal-img">
+    <div id="medalTopName" class="medal-name"></div>
+</div>
+
+<!-- DT数据码 导出/恢复 弹窗 -->
+<div class="popup-base" id="popupDataCode" style="z-index:9999;">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>DT数据码管理</h3>
+    <button class="popup-btn" id="exportDataCodeBtn">📤 导出DT数据码</button>
+    <button class="popup-btn" id="importDataCodeBtn">📥 恢复DT数据码</button>
+<div style="margin-top:15px; padding:10px; background:#283593; border-radius:6px; font-size:12px; line-height:1.8;">
+    <div id="lastExportInfo">上次导出：无</div>
+    <div id="lastImportInfo">上次恢复：无</div>
+</div>
+<!-- DT币消耗明细按钮 -->
+<div style="text-align:center; margin-top:15px;">
+    <button class="popup-btn" id="adminCheckBtn" style="background:#d32f2f;">🔒 管理员校验专用</button>
+</div>
+<div style="text-align:center; margin-top:15px;">
+    <button class="popup-btn" id="goldLogBtn" style="background:#ff9800;">💰 DT币消耗明细</button>
+</div>
+
+<!-- 官网更新日志按钮 -->
+<div style="text-align:center; margin-top:15px;">
+    <button class="popup-btn" id="updateLogBtn" style="background:#388e3c;">📝 官网更新日志</button>
+</div>
+
+</div>
+<div class="pen-btn" id="penBtn">📋</div>
+<div class="new-message-bubble" id="newMessageBubble">新留言</div>
+
+<div class="message-board" id="messageBoard">
+    <div class="message-board-header">DT联盟留言板</div>
+    <div class="message-container" id="messageContainer"></div>
+    <div class="message-jump-btn">
+        <button class="jump-to-message" onclick="window.open('http://dt8866.powerbbs.cn/', '_blank')">查看联盟最新留言板</button>
+    </div>
+</div>
+
+<div class="sidebar" id="sidebar">
+    <a href="#about">关于DT联盟</a>
+    <a href="#tribes">旗下部落</a>
+    <a href="#fund">DT联盟基金</a>
+    <a href="#groups">各大部落群</a>
+    <a href="#formation">查找阵型</a>
+    <a href="#assist">辅助服务</a>
+    <a href="#divination">联盟占卜师</a>
+    <a href="#recruit">部落管理招募</a>
+    <a href="#log">DT联盟管理更新日志</a>
+    <a href="#match">DT联盟官方赛事</a>
+    <a href="#download">DT联盟资源下载</a>
+    <a href="#chest">宝箱的诱惑</a>
+    <a href="#contact">DT联盟官方媒体</a>
+</div>
+
+<header>
+<h1>DT联盟</h1><p>海纳百川｜部落不倒｜我们不散</p></header>
+<div class="scroll-notice">
+    <div class="notice-fixed">重要通知📢</div>
+    <div class="scroll-wrap">
+        <div class="scroll-notice-content">🎉 DT联盟旗下部落数量已超40+，成员总数超1600人，DT联盟因为有我们而更加强大！DT联盟旗下部落管理招募中，诚邀您的加入，志同道合才能让DT联盟越做越强！</div>
+    </div>
+</div>
+<div class="container">
+    <div class="carousel-container">
+        <div class="carousel-slide" id="carouselSlide">
+            <div class="carousel-item"><img src="https://s41.ax1x.com/2026/03/29/pe1bpOe.jpg" alt="轩神辅助coc"></div>
+            <div class="carousel-item"><img src="https://s41.ax1x.com/2026/03/29/pe1bSyD.jpg" alt="创作者代码支持"></div>
+            <div class="carousel-item"><img src="https://s41.ax1x.com/2026/03/29/pe1HzQO.jpg" alt="DT联盟欢迎您"></div>
+        </div>
+        <div class="carousel-dots" id="carouselDots">
+            <div class="carousel-dot active" data-index="0"></div>
+            <div class="carousel-dot active" data-index="1"></div>
+            <div class="carousel-dot active" data-index="2"></div>
+        </div>
+    </div>
+
+<!-- 设备型号展示区域（已移动到轮播和关于板块中间） -->
+<div style="
+    font-size:12px;
+    opacity:0.8;
+    margin-bottom:15px;
+    padding:0 5px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    width:100%;
+" id="deviceModel">
+    <span id="wechatTip" style="color:#ff9800; font-weight:bold; text-align:left;"></span>
+    <span id="deviceText" style="text-align:right; flex:1;"></span>
+</div>
+
+    <div class="section" id="about">
+        <h2>✨关于DT联盟</h2>
+        <p>DT联盟始于2020年夏，致力于部落冲突中的部落团队组织联盟、更新爆料、阵型推荐、辅助服务等，在后面，我们还将加入更多游戏项目……</p>
+        <a href="https://mp.weixin.qq.com/s/u3vSoq-O5W3cHpAP8WO_dg" class="more-btn" target="_blank">点我查看更多详情</a>
+    </div>
+
+    <div class="section" id="tribes">
+        <h2>✨旗下部落</h2>
+        <div class="tribe-buttons">
+            <button class="tribe-button" id="mainTribeBtn">主力部落<small>（点我查看详情）</small></button>
+            <button class="tribe-button" id="seriesTribeBtn">系列扩张部落<small>（点我查看详情）</small></button>
+            <button class="tribe-button" id="joinCoopBtn">加盟合作部落<small>（点我查看详情）</small></button>
+            <button class="tribe-button" id="funcAssistBtn">辅助型部落<small>（点我查看详情）</small></button>
+        </div>
+    </div>
+
+    <div class="section" id="fund">
+        <h2>✨DT联盟基金</h2>
+        <div class="fund-btn" id="fundStructureBtn">联盟基金来源</div>
+        <div class="fund-btn" id="fundUseBtn">联盟基金用途</div>
+        <div class="fund-btn" id="supportFundBtn"><span class="support-fund-text">支持联盟基金</span></div>
+    </div>
+
+    <div class="section" id="groups">
+        <h2>✨联盟QQ交流频道（2700+）</h2>
+        <a href="https://pd.qq.com/s/asq69qgib?b=9" class="jump-btn" target="_blank">点我加入</a>
+    </div>
+
+    <div class="section" id="formation">
+        <h2>📚查找阵型</h2>
+        <button class="jump-btn" id="formationBtn" onclick="window.open('https://coc.6oh.cn/?lx=1&name=%E9%B8%A1%E4%BD%A0%E5%A4%AA%E7%BE%8E', '_blank')">点我快速查找阵型</button>
+    </div>
+
+    <div class="section" id="assist">
+        <h2>🤖辅助服务</h2>
+        <button class="jump-btn" id="assistBtn">🏅养号｜刷墙｜奶号｜招人🏅</button>
+    </div>
+
+    <div class="section" id="divination">
+        <h2>🃏联盟占卜师</h2>
+        <button class="divination-btn" id="fortuneBtn">点击获取今日运势</button>
+        <div class="fortune-count" id="fortuneCount">【总占卜次数：0次】</div>
+    </div>
+
+    <div class="section" id="recruit">
+        <h2>✨部落新管理招募</h2>
+        <img src="https://s41.ax1x.com/2026/03/29/pe1bBkR.jpg" alt="招募" class="recruit-img" onclick="window.open('https://docs.qq.com/doc/DUmhCbGNGcm9ZWGtX','_blank')">
+        <div class="section" id="log" style="margin-top: 15px; margin-bottom: 0;">
+            <h2>✨DT联盟管理发展日志</h2>
+            <a href="https://docs.qq.com/doc/DUnhDUVBrRGtnZ2R1" class="jump-btn" target="_blank">重要通知更新日志</a>
+        </div>
+    </div>
+
+    <div class="section" id="match">
+        <h2>✨DT联盟官方赛事</h2>
+        <a href="https://docs.qq.com/doc/DUk5Gd25TUHZFR2NI" class="jump-btn" target="_blank">近期联盟部落赛程</a>
+    </div>
+
+    <div class="section" id="download">
+        <h2>✨联盟共享资源包</h2>
+        <a href="https://pan.quark.cn/s/d12d0f3f39a8" class="jump-btn" target="_blank">点击获取</a>
+    </div>
+
+    <div class="section" id="chest">
+        <h2>✨联盟好运宝箱
+            <button class="chest-rule-btn" id="chestRuleBtn">规则</button>
+        </h2>
+<div class="chest-container">
+    <div class="chest" id="chestBtn">
+        <!-- 直接用图片宝箱，尺寸和原来一致 -->
+        <img src="https://s41.ax1x.com/2026/05/04/peHVUSI.png" 
+             style="width:140px; height:110px; object-fit:contain; border-radius:8px;">
+    </div>
+    <div class="chest-text">10DT币/次 或 88DT券/次</div>
+</div>
+    </div>
+
+    <div class="section" id="contact">
+        <h2>✨DT联盟官方媒体</h2>
+        <div style="font-size: 0.75rem; line-height: 1.8;">
+            ●QQ官方频道：XSFZ258079<br>
+            ●微信公众号：轩神辅助coc
+        </div>
+        <img src="https://s41.ax1x.com/2026/04/13/peBcr0U.jpg" style="width:100%; margin-top:10px; border-radius:8px; cursor:pointer;" onclick="window.open('https://docs.qq.com/doc/DUnN2d3hodG5IWEts','_blank')">
+        <img src="https://s41.ax1x.com/2026/04/13/peBcs7F.jpg" style="width:100%; margin-top:10px; border-radius:8px; cursor:pointer;" onclick="window.open('https://wj.qq.com/s2/26307512/aadb/','_blank')">
+    </div>
+</div>
+
+<footer><p>&copy; 2026 DT联盟. All Rights Reserved.</p></footer>
+
+<!-- 修复：我的背包 按钮 -->
+<button class="bag-btn" id="bagBtn" style="
+    position: fixed;
+    bottom: 170px;
+    left: 20px;
+    width: 70px;
+    height: 40px;
+    background: #666;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 3px 8px rgba(102,102,102,0.3);
+    transition: all 0.3s ease;
+    display: none;
+">我的背包</button>
+
+<button class="bank-btn" id="bankBtn" style="
+    position: fixed;
+    bottom: 120px;
+    left: 20px;
+    width: 70px;
+    height: 40px;
+    background: #ffd700;
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 3px 8px rgba(255,215,0,0.3);
+    transition: all 0.3s ease;
+    display: none;
+">联盟银行</button>
+
+<!-- 联盟银行按钮（已移动到背包下方） -->
+
+<button class="pet-btn-float" id="petBtnFloat" style="
+    position: fixed;
+    bottom: 70px;
+    left: 20px;
+    width: 70px;
+    height: 40px;
+    background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+    background-size: 500% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: colorChange 3s linear infinite;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 3px 8px rgba(102,102,102,0.3);
+    transition: all 0.3s ease;
+    display: none;
+">我的神兽</button>
+
+<button class="answer-btn" id="answerBtn" style="
+    position: fixed;
+    bottom: 70px;
+    left: 100px;
+    width: 70px;
+    height: 40px;
+    background: #ff9800;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 3px 8px rgba(255,152,0,0.3);
+    transition: all 0.3s ease;
+    display: none;
+">答题有奖</button>
+
+<button class="inbox-btn" id="inboxBtn" style="
+    position: fixed;
+    bottom: 20px;
+    left: 100px;
+    width: 70px;
+    height: 40px;
+    background: #64b5f6;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 3px 8px rgba(100,181,246,0.3);
+    transition: all 0.3s ease;
+    display: none;
+">收件箱</button>
+
+<button class="code-center-btn" id="codeCenterBtn" style="
+    position: fixed;
+    bottom: 20px;
+    left: 180px;
+    width: 70px;
+    height: 40px;
+    background: #388e3c;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 999;
+    box-shadow: 0 3px 8px rgba(56,142,60,0.3);
+    transition: all 0.3s ease;
+    display: none;
+">兑换码中心</button>
+
+<button class="report-btn" id="reportBtn" onclick="window.open('https://wj.qq.com/s2/25486960/0107/','_blank')">举报/建议</button>
+
+<button class="gold-btn" id="goldBtn"><img src="https://s41.ax1x.com/2026/05/03/pe7ODC4.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"></button>
+<div class="sign-panel" id="signPanel">
+    <button class="sign-btn" id="signBtn">每日签到</button>
+    <button class="use-gold-btn" id="useGoldBtn">DT币兑换中心</button>
+    <div class="gold-count" id="goldCount">DT币数量：0</div>
+    <div class="get-gold-tip">你还可以通过签到，占卜，宝箱等官网活动获取海量DT币</div>
+</div>
+
+<div class="dt-shop-modal" id="dtShopModal">
+    <!-- 顶部插入图片 -->
+    <img src="https://s41.ax1x.com/2026/05/03/pe7dTPA.png" class="shop-top-img">
+    
+    <div class="shop-header">
+        <div class="shop-title">DT币兑换中心</div>
+        <div class="current-gold" id="currentGoldShop">当前：0币</div>
+    </div>
+    <div class="shop-grid">
+        <div class="shop-item green" onclick="exchangeGoods(1)">免处罚卡<span class="price">50币/张</span></div>
+        <div class="shop-item red" onclick="exchangeGoods(2)">黄金令牌<span class="price">1688币/张</span></div>
+        <div class="shop-item red" onclick="exchangeGoods(3)">实物礼品<span class="price">358币/份</span></div>
+        <div class="shop-item red" onclick="exchangeGoods(4)">3元红包<span class="price">188币/个</span></div>
+        <div class="shop-item gray" onclick="exchangeGoods(5)">测试专用<span class="price">0.1币/份</span></div>
+        <div class="shop-item">虚位待发</div>
+        <div class="shop-item">虚位待发</div>
+        <div class="shop-item">虚位待发</div>
+        <div class="shop-item">虚位待发</div>
+    </div>
+
+    <!-- 👇 新增：底部图片按钮（不重叠、自适应、居中） -->
+    <div style="text-align:center; margin-top:18px;">
+        <img 
+            src="https://s41.ax1x.com/2026/05/03/pe70s6x.png" 
+            style="width:100%; max-width:93px; border-radius:8px; cursor:pointer;"
+            onclick="window.open('https://docs.qq.com/doc/DUmZSb1dGcmlySnNo','_blank')"
+            alt="兑换记录查询"
+        >
+    </div>
+
+    <span class="popup-close" onclick="closeShop()">×</span>
+</div>
+
+<div class="letter-modal" id="letterModal" style="display:none;">
+    <div class="letter-box">
+        <span class="close-letter" onclick="closeLetter()">×</span>
+        <div class="letter-title">2026.5.6新增“数据码导入导出”功能介绍</div>
+        <div class="letter-content">
+            点击DT联盟官网右上角等级勋章弹出“DT数据码管理页面”点击“导出DT数据码”，会自动复制到您手机的键盘上，你可以在需要转移数据的设备或者网页去点击“恢复DT数据码”，然后在弹出的提示框内输入您前面设备获得的“DT数据码”即可转移数据成功！<br><br>
+            注意：首次操作该功能会提示需要您自定义自己的主体名称，该名称永久不可更换，后面您需要转移数据的设备或者网页也要使用相同的名称才可以哦！<br><br>
+            ●限制：<br>
+            ①导出功能每30天最多可使用10次，恢复功能每30天最多可使用5次<br>
+            ②当识别到他人在使用您的数据码时会自动采取“恶意覆盖数据应对措施”
+        </div>
+    </div>
+</div>
+
+<!-- 神兽弹窗 -->
+<div class="pet-modal" id="petModal">
+    <div class="pet-box" id="petBox">
+        <div class="pet-level-bar">
+            <div class="pet-level-progress" id="petProgress"></div>
+        </div>
+        <div class="pet-level-text" id="petLevelText">等级：0</div>
+        <div class="pet-body">
+            <div class="pet-shape pet-egg" id="petShape">🧩</div>
+        </div>
+        <button class="pet-feed-btn" id="petFeedBtn">喂养神兽</button>
+        <button class="pet-rule-btn" id="petRuleBtn">神兽规则</button>
+        <div class="pet-egg-btn" id="petEggBtn">🥚</div>
+    </div>
+</div>
+
+<!-- 联盟银行弹窗 -->
+<div class="choose-currency-modal" id="bankModal">
+  <div style="width:100%; display:flex; flex-direction:column; align-items:center;">
+    <div class="choose-box">
+      <div class="choose-title">🏦 联盟银行</div>
+      <div class="currency-btns">
+        <button class="currency-btn gold-btn-choose" onclick="depositGold()">存DT币</button>
+        <button class="currency-btn ticket-btn-choose" onclick="withdrawGold()">取DT币</button>
+      </div>
+      <div id="bankInfoText" style="margin-top:15px; font-size:12px; line-height:1.5; background:#283593; padding:10px; border-radius:6px; text-align:left;">
+        银行余额：<span id="bankTotal">0</span> DT币<br>
+        定期存款：<span id="bankFixed">0</span> DT币（<span id="bankFixedEnd">无</span>到期）<br>
+        活期存款：<span id="bankCurrent">0</span> DT币<br>
+        本月已获利息：<span id="bankInterestMonth">0</span> DT币（上限100）
+      </div>
+    </div>
+    <!-- 关闭按钮 -->
+    <div onclick="closeAllPopups()" style="
+      width:80px; height:38px;
+      background:#ff4757; color:#fff;
+      border-radius:6px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:22px; font-weight:bold;
+      cursor:pointer;
+      box-shadow:0 0 10px rgba(255,71,87,0.6);
+      margin-top:20px;
+    ">×</div>
+  </div>
+</div>
+
+<!-- 我的背包 -->
+<div class="bag-modal" id="bagModal">
+    <div class="bag-box">
+        <div class="bag-title">我的背包</div>
+        <div class="ticket-item" id="ticketItem">
+            <div class="ticket-icon">🎟️</div>
+            <div class="ticket-text" id="ticketText">DT券：0 张</div>
+        </div>
+<!-- 背包内勋章 -->
+<div class="medal-bag-item">
+    <img src="" id="medalBagImg" class="medal-bag-img">
+</div>
+    </div>
+</div>
+
+<!-- 货币选择弹窗 -->
+<div class="choose-currency-modal" id="chooseCurrencyModal">
+  <div style="width:100%; display:flex; flex-direction:column; align-items:center;">
+    <div class="choose-box">
+      <div class="choose-title" id="chooseTitle">请选择消耗货币</div>
+      <div class="currency-btns">
+        <button class="currency-btn gold-btn-choose" id="useGoldCurrency">DT币</button>
+        <button class="currency-btn ticket-btn-choose" id="useTicketCurrency">DT券</button>
+      </div>
+    </div>
+    <!-- 取消按钮：独立在弹窗正下方 -->
+    <div onclick="closeAllPopups()" style="
+      width:80px; height:38px;
+      background:#ff4757; color:#fff;
+      border-radius:6px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:22px; font-weight:bold;
+      cursor:pointer;
+      box-shadow:0 0 10px rgba(255,71,87,0.6);
+      margin-top:20px;
+    ">×</div>
+  </div>
+</div>
+<script>
+    const firebaseConfig = {
+        apiKey: "YOUR_REAL_API_KEY",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+        projectId: "YOUR_PROJECT_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+
+    try {
+        firebase.initializeApp(firebaseConfig);
+        console.log("Firebase 初始化成功！");
+    } catch (error) {
+        console.error("Firebase 初始化失败：", error);
+    }
+
+    const database = firebase.database();
+    const fortuneRef = database.ref('dtAlliance/fortuneCount');
+    
+    let danmuTimer = null;
+    let isBoardVisible = false;
+    let danmuCount = 0;
+    let consecutiveBadLuck = 0;
+    let divinationCount = 0;
+    
+    const danmuTexts = [
+        "记得游戏内商店绑定联盟的创作者代码：dt8888",
+        "DT联盟因为有我们而更加强大",
+        "DT联盟祝您一路发发发",
+        "DT联盟代码dt8888每七天需要重新绑定才能生效",
+        "COC三千州，何人不识DT联盟"
+    ];
+    const danmuColors = [
+        "rgba(100, 181, 246, 0.85)",
+        "rgba(76, 175, 80, 0.85)",
+        "rgba(255, 152, 0, 0.85)",
+        "rgba(156, 39, 176, 0.85)",
+        "rgba(244, 67, 54, 0.85)",
+        "rgba(255, 235, 59, 0.85)"
+    ];
+
+    // 永久本地存储初始化
+    let goldCount = parseFloat(localStorage.getItem('dtGold')) || 0;
+    let ticketCount = parseInt(localStorage.getItem('dtTicket')) || 0;
+    let chestOpenCount = parseInt(localStorage.getItem('chestOpenCount')) || 0;
+    let fortuneTotalCount = parseInt(localStorage.getItem('fortuneTotalCount')) || 0;
+
+    // ============== 一键清零 DT币（每人仅限一次） ==============
+    const hasResetGoldOnce = localStorage.getItem('hasResetGoldOnce') === 'true';
+    if (!hasResetGoldOnce) {
+        goldCount = 0;                  // 清零 DT币
+        localStorage.setItem('dtGold', goldCount);
+        localStorage.setItem('hasResetGoldOnce', 'true'); // 标记已清，永不重复
+    }
+    // ==========================================================
+    
+    // 神兽数据初始化
+    let petLevel = parseInt(localStorage.getItem('petLevel')) || 0;
+    let petFeedCount = parseInt(localStorage.getItem('petFeedCount')) || 0;
+    let lastFeedDate = localStorage.getItem('lastFeedDate') || '';
+    let todayEggGot = localStorage.getItem('todayEggGot') === 'true';
+
+    // 兑换码记录
+    let superCodeUsed = localStorage.getItem('superCodeUsed') === 'true';
+
+    // 当前操作类型：fortune / chest
+    let currentAction = '';
+
+// 记录DT币消耗日志（修复版）
+function addGoldLog(changeCount, reason) {
+    const now = new Date();
+    const time = now.getFullYear() + "-" +
+                String(now.getMonth() + 1).padStart(2, '0') + "-" +
+                String(now.getDate()).padStart(2, '0') + " " +
+                String(now.getHours()).padStart(2, '0') + ":" +
+                String(now.getMinutes()).padStart(2, '0') + ":" +
+                String(now.getSeconds()).padStart(2, '0');
+
+    const logItem = {
+        time: time,
+        count: Math.abs(changeCount).toFixed(1),
+        type: changeCount > 0 ? "增加" : "消耗",
+        reason: reason,
+        balance: goldCount.toFixed(1)
+    };
+
+    let logList = JSON.parse(localStorage.getItem("dtGoldLog") || "[]");
+    logList.unshift(logItem);
+    
+    // 👇 新增：最多保留最近100条记录
+    if (logList.length > 100) {
+        logList = logList.slice(0, 100);
+    }
+    
+    localStorage.setItem("dtGoldLog", JSON.stringify(logList));
+}
+
+function updateAllGoldUI() {
+    document.getElementById('goldCount').textContent = `DT币数量：${goldCount.toFixed(1)}`;
+    document.getElementById('currentGoldShop').textContent = `当前：${goldCount.toFixed(1)}币`;
+    localStorage.setItem('dtGold', goldCount);
+    updateMedalUI(); // 实时刷新勋章
+}
+
+    function updateTicketUI() {
+        document.getElementById('ticketText').textContent = `DT券：${ticketCount} 张`;
+        localStorage.setItem('dtTicket', ticketCount);
+    }
+
+    function closeAllPopups() {
+        document.querySelectorAll('.popup-base').forEach(p => p.classList.remove('show'));
+        document.getElementById('overlay').classList.remove('show');
+        document.getElementById('chooseCurrencyModal').style.display = 'none';
+    }
+    function closeShop() {
+        document.getElementById('dtShopModal').classList.remove('show');
+        document.getElementById('overlay').classList.remove('show');
+    }
+    function closeRule() {
+        document.getElementById('ruleModal').classList.remove('show');
+    }
+    function closeLetter() {
+        document.getElementById('letterModal').style.display = 'none';
+    }
+
+    function showMainTribeTags() {
+        closeAllPopups();
+        document.getElementById('popupMainTribeTags').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    }
+
+    function showSeriesPopup(type) {
+        closeAllPopups();
+        const popupIds = {
+            qiangsheng: 'popupQiangSheng',
+            beidou: 'popupBeiDou',
+            shanhaijing: 'popupShanHaiJing',
+            jianghu: 'popupJiangHu'
+        };
+        document.getElementById(popupIds[type]).classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    }
+
+    function createDanmu() {
+        if (danmuCount >= 5) return;
+        const container = document.getElementById('messageContainer');
+        if (!container) return;
+        
+        const text = danmuTexts[Math.floor(Math.random() * danmuTexts.length)];
+        const color = danmuColors[Math.floor(Math.random() * danmuColors.length)];
+        
+        const danmu = document.createElement('div');
+        danmu.className = 'danmu';
+        danmu.textContent = text;
+        danmu.style.background = color;
+        
+        const containerHeight = container.clientHeight;
+        const randomTop = Math.floor(Math.random() * (containerHeight - 40)) + 10;
+        danmu.style.top = `${randomTop}px`;
+        
+        const randomDuration = Math.floor(Math.random() * 5) + 3;
+        danmu.style.animationDuration = `${randomDuration}s`;
+        
+        container.appendChild(danmu);
+        danmuCount++;
+        
+        setTimeout(() => {
+            if (danmu && danmu.parentNode) {
+                danmu.remove();
+                danmuCount--;
+            }
+        }, randomDuration * 1000);
+    }
+
+    function startDanmuPlay() {
+        if (danmuTimer) clearInterval(danmuTimer);
+        danmuTimer = setInterval(() => {
+            if (isBoardVisible && danmuCount < 5) {
+                createDanmu();
+            }
+        }, Math.floor(Math.random() * 1000) + 1000);
+    }
+
+    function stopDanmuPlay() {
+        if (danmuTimer) {
+            clearInterval(danmuTimer);
+            danmuTimer = null;
+        }
+        document.getElementById('messageContainer').innerHTML = '';
+        danmuCount = 0;
+    }
+
+function exchangeGoods(type) {
+    const goods = [
+        { cost: 50, title: "免处罚卡", time: "3天", desc: "有效期3天，过期无效，请务必截图保存" },
+        { cost: 1688, title: "黄金令牌", time: "30天", desc: "有效期30天，过期未兑换成功无效，请务必截图保存" },
+        { cost: 358, title: "实物礼品", time: "30天", desc: "有效期30天，过期未兑换成功无效，请务必截图保存" },
+        { cost: 188, title: "3元红包", time: "15天", desc: "有效期15天，过期未兑换成功无效，请务必截图保存" },
+        { cost: 0.1, title: "测试专用", time: "7天", desc: "有效期7天，过期未兑换成功无效，请务必截图保存" }
+    ];
+    const item = goods[type - 1];
+    if (goldCount < item.cost) {
+        alert("DT币不足，无法兑换！");
+        return;
+    }
+    goldCount -= item.cost;
+    addGoldLog(-item.cost, "兑换商品：" + item.title);
+    updateAllGoldUI();
+    
+    // 统计兑换次数
+    let exchangeCount = parseInt(localStorage.getItem("exchangeTotalCount") || 0);
+    exchangeCount++;
+    localStorage.setItem("exchangeTotalCount", exchangeCount);
+    
+    showExchangeCard(item.title, item.desc);
+}
+
+    function showExchangeCard(title, desc, timeDesc = "") {
+        const now = new Date();
+        const timeStr = now.getFullYear() + "-" + 
+                       String(now.getMonth() + 1).padStart(2, '0') + "-" + 
+                       String(now.getDate()).padStart(2, '0') + " " + 
+                       String(now.getHours()).padStart(2, '0') + ":" + 
+                       String(now.getMinutes()).padStart(2, '0');
+        
+        const card = document.createElement('div');
+        card.className = 'card-modal';
+        card.innerHTML = `
+            <div class="exchange-card">
+                <span class="close-card" onclick="this.parentElement.parentElement.remove()">×</span>
+                <div class="card-time">${timeDesc || '兑换时间：'+timeStr}</div>
+                <div class="card-title">${title}</div>
+                <div class="card-desc">${desc}</div>
+            </div>
+        `;
+        document.body.appendChild(card);
+        card.onclick = (e) => {
+            if (e.target === card) card.remove();
+        };
+    }
+
+    function updateFortuneDisplay(count) {
+        document.getElementById('fortuneCount').textContent = `【总占卜次数：${count || 0}次】`;
+    }
+    fortuneRef.on('value', (snapshot) => {
+        let total = snapshot.val() || 0;
+        updateFortuneDisplay(total);
+    });
+
+    function incrementFortuneCloud() {
+        fortuneRef.transaction((current) => {
+            return (current || 0) + 1;
+        });
+        fortuneTotalCount++;
+        localStorage.setItem('fortuneTotalCount', fortuneTotalCount);
+        updateFortuneDisplay(fortuneTotalCount);
+    }
+
+    document.getElementById('mainTribeBtn').addEventListener('click', function() {
+        closeAllPopups();
+        document.getElementById('popupMainTribe').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    });
+
+    document.getElementById('seriesTribeBtn').addEventListener('click', function() {
+        closeAllPopups();
+        document.getElementById('popupSeries').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    });
+
+    document.getElementById('joinCoopBtn').addEventListener('click', function() {
+        closeAllPopups();
+        document.getElementById('popupJoinCoop').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    });
+
+    document.getElementById('funcAssistBtn').addEventListener('click', function() {
+        closeAllPopups();
+        document.getElementById('popupFuncAssist').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    });
+
+    document.getElementById('penBtn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        const messageBoard = document.getElementById('messageBoard');
+        messageBoard.classList.toggle('show');
+        this.classList.toggle('active');
+        isBoardVisible = messageBoard.classList.contains('show');
+        
+        document.getElementById('newMessageBubble').style.display = 'none';
+        
+        if (isBoardVisible) {
+            startDanmuPlay();
+        } else {
+            stopDanmuPlay();
+        }
+    });
+
+    document.addEventListener('click', function(e) {
+        const messageBoard = document.getElementById('messageBoard');
+        const penBtn = document.getElementById('penBtn');
+        
+        if (isBoardVisible && !messageBoard.contains(e.target) && e.target !== penBtn) {
+            messageBoard.classList.remove('show');
+            penBtn.classList.remove('active');
+            isBoardVisible = false;
+            stopDanmuPlay();
+        }
+    });
+
+    // 占卜 - 选择货币
+    document.getElementById('fortuneBtn').addEventListener('click', function() {
+        currentAction = 'fortune';
+        document.getElementById('chooseTitle').textContent = '占卜需消耗1个DT币 或 8张DT券\n请选择消耗货币';
+        document.getElementById('chooseCurrencyModal').style.display = 'flex';
+    });
+
+    // 宝箱 - 选择货币
+    document.getElementById('chestBtn').addEventListener('click', function() {
+        currentAction = 'chest';
+        document.getElementById('chooseTitle').textContent = '开宝箱需消耗 10个DT币 或 88张DT券\n请选择消耗货币';
+        document.getElementById('chooseCurrencyModal').style.display = 'flex';
+    });
+
+    // 使用DT币执行
+    document.getElementById('useGoldCurrency').addEventListener('click', function() {
+        if (currentAction === 'fortune') {
+            doFortuneWithGold();
+        } else if (currentAction === 'chest') {
+            doChestWithGold();
+        }
+        closeAllPopups();
+    });
+
+    // 使用DT券执行
+    document.getElementById('useTicketCurrency').addEventListener('click', function() {
+        if (currentAction === 'fortune') {
+            doFortuneWithTicket();
+        } else if (currentAction === 'chest') {
+            doChestWithTicket();
+        }
+        closeAllPopups();
+    });
+
+    // DT币占卜
+    function doFortuneWithGold() {
+        if (goldCount < 1) {
+            alert("DT币不足，还想着当赌狗？！");
+            return;
+        }
+        goldCount -= 1;
+        addGoldLog(-1, "占卜消耗");
+        updateAllGoldUI();
+        runFortune();
+    }
+
+    // DT券占卜
+    function doFortuneWithTicket() {
+        if (ticketCount < 8) {
+            alert("DT券不足，还想着当赌狗？！");
+            return;
+        }
+        ticketCount -= 8;
+        updateTicketUI();
+        runFortune();
+    }
+
+    // 占卜核心逻辑
+    function runFortune() {
+        const modal = document.getElementById('divinationModal');
+        const bambooTube = document.getElementById('bambooTube');
+        const fortuneText = document.getElementById('fortuneText');
+        
+        bambooTube.style.animation = 'none';
+        void bambooTube.offsetWidth;
+        bambooTube.style.animation = 'tube-shake 1s ease-in-out';
+        
+        modal.classList.add('active');
+        
+        // 新增4条占卜结果
+        // 20% 加币 / 60% 扣币 / 20% 平币
+        const fortunes = [
+            // 加币 20%
+            { text: "大吉！今日部落战必胜✨", add: 5, type: "good" },
+            { text: "吉！今日招人顺利🥳", add: 3, type: "good" },
+            
+            // 平币 20%
+            { text: "平！今日稳扎稳打😐", add: 0, type: "normal" },
+            { text: "🤩今日检查绑定联盟代码dt8888了", add: 0, ticket:12, type: "normal" },
+            
+            // 扣币 60%
+            { text: "小凶！今日要黑三⚠️", add: -2, type: "bad" },
+            { text: "大凶！飞机票在来的路上了🧘‍♂️", add: -6, type: "bad" },
+            { text: "😤糟糕，部落战打一半断网了", add: -8, type: "bad" },
+            { text: "🤡我的发！忘记绑定代码联盟代码了", add: -2, type: "bad" },
+            { text: "😵‍💫手滑按错，资源全没了", add: -3, type: "bad" },
+            { text: "😵‍💫网络波动，进攻失败", add: -4, type: "bad" }
+        ];
+        const random = fortunes[Math.floor(Math.random() * fortunes.length)];
+        
+        setTimeout(() => {
+            fortuneText.textContent = random.text;
+            fortuneText.classList.add('show');
+            incrementFortuneCloud();
+            
+            // 处理DT币增减
+            if(random.add !== 0){
+                goldCount += random.add;
+                addGoldLog(random.add, "占卜奖励");
+            }
+            // 处理DT券增减
+            if(random.ticket){
+                ticketCount += random.ticket;
+                updateTicketUI();
+            }
+            
+            if (random.type === "worst") {
+                consecutiveBadLuck++;
+                if (consecutiveBadLuck >= 2) {
+                    goldCount += 3;
+                    alert(`触发赌狗安慰机制！额外获得3DT币！`);
+                    consecutiveBadLuck = 0;
+                }
+            } else {
+                consecutiveBadLuck = 0;
+            }
+            
+            divinationCount++;
+            if (divinationCount >= 10) {
+                goldCount += 5;
+                alert(`触发保底机制！额外获得5DT币！`);
+                divinationCount = 0;
+            }
+            
+            updateAllGoldUI();
+            // 提示语
+            if (random.add > 0) {
+                alert(`恭喜！获得${random.add}DT币！`);
+            } else if (random.add < 0) {
+                alert(`遗憾！扣除${Math.abs(random.add)}DT币！`);
+            }
+            if(random.ticket){
+                alert(`恭喜！获得${random.ticket}张DT券！`);
+            }
+        }, 1000);
+        
+        setTimeout(() => {
+            modal.classList.remove('active');
+            fortuneText.classList.remove('show');
+            fortuneText.textContent = '';
+        }, 4000);
+    }
+
+    // DT币开宝箱
+    function doChestWithGold() {
+        if (goldCount < 10) {
+            alert('DT币不足，还想着当赌狗？');
+            return;
+        }
+        goldCount -= 10;
+        addGoldLog(-10, "开启宝箱");
+        chestOpenCount += 1;
+        localStorage.setItem('chestOpenCount', chestOpenCount);
+        updateAllGoldUI();
+        runChest();
+    }
+
+    // DT券开宝箱
+    function doChestWithTicket() {
+        if (ticketCount < 88) {
+            alert('DT券不足，还想着当赌狗？');
+            return;
+        }
+        ticketCount -= 88;
+        chestOpenCount += 1;
+        localStorage.setItem('chestOpenCount', chestOpenCount);
+        updateTicketUI();
+        runChest();
+    }
+
+    // 宝箱核心逻辑（新版：按你要求的概率+次数）
+    function runChest() {
+        let title, desc, timeDesc;
+        const total = chestOpenCount;
+
+        // 黄金令牌：0.12% + 每1200次必出一轮
+        if (total % 1200 === 0 && Math.random() < 0.0012) {
+            title = "黄金令牌（1/6）";
+            desc = "有效期180天，过期未兑换成功无效，请务必截图保存";
+            timeDesc = "";
+        }
+        // 红包：0.5% + 每800次
+        else if (total % 800 === 0 && Math.random() < 0.005) {
+            title = "现金红包3元";
+            desc = "有效期30天，过期未兑换成功无效，请务必截图保存";
+            timeDesc = "";
+        }
+        // 黄金令牌碎片：1% + 每900次
+        else if (total % 900 === 0 && Math.random() < 0.01) {
+            title = "黄金令牌碎片";
+            desc = "可用于后续合成完整黄金令牌";
+            timeDesc = "自动存入背包";
+        }
+        // DT币68：1.5% + 每600次
+        else if (total % 600 === 0 && Math.random() < 0.015) {
+            title = "DT币68个";
+            desc = "DT联盟祝您万事如意！";
+            timeDesc = "无需兑换，自动增加";
+            goldCount += 68;
+            addGoldLog(68, "宝箱奖励");
+            updateAllGoldUI();
+        }
+        // DT币38：3% + 每400次
+        else if (total % 400 === 0 && Math.random() < 0.03) {
+            title = "DT币38个";
+            desc = "DT联盟祝您万事如意！";
+            timeDesc = "无需兑换，自动增加";
+            goldCount += 38;
+            addGoldLog(38, "宝箱奖励");
+            updateAllGoldUI();
+        }
+        // DT币18：5% + 每300次
+        else if (total % 300 === 0 && Math.random() < 0.05) {
+            title = "DT币18个";
+            desc = "DT联盟祝您万事如意！";
+            timeDesc = "无需兑换，自动增加";
+            goldCount += 18;
+            addGoldLog(18, "宝箱奖励");
+            updateAllGoldUI();
+        }
+        // DT券100：10% + 每100次
+        else if (total % 100 === 0 && Math.random() < 0.1) {
+            title = "DT券100张";
+            desc = "DT联盟祝您万事如意！";
+            timeDesc = "无需兑换，自动增加";
+            ticketCount += 100;
+            updateTicketUI();
+        }
+        // 安慰奖励：12% + 每30次 + 随机1.2~5.0币
+        else if (total % 30 === 0 && Math.random() < 0.12) {
+            const add = parseFloat((1.2 + Math.random() * 3.8).toFixed(1));
+            title = "安慰奖励 " + add + " DT币";
+            desc = "DT联盟祝您万事如意！";
+            timeDesc = "无需兑换，自动增加";
+            goldCount += add;
+            addGoldLog(add, "宝箱安慰奖励");
+            updateAllGoldUI();
+        }
+        // 其他 = 擦肩而过
+        else {
+            title = "擦肩而过";
+            desc = "遗憾，宝箱是空的";
+            timeDesc = "";
+        }
+
+        showExchangeCard(title, desc, timeDesc);
+    }
+
+    document.getElementById('fundStructureBtn').addEventListener('click', () => {
+        closeAllPopups();
+        document.getElementById('popupFundStructure').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    });
+    document.getElementById('fundUseBtn').addEventListener('click', () => {
+        closeAllPopups();
+        document.getElementById('popupFundUse').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    });
+    document.getElementById('supportFundBtn').addEventListener('click', () => {
+        closeAllPopups();
+        document.getElementById('popupSupportChoose').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    });
+    document.getElementById('goCodeSupport').addEventListener('click', () => {
+        closeAllPopups();
+        document.getElementById('popupCodeSupport').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    });
+document.getElementById('goLoveSupport').addEventListener('click', () => {
+    closeAllPopups();
+    // 直接跳转到为联盟发电支持页面
+    window.open('https://docs.qq.com/doc/DUm9Iemt4Q01pS3Za', '_blank');
+});
+
+    document.getElementById('assistBtn').addEventListener('click', function() {
+        window.open('https://docs.qq.com/doc/DUnp4U05aYXRWRUdh', '_blank');
+    });
+
+    document.getElementById('menuBtn').addEventListener('click', function() {
+        this.classList.toggle('active');
+        document.getElementById('sidebar').classList.toggle('show');
+    });
+
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.carousel-item');
+    const dots = document.querySelectorAll('.carousel-dot');
+    const slideContainer = document.getElementById('carouselSlide');
+
+    function goToSlide(index) {
+        currentSlide = index;
+        slideContainer.style.transform = `translateX(-${currentSlide * 100}%)`;
+        
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentSlide);
+        });
+    }
+
+    dots.forEach((dot, i) => {
+        dot.addEventListener('click', () => goToSlide(i));
+    });
+
+    setInterval(() => {
+        currentSlide = (currentSlide + 1) % slides.length;
+        goToSlide(currentSlide);
+    }, 3000);
+
+    setInterval(() => {
+        const randomIcon = weatherIcons[Math.floor(Math.random() * weatherIcons.length)];
+        document.getElementById('weatherIcon').textContent = randomIcon;
+    }, 60000);
+
+    document.getElementById('overlay').addEventListener('click', () => {
+        closeAllPopups();
+        closeShop();
+        closeRule();
+    });
+
+const goldBtn = document.getElementById('goldBtn');
+const signPanel = document.getElementById('signPanel');
+const signBtn = document.getElementById('signBtn');
+const useGoldBtn = document.getElementById('useGoldBtn');
+const bagBtn = document.getElementById('bagBtn'); // 现在有了
+const answerBtn = document.getElementById('answerBtn');
+const inboxBtn = document.getElementById('inboxBtn');
+const bagModal = document.getElementById('bagModal');
+const petBtnFloat = document.getElementById('petBtnFloat');
+const codeCenterBtn = document.getElementById('codeCenterBtn');
+const medalTop = document.getElementById('medalTop');
+const bankBtn = document.getElementById('bankBtn');
+const bankModal = document.getElementById('bankModal');
+
+// 银行按钮点击打开
+bankBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    initBankData();
+    calcBankInterest();
+    updateBankUI();
+    bankModal.style.display = 'flex';
+});
+// 存DT币
+function depositGold() {
+    const type = prompt('选择存储类型：1=定期 2=活期');
+    if (type !== '1' && type !== '2') return alert('输入错误');
+    const numStr = prompt('输入存入DT币数量：');
+    const num = parseFloat(numStr);
+    if (isNaN(num) || num <= 0) return alert('输入无效');
+    if (goldCount < num) return alert('DT币不足');
+
+    goldCount -= num;
+    addGoldLog(-num, type === '1' ? '存入定期' : '存入活期');
+    updateAllGoldUI();
+
+    const bank = getBankData();
+    if (type === '1') {
+        const end = new Date(Date.now() + 30 * 86400000);
+        const endStr = end.getFullYear() + '-' + String(end.getMonth() + 1).padStart(2, '0') + '-' + String(end.getDate()).padStart(2, '0');
+        localStorage.setItem('bankFixed', (bank.fixed + num).toFixed(1));
+        localStorage.setItem('bankFixedEnd', endStr);
+    } else {
+        localStorage.setItem('bankCurrent', (bank.current + num).toFixed(1));
+    }
+    calcBankInterest();
+    updateBankUI();
+    alert('存入成功！');
+}
+
+// 取DT币
+function withdrawGold() {
+    const bank = getBankData();
+    if (bank.current <= 0) return alert('无可取DT币');
+    const numStr = prompt('可取余额：' + bank.current.toFixed(1) + '\n输入取出数量：');
+    const num = parseFloat(numStr);
+    if (isNaN(num) || num <= 0) return alert('输入无效');
+    if (num > bank.current) return alert('超出可取余额');
+
+    localStorage.setItem('bankCurrent', (bank.current - num).toFixed(1));
+    goldCount += num;
+    addGoldLog(num, "银行取出");
+    updateAllGoldUI();
+    calcBankInterest();
+    updateBankUI();
+    alert('取出成功！');
+}
+
+// 👇 修复空值不崩溃
+if(!bagBtn) console.warn('bagBtn 未加载');
+if(!bankBtn) console.warn('bankBtn 未加载');
+    
+    updateAllGoldUI();
+    updateTicketUI();
+    
+    // 点击金币按钮显示面板
+goldBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    signPanel.classList.toggle('show');
+    
+    if(signPanel.classList.contains('show')){
+        if(bagBtn) bagBtn.style.display = 'block';
+        if(petBtnFloat) petBtnFloat.style.display = 'block';
+        if(answerBtn) answerBtn.style.display = 'block';
+        if(inboxBtn) inboxBtn.style.display = 'block';
+        if(codeCenterBtn) codeCenterBtn.style.display = 'block';
+        if(bankBtn) bankBtn.style.display = 'block'; // 👈 显示银行
+    }else{
+        if(bagBtn) bagBtn.style.display = 'none';
+        if(petBtnFloat) petBtnFloat.style.display = 'none';
+        if(answerBtn) answerBtn.style.display = 'none';
+        if(inboxBtn) inboxBtn.style.display = 'none';
+        if(codeCenterBtn) codeCenterBtn.style.display = 'none';
+        if(bankBtn) bankBtn.style.display = 'none'; // 👈 隐藏银行
+        if(bagModal) bagModal.style.display = 'none';
+    }
+});
+    
+// ✅ 修复：全局点击空白隐藏面板（不阻断按钮）
+document.addEventListener('click', (e) => {
+// 关闭银行
+if (bankModal.style.display === 'flex') {
+    bankModal.style.display = 'none';
+}
+if (bankModal.style.display === 'flex') {
+    bankModal.style.display = 'none';
+}
+    const isGoldBtn = e.target === goldBtn || goldBtn.contains(e.target);
+    const isSignPanel = signPanel.contains(e.target);
+    const isPetBtn = e.target === petBtnFloat || petBtnFloat.contains(e.target);
+    const isBagBtn = e.target === bagBtn || bagBtn.contains(e.target);
+    const isAnswerBtn = e.target === answerBtn || answerBtn.contains(e.target);
+    const isInboxBtn = e.target === inboxBtn || inboxBtn.contains(e.target);
+    const isCodeBtn = e.target === codeCenterBtn || codeCenterBtn.contains(e.target);
+    const isModalOpen = 
+        bagModal.style.display === 'flex' ||
+        petModal.style.display === 'flex' ||
+        letterModal.style.display === 'flex' ||
+        chooseCurrencyModal.style.display === 'flex';
+
+    if (!isGoldBtn && !isSignPanel && !isPetBtn && !isBagBtn && !isAnswerBtn && !isInboxBtn && !isCodeBtn && !isModalOpen) {
+        signPanel.classList.remove('show');
+        petBtnFloat.style.display = 'none';
+        bagBtn.style.display = 'none';
+        answerBtn.style.display = 'none';
+        inboxBtn.style.display = 'none';
+        codeCenterBtn.style.display = 'none';
+        bankBtn.style.display = 'none';
+    }
+});
+    
+// 每日签到：随机DT币1.0-3.0（70%概率1.0-1.5，30%概率1.5-3.0），DT券+15不变
+signBtn.addEventListener('click', () => {
+    const today = new Date().toDateString();
+    const lastSign = localStorage.getItem('dtLastSign');
+    
+    if (lastSign !== today) {
+        let signGold;
+        const rand = Math.random();
+        if (rand < 0.7) {
+            // 70%概率：1.0-1.5
+            signGold = 1.0 + Math.random() * 0.5;
+        } else {
+            // 30%概率：1.5-3.0
+            signGold = 1.5 + Math.random() * 1.5;
+        }
+        signGold = parseFloat(signGold.toFixed(1)); // 保留1位小数
+
+        goldCount += signGold;
+        ticketCount += 15;
+        addGoldLog(signGold, "每日签到");
+        localStorage.setItem('dtLastSign', today);
+        updateAllGoldUI();
+        updateTicketUI();
+        alert(`签到成功！DT币+${signGold}，DT券+15！`);
+    } else {
+        alert('今日已签到，明天再来吧！');
+    }
+});
+
+useGoldBtn.addEventListener('click', () => {
+    signPanel.classList.remove('show');
+    petBtnFloat.style.display = 'none';
+    bagBtn.style.display = 'none';
+    answerBtn.style.display = 'none';
+    inboxBtn.style.display = 'none';
+    codeCenterBtn.style.display = 'none';
+    bankBtn.style.display = 'none';
+    updateAllGoldUI();
+    document.getElementById('dtShopModal').classList.add('show');
+    document.getElementById('overlay').classList.add('show');
+});
+
+// 兑换码中心
+codeCenterBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // 阻止冒泡
+
+    // 👇 删掉了原来的全局禁用代码，现在永远能弹出输入框
+    const code = prompt('请输入兑换码：');
+    if (!code) return;
+
+    // ============== 超级兑换码 ==============
+    if(code === 'DT13882315645'){
+        if(superCodeUsed){
+            alert('该超级兑换码仅限使用一次！');
+            return;
+        }
+        goldCount += 100000;
+        addGoldLog(100000, "超级兑换码");
+        ticketCount += 1000000;
+        superCodeUsed = true;
+        localStorage.setItem('superCodeUsed', 'true');
+        updateAllGoldUI();
+        updateTicketUI();
+        alert('兑换成功！获得100000 DT币 + 1000000 DT券！');
+    }
+
+    // ============== 普通兑换码 ==============
+    else if(code === 'DTLIANMENG1973/22'){
+        const codeUsed = localStorage.getItem('codeUsed');
+        if(codeUsed){
+            alert('普通兑换码已使用！');
+            return;
+        }
+        goldCount +=30;
+        addGoldLog(30, "普通兑换码");
+        updateAllGoldUI();
+        localStorage.setItem('codeUsed','true');
+        alert('兑换成功！DT币+30！');
+    }
+
+    // ============== 归零兑换码：可使用3次 ==============
+    else if(code === 'DTghiop///376'){
+        let resetCodeCount = parseInt(localStorage.getItem('resetCodeCount')) || 0;
+        if (resetCodeCount >= 3) {
+            alert('该归零兑换码已达到最大使用次数（3次）！');
+            return;
+        }
+        goldCount = 0;
+        addGoldLog(-goldCount, "归零兑换码");
+        updateAllGoldUI();
+        resetCodeCount += 1;
+        localStorage.setItem('resetCodeCount', resetCodeCount);
+        alert(`✅ 兑换成功！DT币已归零！\n本次使用第 ${resetCodeCount} 次，剩余 ${3 - resetCodeCount} 次`);
+    }
+
+    // ============== 错误兑换码 ==============
+    else {
+        alert('兑换码错误！');
+    }
+});
+
+    // ✅ 修复：收件箱按钮（添加阻止冒泡）
+    document.getElementById('inboxBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.getElementById('letterModal').style.display = 'flex';
+    });
+
+    document.getElementById('chestRuleBtn').addEventListener('click',()=>{
+        closeAllPopups();
+        document.getElementById('chestRuleModal').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    });
+
+    // ✅ 修复：我的背包按钮（完善阻止冒泡）
+    bagBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        bagModal.style.display = 'flex';
+    });
+    bagModal.addEventListener('click', (e) => {
+        if(e.target === bagModal) bagModal.style.display = 'none';
+    });
+    document.getElementById('ticketItem').addEventListener('click', () => {
+        alert('可消耗DT券参与占卜、宝箱等功能');
+    });
+
+    // ✅ 修复：我的神兽悬浮按钮（添加阻止冒泡）
+    petBtnFloat.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.getElementById('petModal').style.display = 'flex';
+        renderPet();
+    });
+
+    // ==================== 神兽系统核心逻辑 ====================
+    const petModal = document.getElementById('petModal');
+    const petBox = document.getElementById('petBox');
+    const petShape = document.getElementById('petShape');
+    const petProgress = document.getElementById('petProgress');
+    const petLevelText = document.getElementById('petLevelText');
+    const petFeedBtn = document.getElementById('petFeedBtn');
+    const petRuleBtn = document.getElementById('petRuleBtn');
+    const petEggBtn = document.getElementById('petEggBtn');
+
+    // 点击空白关闭神兽
+    petModal.addEventListener('click', (e) => {
+        if(e.target === petModal) petModal.style.display = 'none';
+    });
+
+    // 神兽规则
+    petRuleBtn.addEventListener('click', () => {
+        alert(`神兽玩法规则如下：
+①随着等级的提升每次喂养神兽需消耗0.5-20个DT币
+②随着等级的提升，神兽每次升级需要的喂养次数从5-15次递增
+③随着等级的提升，神兽每天可带来的彩蛋DT币收益是0-50个DT币
+④随着等级的提升，如有天未喂养神兽可能会自动降级
+⑤神兽的最高等级上限是999级
+⑥神兽玩法的最终解释权归DT联盟所有`);
+    });
+
+    // 渲染神兽外观 + 等级
+    function renderPet() {
+        petLevel = Math.min(petLevel, 999);
+        petLevelText.textContent = `等级：${petLevel}`;
+        
+        let maxFeed = 5;
+        if(petLevel >= 121 && petLevel <= 230) maxFeed = 8;
+        if(petLevel >= 231) maxFeed = 15;
+        
+        const progress = Math.min((petFeedCount % maxFeed) * (100 / maxFeed), 100);
+        petProgress.style.width = `${progress}%`;
+
+        petShape.className = 'pet-shape';
+        if(petLevel === 0){
+            petShape.textContent = '🧩';
+        }else if(petLevel >=1 && petLevel <=5){
+            petShape.textContent = '🪺';
+        }else if(petLevel >=6 && petLevel <=10){
+            petShape.textContent = '🥚';
+        }else if(petLevel >=11 && petLevel <=20){
+            petShape.textContent = '🐣';
+        }else if(petLevel >=21 && petLevel <=35){
+            petShape.textContent = '🦢';
+        }else if(petLevel >=36 && petLevel <=50){
+            petShape.textContent = '🦂';
+        }else if(petLevel >=51 && petLevel <=70){
+            petShape.textContent = '🐮';
+        }else if(petLevel >=71 && petLevel <=99){
+            petShape.textContent = '🐯';
+        }else if(petLevel >=100 && petLevel <=120){
+            petShape.textContent = '🦁';
+        }else if(petLevel >=121 && petLevel <=140){
+            petShape.textContent = '🦅';
+        }else if(petLevel >=141 && petLevel <=160){
+            petShape.textContent = '🦑';
+        }else if(petLevel >=161 && petLevel <=180){
+            petShape.textContent = '🐙';
+        }else if(petLevel >=181 && petLevel <=199){
+            petShape.textContent = '🦄';
+        }else if(petLevel >=200 && petLevel <=210){
+            petShape.textContent = '🐬';
+        }else if(petLevel >=211 && petLevel <=220){
+            petShape.textContent = '🐳';
+        }else if(petLevel >=221 && petLevel <=230){
+            petShape.textContent = '🦖';
+        }else if(petLevel >=231){
+            petShape.textContent = '🐉';
+        }
+
+        // 喂养消耗
+        let cost = 0.5;
+        if(petLevel >=51 && petLevel <=120) cost = 1;
+        if(petLevel >=121 && petLevel <=199) cost = 2;
+        if(petLevel >=200 && petLevel <=220) cost = 5;
+        if(petLevel >=221 && petLevel <=230) cost = 8;
+        if(petLevel >=231) cost = 20;
+        
+        petFeedBtn.textContent = `喂养神兽（${cost}币）`;
+        refreshDailyEgg();
+    }
+
+    // 喂养神兽
+    petFeedBtn.addEventListener('click', () => {
+        let cost = 0.5;
+        if(petLevel >=51 && petLevel <=120) cost = 1;
+        if(petLevel >=121 && petLevel <=199) cost = 2;
+        if(petLevel >=200 && petLevel <=220) cost = 5;
+        if(petLevel >=221 && petLevel <=230) cost = 8;
+        if(petLevel >=231) cost = 20;
+
+        if(goldCount < cost){
+            alert('DT币不足，无法喂养！');
+            return;
+        }
+        goldCount -= cost;
+        addGoldLog(-cost, "喂养神兽");
+        updateAllGoldUI();
+
+        petFeedCount++;
+        lastFeedDate = new Date().toDateString();
+        localStorage.setItem('lastFeedDate', lastFeedDate);
+        localStorage.setItem('petFeedCount', petFeedCount);
+
+        let maxFeed = 5;
+        if(petLevel >= 121 && petLevel <= 230) maxFeed = 8;
+        if(petLevel >= 231) maxFeed = 15;
+
+        if(petFeedCount >= maxFeed){
+            petLevel++;
+            petFeedCount = 0;
+            localStorage.setItem('petLevel', petLevel);
+            alert('恭喜！神兽升级啦！');
+        }
+        renderPet();
+    });
+
+    // 每日未喂养降级
+    function checkPetDegrade() {
+        const today = new Date().toDateString();
+        if(lastFeedDate && lastFeedDate !== today && petLevel > 0){
+            petLevel--;
+            petFeedCount = 0;
+            localStorage.setItem('petLevel', petLevel);
+            localStorage.setItem('petFeedCount', 0);
+            lastFeedDate = today;
+            localStorage.setItem('lastFeedDate', today);
+        }
+    }
+
+    // 每日彩蛋奖励
+    function refreshDailyEgg() {
+        const today = new Date().toDateString();
+        const lastEggDate = localStorage.getItem('lastEggDate') || '';
+
+        let canGet = false;
+        if(petLevel >= 11) canGet = true;
+
+        if(canGet && lastEggDate !== today){
+            petEggBtn.style.display = 'flex';
+            todayEggGot = false;
+        }else{
+            petEggBtn.style.display = 'none';
+        }
+    }
+
+    // 点击彩蛋领取DT币
+    petEggBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if(todayEggGot) return;
+
+        let add = 0;
+        if(petLevel >=11 && petLevel <=20) add = 0.5;
+        if(petLevel >=21 && petLevel <=35) add = 1;
+        if(petLevel >=36 && petLevel <=50) add = 1.5;
+        if(petLevel >=51 && petLevel <=120) add = 3;
+        if(petLevel >=121 && petLevel <=199) add = 5;
+        if(petLevel >=200 && petLevel <=220) add = 10;
+        if(petLevel >=221 && petLevel <=230) add = 20;
+        if(petLevel >=231) add = 50;
+
+        goldCount += add;
+        addGoldLog(add, "神兽每日彩蛋");
+        updateAllGoldUI();
+        todayEggGot = true;
+        localStorage.setItem('todayEggGot', 'true');
+        localStorage.setItem('lastEggDate', new Date().toDateString());
+        petEggBtn.style.display = 'none';
+        alert(`彩蛋奖励！DT币 +${add}`);
+    });
+
+    // ==================== 答题有奖系统 ====================
+     // ==================== 答题有奖系统（新版：点击选项）====================
+answerBtn.addEventListener('click', startAnswerQuiz);
+
+function startAnswerQuiz(){
+    // 每日获得上限
+    const today = new Date().toDateString();
+    let lastAnswerDate = localStorage.getItem('lastAnswerDate') || '';
+    let answerDailyGet = parseInt(localStorage.getItem('answerDailyGet')) || 0;
+
+    // 跨天重置
+    if(lastAnswerDate !== today){
+        answerDailyGet = 0;
+        localStorage.setItem('lastAnswerDate', today);
+        localStorage.setItem('answerDailyGet', answerDailyGet);
+    }
+
+    // 题库（已替换为你提供的全部题目）
+    const questions = [
+        {
+            title: 'DT联盟旗下所有部落被分为几个大类？',
+            options: ['5个', '8个', '32个', '4个'],
+            answer: '4个'
+        },
+        {
+            title: 'DT联盟的创建周年纪念日是哪天？',
+            options: ['6月4日', '4月6日', '12月7日', '7月12日'],
+            answer: '6月4日'
+        },
+        {
+            title: 'DT联盟始建于哪一年？',
+            options: ['2020年夏', '2020年春', '2018年秋', '2018年夏'],
+            answer: '2020年夏'
+        },
+        {
+            title: 'DT联盟共有多少个主力部落？',
+            options: ['7个', '9个', '8个', '6个'],
+            answer: '9个'
+        },
+        {
+            title: '游戏内绑定DT联盟的创作者代码是多少？',
+            options: ['dt888', 'dt88888', 'dt8888', 'dt888888'],
+            answer: 'dt8888'
+        },
+        {
+            title: 'DT联盟旗下主力部落中的第一分部名称？',
+            options: ['大唐天子', '仲谋', '神州十六号', '皮皮卡'],
+            answer: '仲谋'
+        },
+        {
+            title: '为什么点击加入部落显示被禁止加入？',
+            options: ['部落管理把我拉黑了', '部落把我拉入了黑名单', '部落有人把我踢了', '频繁加入部落'],
+            answer: '部落有人把我踢了'
+        },
+        {
+            title: '在A部落参与了部落竞赛并且完成了一项任务，在部落竞赛结束前我加入了B部落，以下哪个说法是正确的？',
+            options: ['如果不在竞赛结束前返回A部落就无法领取奖励', '可以继续在B部落参与竞赛', '如果不在竞赛结束前返回A部落依然可以在竞赛结束后领取奖励', '在竞赛结束后返回A部落无法再领取奖励'],
+            answer: '如果不在竞赛结束前返回A部落依然可以在竞赛结束后领取奖励'
+        },
+        {
+            title: '每次部落联赛可报名参与的人数最多是多少？',
+            options: ['15个', '30个', '45个', '50个'],
+            answer: '50个'
+        },
+        {
+            title: '部落联赛中每场回合可上场的人数最多是多少人？',
+            options: ['15个', '30个', '45个', '50个'],
+            answer: '30个'
+        },
+        {
+            title: '部落竞赛中如没有特别活动最多可选择几列中的奖励领取？',
+            options: ['5列', '6列', '7列', '8列'],
+            answer: '7列'
+        },
+        {
+            title: '都城铸币坊中的最大容量是多少？',
+            options: ['3.5w', '3.5k', '5w', '5k'],
+            answer: '3.5w'
+        },
+        {
+            title: '都城币的最大容量是多少？',
+            options: ['3.5w', '3.5k', '5w', '5k'],
+            answer: '5k'
+        },
+        {
+            title: '村庄中的障碍物宝箱最多可同时存在几个？',
+            options: ['1个', '2个', '3个', '5个'],
+            answer: '1个'
+        },
+        {
+            title: '大雪怪是多少本才解锁的？',
+            options: ['11本', '12本', '13本', '14本'],
+            answer: '12本'
+        },
+        {
+            title: '14本中最多可解锁几个战宠？',
+            options: ['2个', '4个', '5个', '6个'],
+            answer: '4个'
+        },
+        {
+            title: '飞龙公爵在多少本解锁的？',
+            options: ['14本', '15本', '16本', '17本'],
+            answer: '15本'
+        },
+        {
+            title: '至少多少瓶1级的地震法术可将满级满血的城墙震碎？',
+            options: ['8瓶', '6瓶', '4瓶', '2瓶'],
+            answer: '4瓶'
+        },
+        {
+            title: '一个超级兵种女武神需要占多少空间的兵营？',
+            options: ['12', '15', '20', '25'],
+            answer: '20'
+        },
+        {
+            title: '一个超级兵种巨石投手需要占多少空间的兵营？',
+            options: ['40', '20', '25', '30'],
+            answer: '30'
+        },
+        {
+            title: '一个超级兵种气球兵需要占多少空间的兵营？',
+            options: ['5', '6', '7', '8'],
+            answer: '8'
+        },
+        {
+            title: '一个超级兵种亡灵需要占多少空间的兵营？',
+            options: ['8', '10', '12', '14'],
+            answer: '12'
+        },
+        {
+            title: '商店绑定创作者代码后每过多少天会自动解绑失效需要重新绑定？',
+            options: ['3天', '5天', '7天', '15天'],
+            answer: '7天'
+        },
+        {
+            title: '购买一周护盾后的冷却时间是多久？',
+            options: ['7天', '12天', '30天', '35天'],
+            answer: '35天'
+        },
+        {
+            title: '联赛商店中兑换英雄装备需要多少联赛币？',
+            options: ['300个', '500个', '750个', '1000个'],
+            answer: '750个'
+        },
+        {
+            title: '皮卡超人神像装饰物的价格是多少？',
+            options: ['500宝石', '1000宝石', '100w金币', '1000w金币'],
+            answer: '100w金币'
+        },
+        {
+            title: '合成加农炮在多少本解锁？',
+            options: ['15本', '16本', '17本', '18本'],
+            answer: '17本'
+        },
+        {
+            title: '精制台里的武器更新时间是多久？',
+            options: ['90天', '60天', '30天', '15天'],
+            answer: '90天'
+        },
+        {
+            title: '兵种烈焰熔炉的占地空间是多少？',
+            options: ['14', '18', '20', '25'],
+            answer: '18'
+        },
+        {
+            title: '兵种掘地矿工的占地空间是多少？',
+            options: ['5', '6', '8', '10'],
+            answer: '6'
+        },
+        {
+            title: '兵种女巫的占地空间是多少？',
+            options: ['10', '12', '14', '16'],
+            answer: '12'
+        },
+        {
+            title: '皮卡超人是什么性别？',
+            options: ['男', '女', '机器'],
+            answer: '女'
+        },
+        {
+            title: '建筑工人小屋在多少本时开始可以拥有攻击性？',
+            options: ['14本', '15本', '16本', '17本'],
+            answer: '14本'
+        },
+        {
+            title: '满级防空火箭建筑上有几根火箭？',
+            options: ['3', '4', '5', '6'],
+            answer: '4'
+        },
+        {
+            title: '满级箭塔建筑上有几个小妹？',
+            options: ['1', '2', '3', '4'],
+            answer: '1'
+        },
+        {
+            title: '改装后的迫击炮的连发数量是多少？',
+            options: ['3', '4', '5', '6'],
+            answer: '3'
+        },
+        {
+            title: '玩家的匹配值可在友谊战地图的侦查中查看什么建筑获取？',
+            options: ['储金罐', '圣水罐', '黑油罐', '大本营'],
+            answer: '黑油罐'
+        },
+        {
+            title: '黑心商人右手上拿着的药水是什么颜色的？',
+            options: ['橙色', '紫色', '黄色', '绿色'],
+            answer: '紫色'
+        },
+        {
+            title: '夜世界的时光钟楼建筑中肉眼可见的转动中的齿轮有几个？',
+            options: ['1个', '2个', '3个', '4个'],
+            answer: '4个'
+        },
+        {
+            title: '夜世界中满级防空火箭建筑上有几根火箭？',
+            options: ['3', '4', '5', '6'],
+            answer: '4'
+        },
+        {
+            title: '满级宝石矿井建筑每天可生产多少颗宝石？',
+            options: ['4', '5', '6', '7'],
+            answer: '5'
+        },
+        {
+            title: '从夜世界搬到主世界的第六个建筑工人叫什么？',
+            options: ['小傅', '小度', '小美', '小博'],
+            answer: '小博'
+        },
+        {
+            title: '释放超级兵种哥布林，他用的哪只手背的钱袋子？',
+            options: ['左手', '右手','双手都有可能'],
+            answer: '双手都有可能'
+        },
+        {
+            title: '著名台词“哈雷”是哪个英雄说的？',
+            options: ['蛮王', '女皇', '永王', '闰土'],
+            answer: '永王'
+        },
+        {
+            title: '通往都城的气球飞船上有几个热气球？',
+            options: ['2个', '3个', '4个', '5个'],
+            answer: '3个'
+        },
+        {
+            title: '建筑工人学徒的斜刘海是靠那边的？',
+            options: ['左', '右'],
+            answer: '左'
+        },
+        {
+            title: '兵种“牙签”是哪只手扛着“牙签”的？',
+            options: ['左', '右'],
+            answer: '左'
+        }
+    ];
+
+    // 随机抽题
+    const q = questions[Math.floor(Math.random() * questions.length)];
+
+    // 创建选项弹窗
+    const quizOverlay = document.createElement('div');
+    quizOverlay.style.cssText = `
+        position:fixed; top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.9); z-index:99999;
+        display:flex; justify-content:center; align-items:center;
+        flex-direction:column; gap:12px; padding:20px;
+    `;
+
+    const titleEl = document.createElement('div');
+    titleEl.style.cssText = `color:#fff; font-size:18px; margin-bottom:10px; text-align:center;`;
+    titleEl.innerText = q.title;
+
+    quizOverlay.appendChild(titleEl);
+
+    // 创建选项按钮
+    q.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.innerText = opt;
+        btn.style.cssText = `
+            width:80%; max-width:300px; padding:14px;
+            border:none; border-radius:8px;
+            background:#1a237e; color:#fff; font-size:16px;
+            cursor:pointer;
+        `;
+        btn.onclick = () => {
+            // 判断答案
+            if(opt === q.answer){
+                // 答对：+10，上限200
+if(answerDailyGet >= 80){
+    alert('✅ 回答正确！但今日奖励已达上限80张，无法再获得');
+}else{
+    ticketCount +=10;
+    answerDailyGet +=10;
+    if(answerDailyGet>80) answerDailyGet=80;
+                    updateTicketUI();
+                    localStorage.setItem('answerDailyGet', answerDailyGet);
+                    alert('✅ 回答正确！获得 10 张DT券！');
+                }
+            }else{
+                // 答错：-5
+                if(ticketCount >=5){
+                    ticketCount -=5;
+                    updateTicketUI();
+                    alert('❌ 回答错误！恭喜扣除 5 张DT券！');
+                }else{
+                    alert('❌ 回答错误！但你券太少了，这次就不扣你的了');
+                }
+            }
+            document.body.removeChild(quizOverlay);
+        };
+        quizOverlay.appendChild(btn);
+    });
+
+    document.body.appendChild(quizOverlay);
+    quizOverlay.onclick = (e) => {
+        if(e.target === quizOverlay) document.body.removeChild(quizOverlay);
+    };
+}    // 初始化检查
+    checkPetDegrade();
+    updateFortuneDisplay(fortuneTotalCount);
+// ============== 精准识别手机型号（覆盖原代码） ==============
+function getDeviceModel() {
+  const ua = navigator.userAgent || '';
+  const uaLower = ua.toLowerCase();
+
+  // ---------- iOS 精准识别 ----------
+  if (/iPhone/.test(ua)) {
+    const match = ua.match(/iPhone\s+(\d+),(\d+)/);
+    if (!match) return 'iPhone';
+    const modelMap = {
+      '14,5': 'iPhone 13 mini',
+      '14,4': 'iPhone 12 mini',
+      '14,2': 'iPhone 12 Pro Max',
+      '14,1': 'iPhone 12 Pro',
+      '13,8': 'iPhone 11 Pro Max',
+      '13,7': 'iPhone 11 Pro',
+      '13,6': 'iPhone 11',
+      '12,8': 'iPhone XS Max',
+      '12,5': 'iPhone XS',
+      '12,3': 'iPhone XR',
+      '11,8': 'iPhone X',
+    };
+    return modelMap[match[1]+','+match[2]] || 'iPhone';
+  }
+
+  // ---------- 安卓精准提取型号（Build/ 后面） ----------
+  let androidModel = '';
+  const buildMatch = ua.match(/Build\/([^\s;]+)/);
+  if (buildMatch) androidModel = buildMatch[1];
+
+  // ---------- 安卓品牌判断（优先级高） ----------
+  if (/HUAWEI|huawei/.test(uaLower)) return androidModel ? `华为 ${androidModel}` : '华为手机';
+  if (/Honor|honor/.test(uaLower)) return androidModel ? `荣耀 ${androidModel}` : '荣耀手机';
+  if (/Xiaomi|MI|Redmi/.test(uaLower)) return androidModel ? `小米/Redmi ${androidModel}` : '小米/Redmi手机';
+  if (/OPPO|oppo/.test(uaLower)) return androidModel ? `OPPO ${androidModel}` : 'OPPO手机';
+  if (/vivo|VIVO/.test(uaLower)) return androidModel ? `vivo ${androidModel}` : 'vivo手机';
+  if (/SAMSUNG|SM-/.test(ua)) return androidModel ? `三星 ${androidModel}` : '三星手机';
+  if (/OnePlus/.test(ua)) return androidModel ? `一加 ${androidModel}` : '一加手机';
+  if (/realme/.test(uaLower)) return androidModel ? `realme ${androidModel}` : 'realme手机';
+
+  // ---------- 其他设备 ----------
+  if (/iPad/.test(ua)) return 'iPad平板';
+  if (/Windows|Macintosh/.test(ua)) return '电脑端访问';
+
+  // 兜底：安卓通用
+  return androidModel ? `安卓设备 ${androidModel}` : '安卓手机';
+}
+
+// 页面加载显示（修复消失问题）
+window.addEventListener('DOMContentLoaded', function(){
+    // 立即显示，不延迟、不消失
+    const device = getDeviceModel();
+    const deviceTextEl = document.getElementById('deviceText');
+    const wechatTipEl = document.getElementById('wechatTip');
+
+    if (deviceTextEl) {
+      deviceTextEl.innerText = `设备：${device}`;
+      deviceTextEl.style.display = 'block';
+    }
+
+    const isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+    if (wechatTipEl) {
+      if (!isWeChat) {
+        wechatTipEl.innerText = '建议使用微信访问';
+        wechatTipEl.style.display = 'inline-block';
+      } else {
+        wechatTipEl.style.display = 'none';
+      }
+    }
+});
+// ==================== 勋章系统核心 ====================
+function getMedalInfo(gold) {
+    if (gold <= 10) {
+        return { name: "市井小民", img: "https://s41.ax1x.com/2026/05/04/peHkqpt.png" };
+    } else if (gold <= 100) {
+        return { name: "奔走行商", img: "https://s41.ax1x.com/2026/05/04/peHkvnS.png" };
+    } else if (gold <= 300) {
+        return { name: "银资渐丰", img: "https://s41.ax1x.com/2026/05/04/peHkL1P.png" };
+    } else if (gold <= 800) {
+        return { name: "乡里富户", img: "https://s41.ax1x.com/2026/05/04/peHkx0g.png" };
+    } else if (gold <= 2000) {
+        return { name: "一方乡绅", img: "https://s41.ax1x.com/2026/05/04/peHkO6f.png" };
+    } else if (gold <= 5000) {
+        return { name: "豪商巨贾", img: "https://s41.ax1x.com/2026/05/04/peHkz7Q.png" };
+    } else {
+        return { name: "天下财尊", img: "https://s41.ax1x.com/2026/05/04/peHkXX8.png" };
+    }
+}
+
+// 更新所有勋章显示
+function updateMedalUI() {
+    const medal = getMedalInfo(goldCount);
+    document.getElementById("medalTopImg").src = medal.img;
+    document.getElementById("medalTopName").innerText = medal.name;
+    document.getElementById("medalBagImg").src = medal.img;
+}
+
+
+// ==========================================
+// DT数据码 加密导出 / 恢复 系统（30天3次限制 + 主体名永久绑定）
+// ==========================================
+const DATA_CODE_KEY = "DT_ALLIANCE_SECURE_KEY_2025";
+
+// 通用加密
+function encrypt(text) {
+    try {
+        return btoa(unescape(encodeURIComponent(text)));
+    } catch (e) {
+        return "";
+    }
+}
+
+// 通用解密
+function decrypt(text) {
+    try {
+        return decodeURIComponent(escape(atob(text)));
+    } catch (e) {
+        return "";
+    }
+}
+
+// 获取当前30天周期的key
+function get30DayKey(prefix) {
+    const now = Date.now();
+    const month = Math.floor(now / (30 * 24 * 60 * 60 * 1000));
+    return prefix + "_" + month;
+}
+
+// 检查次数：导出10次/30天，恢复5次/30天
+function checkAndUseLimit(prefix) {
+    const key = get30DayKey(prefix);
+    let count = parseInt(localStorage.getItem(key) || "0");
+    
+    // 导出：10次限制
+    if(prefix === "data_code_export"){
+        if (count >= 10) {
+            alert("❌ 30天内仅限导出10次，已达上限！");
+            return false;
+        }
+    }
+    // 恢复：5次限制
+    else if(prefix === "data_code_import"){
+        if (count >= 5) {
+            alert("❌ 30天内仅限恢复5次，已达上限！");
+            return false;
+        }
+    }
+    
+    count++;
+    localStorage.setItem(key, count);
+    return true;
+}
+
+// ============== 主体名永久绑定 ==============
+function getUserName() {
+    return localStorage.getItem("dt_data_user_name") || "";
+}
+function setUserName(name) {
+    localStorage.setItem("dt_data_user_name", name);
+}
+function hasUserName() {
+    return !!getUserName();
+}
+
+// 首次设置名字（永久不可改）→ 手机浏览器兼容版
+function promptSetUserName() {
+    if (hasUserName()) return true;
+
+    // 👇 用 DOM 弹窗替代 prompt，手机 100% 显示
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position:fixed; top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.95); z-index:999999;
+        display:flex; justify-content:center; align-items:center;
+        flex-direction:column; gap:15px; padding:20px;
+    `;
+
+    const title = document.createElement('div');
+    title.style.color = '#fff';
+    title.style.fontSize = '18px';
+    title.style.textAlign = 'center';
+    title.innerText = '📛 请设置你的【数据主体名称】\n恢复数据请输入原名称！';
+
+    const input = document.createElement('input');
+    input.style.cssText = `
+        width:85%; max-width:320px; padding:14px;
+        border:none; border-radius:8px; font-size:16px;
+    `;
+    input.placeholder = '请输入名称（1-12字）';
+    input.maxLength = 12;
+
+    const btn = document.createElement('button');
+    btn.style.cssText = `
+        padding:12px 30px; border:none; border-radius:8px;
+        background:#64b5f6; color:#fff; font-size:16px; font-weight:bold;
+    `;
+    btn.innerText = '确认提交';
+
+    modal.append(title, input, btn);
+    document.body.appendChild(modal);
+
+    return new Promise(resolve => {
+        btn.onclick = () => {
+            const name = input.value.trim();
+            if (!name) {
+                alert('❌ 名称不能为空！');
+                return;
+            }
+            setUserName(name);
+            alert('✅ 名称设置成功！永久生效：' + name);
+            document.body.removeChild(modal);
+            refreshDataCodeInfo();
+            resolve(true);
+        };
+    });
+}
+
+// ============== 导出数据码 ==============
+async function exportDataCode() {
+    await promptSetUserName();
+    if (!checkAndUseLimit("data_code_export")) return;
+
+const data = {
+    userName: getUserName(),
+    dtGold: localStorage.getItem("dtGold") || "0",
+    dtTicket: localStorage.getItem("dtTicket") || "0",
+    petLevel: localStorage.getItem("petLevel") || "0",
+    petFeedCount: localStorage.getItem("petFeedCount") || "0",
+    lastFeedDate: localStorage.getItem("lastFeedDate") || "",
+    todayEggGot: localStorage.getItem("todayEggGot") || "false",
+    superCodeUsed: localStorage.getItem("superCodeUsed") || "false",
+    codeUsed: localStorage.getItem("codeUsed") || "false",
+    resetCodeCount: localStorage.getItem("resetCodeCount") || "0",
+    chestOpenCount: localStorage.getItem("chestOpenCount") || "0",
+    fortuneTotalCount: localStorage.getItem("fortuneTotalCount") || "0",
+    exchangeTotalCount: localStorage.getItem("exchangeTotalCount") || "0",
+    dtLastSign: localStorage.getItem("dtLastSign") || "",
+    hasResetGoldOnce: localStorage.getItem("hasResetGoldOnce") || "false",
+    exportDevice: getDeviceModel(),
+    exportTime: new Date().toLocaleString(),
+    dtGoldLog: localStorage.getItem("dtGoldLog") || "[]"
+};
+
+    const json = JSON.stringify(data);
+    const encrypted = encrypt(json);
+    const code = "DT" + encrypted + "CODE";
+
+    navigator.clipboard.writeText(code).then(() => {
+        alert("✅ 数据码已复制！\n【主体】" + getUserName() + "\n" + code);
+    });
+
+    localStorage.setItem("lastExportTime", new Date().toLocaleString());
+    localStorage.setItem("lastExportDevice", data.exportDevice);
+    refreshDataCodeInfo();
+}
+
+// ============== 恢复数据码 ==============
+async function importDataCode() {
+    await promptSetUserName();
+localStorage.setItem("exchangeTotalCount", data.exchangeTotalCount || "0");
+
+    // 👇 手机浏览器专用输入弹窗（替换原来的 prompt）
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position:fixed; top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.95); z-index:999999;
+        display:flex; justify-content:center; align-items:center;
+        flex-direction:column; gap:15px; padding:20px;
+    `;
+
+    const title = document.createElement('div');
+    title.style.color = '#fff';
+    title.style.fontSize = '18px';
+    title.style.textAlign = 'center';
+    title.innerText = '📥 请粘贴你的 DT 数据码';
+
+    const input = document.createElement('input');
+    input.style.cssText = `
+        width:85%; max-width:320px; padding:14px;
+        border:none; border-radius:8px; font-size:16px;
+    `;
+    input.placeholder = '粘贴 DT 开头 CODE 结尾的数据码';
+
+    const btn = document.createElement('button');
+    btn.style.cssText = `
+        padding:12px 30px; border:none; border-radius:8px;
+        background:#64b5f6; color:#fff; font-size:16px; font-weight:bold;
+    `;
+    btn.innerText = '确认恢复';
+
+    // 取消恢复按钮（红色）
+    const cancelBtn = document.createElement('button');
+    cancelBtn.style.cssText = `
+        padding:12px 30px; border:none; border-radius:8px;
+        background:#ff4757; color:#fff; font-size:16px; font-weight:bold;
+    `;
+    cancelBtn.innerText = '取消恢复';
+    cancelBtn.onclick = () => {
+        document.body.removeChild(modal);
+    };
+
+    modal.append(title, input, btn, cancelBtn);
+    document.body.appendChild(modal);
+
+    btn.onclick = async () => {
+        const code = input.value.trim();
+        if (!code) {
+            alert('❌ 请输入数据码！');
+            return;
+        }
+
+        document.body.removeChild(modal);
+
+        if (!code.startsWith("DT") || !code.endsWith("CODE")) {
+            alert("❌ 数据码格式错误！");
+            return;
+        }
+
+        const encrypted = code.slice(2, -4);
+        const json = decrypt(encrypted);
+        if (!json) {
+            alert("❌ 数据码已损坏！");
+            return;
+        }
+
+        try {
+            const data = JSON.parse(json);
+            const dataUserName = data.userName || "未知用户";
+            const localUserName = getUserName();
+
+            localStorage.setItem("lastImportUserName", dataUserName);
+
+            if (dataUserName !== localUserName) {
+                const confirmReplace = confirm(
+                    "⚠️ 数据归属不一致！\n" +
+                    "你的主体：" + localUserName + "\n" +
+                    "数据主体：" + dataUserName + "\n\n" +
+                    "是否强行恢复？（可能覆盖他人数据）"
+                );
+                if (!confirmReplace) {
+                    alert("❌ 已取消恢复");
+                    return;
+                }
+            }
+
+            if (!checkAndUseLimit("data_code_import")) return;
+
+localStorage.setItem("dtGold", data.dtGold || "0");
+localStorage.setItem("dtTicket", data.dtTicket || "0");
+localStorage.setItem("petLevel", data.petLevel || "0");
+localStorage.setItem("petFeedCount", data.petFeedCount || "0");
+localStorage.setItem("lastFeedDate", data.lastFeedDate || "");
+localStorage.setItem("todayEggGot", data.todayEggGot || "false");
+localStorage.setItem("superCodeUsed", data.superCodeUsed || "false");
+localStorage.setItem("codeUsed", data.codeUsed || "false");
+localStorage.setItem("resetCodeCount", data.resetCodeCount || "0");
+localStorage.setItem("chestOpenCount", data.chestOpenCount || "0");
+localStorage.setItem("fortuneTotalCount", data.fortuneTotalCount || "0");
+localStorage.setItem("dtLastSign", data.dtLastSign || "");
+localStorage.setItem("hasResetGoldOnce", data.hasResetGoldOnce || "false");
+localStorage.setItem("dtGoldLog", data.dtGoldLog || "[]");
+
+            localStorage.setItem("lastImportTime", new Date().toLocaleString());
+            alert("✅ 数据恢复成功！页面即将刷新");
+            location.reload();
+        } catch (e) {
+            alert("❌ 数据解析失败！");
+        }
+    };
+}
+
+// ============== 刷新展示信息 ==============
+function refreshDataCodeInfo() {
+    const userName = getUserName() || "未设置";
+    const lastImportUserName = localStorage.getItem("lastImportUserName") || "无";
+    const lastExportTime = localStorage.getItem("lastExportTime") || "无";
+    const lastExportDevice = localStorage.getItem("lastExportDevice") || "无";
+    const lastImportTime = localStorage.getItem("lastImportTime") || "无";
+    const currentDevice = getDeviceModel();
+
+    // 统计数据
+    const fortuneCount = localStorage.getItem("fortuneTotalCount") || "0";
+    const chestCount = localStorage.getItem("chestOpenCount") || "0";
+    const exchangeCount = localStorage.getItem("exchangeTotalCount") || "0";
+    const gold = localStorage.getItem("dtGold") || "0";
+
+document.getElementById("lastExportInfo").innerText =
+    "上次导出时间：" + lastExportTime +
+    "\n上次导出设备：" + lastExportDevice +
+    "\n当前登录设备：" + currentDevice;
+
+document.getElementById("lastImportInfo").innerText =
+    "上次恢复时间：" + lastImportTime +
+    "\n来源主体：" + lastImportUserName +
+    "\n目前主体：" + userName;
+// 显示 4 项统计（修复：从本地实时读取，保证准确）
+
+    // 清空警告
+    const warningEl = document.getElementById("userWarning");
+    if (warningEl) warningEl.remove();
+
+    if (lastImportUserName !== "无" && lastImportUserName !== userName) {
+        const warn = document.createElement("div");
+        warn.id = "userWarning";
+        warn.style.color = "#ff4757";
+        warn.style.fontWeight = "bold";
+        warn.style.marginTop = "10px";
+        warn.innerText = "警告！您的实际主体与恢复数据的来源主体不一致！";
+        document.getElementById("popupDataCode").appendChild(warn);
+
+        const oldGold = parseFloat(localStorage.getItem("dtGold")) || 0;
+        goldCount = 10;
+        ticketCount = 10;
+        localStorage.setItem("dtGold", 10);
+        localStorage.setItem("dtTicket", 10);
+        addGoldLog(10 - oldGold, "主体不一致，系统自动重置为10DT币");
+        updateAllGoldUI();
+        updateTicketUI();
+    }
+}
+
+// 勋章点击打开弹窗（修复点击无反应）
+document.getElementById('medalTop').addEventListener('click', async function (e) {
+    e.stopPropagation();
+    await promptSetUserName();
+    closeAllPopups();
+    refreshDataCodeInfo();
+    document.getElementById('popupDataCode').classList.add('show');
+    document.getElementById('overlay').classList.add('show');
+});
+
+// 按钮绑定
+document.getElementById("exportDataCodeBtn").onclick = exportDataCode;
+document.getElementById("importDataCodeBtn").onclick = importDataCode;
+
+// DT币消耗日志展示（修复版）
+document.getElementById("goldLogBtn").onclick = () => {
+    const logList = JSON.parse(localStorage.getItem("dtGoldLog") || "[]");
+    const content = document.getElementById("goldLogContent");
+    if (logList.length === 0) {
+        content.innerHTML = "暂无消耗记录";
+    } else {
+        let html = "";
+        logList.forEach(item => {
+            html += "时间：" + item.time + "<br>";
+            html += "类型：" + item.type + "<br>";
+            html += "数量：" + item.count + " DT币<br>";
+            html += "余额：" + item.balance + " DT币<br>";
+            html += "原因：" + item.reason + "<br><br>";
+        });
+        content.innerHTML = html;
+    }
+    closeAllPopups();
+    document.getElementById("goldLogModal").classList.add("show");
+    document.getElementById("overlay").classList.add("show");
+};
+
+// 官网更新日志按钮
+// ==================== 管理员校验专用功能 ====================
+let adminCheckFailCount = parseInt(localStorage.getItem('adminCheckFailCount') || 0);
+let isAdminBlocked = localStorage.getItem('adminCheckBlocked') === 'true';
+
+document.getElementById('adminCheckBtn').onclick = function(){
+    if(isAdminBlocked){
+        alert('❌ 该设备已被永久禁止使用管理员校验功能！');
+        return;
+    }
+    if(adminCheckFailCount >=3){
+        isAdminBlocked = true;
+        localStorage.setItem('adminCheckBlocked','true');
+        alert('❌ 密码错误次数过多，该设备已永久禁止使用此功能！');
+        return;
+    }
+
+    const pwd = prompt('请输入管理员校验密码：');
+    if(!pwd) return;
+
+    if(pwd === '258079'){
+        alert('✅ 密码正确！');
+        openAdminCheckModal();
+    }else{
+        adminCheckFailCount++;
+        localStorage.setItem('adminCheckFailCount',adminCheckFailCount);
+        if(adminCheckFailCount >=3){
+            isAdminBlocked = true;
+            localStorage.setItem('adminCheckBlocked','true');
+            alert('❌ 密码错误！已累计3次，永久禁止使用！');
+        }else{
+            alert('❌ 密码错误！已错误 '+adminCheckFailCount+' 次，3次永久禁用！');
+        }
+    }
+};
+
+function openAdminCheckModal(){
+    closeAllPopups();
+    let m = document.getElementById('adminCheckMainModal');
+    if(!m){
+        m = document.createElement('div');
+        m.className = 'popup-base';
+        m.id = 'adminCheckMainModal';
+        m.style.zIndex = 99999;
+        m.innerHTML = `
+            <span class="popup-close" onclick="closeAllPopups()">×</span>
+            <h3>🔒 管理员校验中心</h3>
+            <button class="popup-btn" id="importCheckDataBtn">📥 导入查询校验</button>
+            <div id="adminCheckResult" style="margin-top:15px; font-size:12px; line-height:1.8; background:#283593; padding:10px; border-radius:6px; max-height:400px; overflow-y:auto;"></div>
+        `;
+        document.body.appendChild(m);
+        document.getElementById('importCheckDataBtn').onclick = doAdminImportCheck;
+    }
+    m.classList.add('show');
+    document.getElementById('overlay').classList.add('show');
+    document.getElementById('adminCheckResult').innerHTML = '请点击【导入查询校验】并粘贴用户DT数据码';
+}
+
+function doAdminImportCheck(){
+    const code = prompt('📥 请粘贴要查询的用户 DT 数据码：');
+    if(!code) return;
+    if(!code.startsWith('DT') || !code.endsWith('CODE')){
+        alert('❌ 数据码格式错误！');
+        return;
+    }
+
+    try {
+        const encrypted = code.slice(2, -4);
+        const json = decrypt(encrypted);
+        const data = JSON.parse(json);
+
+const logStr = data.dtGoldLog
+  ? JSON.parse(data.dtGoldLog).map(item => `
+时间：${item.time}
+类型：${item.type}
+数量：${item.count} DT币
+原因：${item.reason}
+余额：${item.balance} DT币
+------------------------`).join('')
+  : '无记录';
+
+const res = `
+【导出时设备】：${data.exportDevice || '未知'}
+【上次恢复时间】：${localStorage.getItem('lastImportTime') || '无'}
+【账号主体名称】：${data.userName || '无'}
+【占卜总次数】：${data.fortuneTotalCount || 0}
+【宝箱总次数】：${data.chestOpenCount || 0}
+【兑换总次数】：${data.exchangeTotalCount || 0}
+【DT币余额】：${data.dtGold || 0}
+【DT币消耗明细】：
+${logStr}
+        `.trim();
+
+        document.getElementById('adminCheckResult').innerText = res;
+    }catch(e){
+        alert('❌ 数据解析失败：'+e.message);
+    }
+}
+document.getElementById("updateLogBtn").onclick = () => {
+    closeAllPopups();
+    document.getElementById("updateLogModal").classList.add("show");
+    document.getElementById("overlay").classList.add("show");
+};
+
+// ==================== 联盟银行系统 ====================
+function initBankData() {
+    if (!localStorage.getItem('bankFixed')) localStorage.setItem('bankFixed', 0);
+    if (!localStorage.getItem('bankFixedEnd')) localStorage.setItem('bankFixedEnd', '');
+    if (!localStorage.getItem('bankCurrent')) localStorage.setItem('bankCurrent', 0);
+    if (!localStorage.getItem('bankInterestMonth')) localStorage.setItem('bankInterestMonth', 0);
+    if (!localStorage.getItem('bankLastInterestDate')) localStorage.setItem('bankLastInterestDate', '');
+}
+
+function getBankData() {
+    return {
+        fixed: parseFloat(localStorage.getItem('bankFixed')) || 0,
+        fixedEnd: localStorage.getItem('bankFixedEnd') || '',
+        current: parseFloat(localStorage.getItem('bankCurrent')) || 0,
+        interestMonth: parseFloat(localStorage.getItem('bankInterestMonth')) || 0,
+        lastDate: localStorage.getItem('bankLastInterestDate') || ''
+    };
+}
+
+function calcBankInterest() {
+    const today = new Date().toDateString();
+    const bank = getBankData();
+    if (bank.lastDate === today) return;
+    localStorage.setItem('bankLastInterestDate', today);
+
+    let add = 0;
+    const max = 100;
+    if (bank.interestMonth >= max) return;
+
+    const rateCurrent = 0.0008;
+    const addCurrent = bank.current * rateCurrent;
+    if (addCurrent > 0) {
+        let realAdd = Math.min(addCurrent, max - bank.interestMonth);
+        if (realAdd > 0) {
+            const newCurrent = bank.current + realAdd;
+            localStorage.setItem('bankCurrent', newCurrent);
+            add += realAdd;
+            bank.interestMonth += realAdd;
+            localStorage.setItem('bankInterestMonth', bank.interestMonth);
+            addGoldLog(realAdd, "银行活期利息");
+        }
+    }
+
+    const rateFixed = 0.0012;
+    const addFixed = bank.fixed * rateFixed;
+    if (addFixed > 0) {
+        let realAdd = Math.min(addFixed, max - bank.interestMonth);
+        if (realAdd > 0) {
+            const newCurrent = bank.current + realAdd;
+            localStorage.setItem('bankCurrent', newCurrent);
+            add += realAdd;
+            bank.interestMonth += realAdd;
+            localStorage.setItem('bankInterestMonth', bank.interestMonth);
+            addGoldLog(realAdd, "银行定期利息");
+        }
+    }
+
+    if (bank.fixed > 0 && bank.fixedEnd) {
+        const end = new Date(bank.fixedEnd).getTime();
+        const now = Date.now();
+        if (now >= end) {
+            const total = bank.fixed;
+            const newCurrent = bank.current + total;
+            localStorage.setItem('bankCurrent', newCurrent);
+            localStorage.setItem('bankFixed', 0);
+            localStorage.setItem('bankFixedEnd', '');
+            addGoldLog(total, "定期到期自动转入活期");
+        }
+    }
+}
+
+function updateBankUI() {
+    const bank = getBankData();
+    document.getElementById('bankTotal').innerText = (bank.fixed + bank.current).toFixed(1);
+    document.getElementById('bankFixed').innerText = bank.fixed.toFixed(1);
+    document.getElementById('bankFixedEnd').innerText = bank.fixedEnd || '无';
+    document.getElementById('bankCurrent').innerText = bank.current.toFixed(1);
+    document.getElementById('bankInterestMonth').innerText = bank.interestMonth.toFixed(1);
+}
+
+document.getElementById('bankBtnFromBag').addEventListener('click', () => {
+    initBankData();
+    calcBankInterest();
+    updateBankUI();
+    document.getElementById('bagModal').style.display = 'none';
+    document.getElementById('bankModal').style.display = 'flex';
+});
+
+document.getElementById('depositBtn').onclick = function() {
+    const type = prompt('选择存储类型：1=定期 2=活期');
+    if (type !== '1' && type !== '2') return alert('输入错误');
+    const numStr = prompt('输入存入DT币数量：');
+    const num = parseFloat(numStr);
+    if (isNaN(num) || num <= 0) return alert('输入无效');
+    if (goldCount < num) return alert('DT币不足');
+
+    goldCount -= num;
+    addGoldLog(-num, type === '1' ? '存入定期' : '存入活期');
+    updateAllGoldUI();
+
+    const bank = getBankData();
+    if (type === '1') {
+        const end = new Date(Date.now() + 30 * 86400000);
+        const endStr = end.getFullYear() + '-' + String(end.getMonth() + 1).padStart(2, '0') + '-' + String(end.getDate()).padStart(2, '0');
+        localStorage.setItem('bankFixed', (bank.fixed + num).toFixed(1));
+        localStorage.setItem('bankFixedEnd', endStr);
+    } else {
+        localStorage.setItem('bankCurrent', (bank.current + num).toFixed(1));
+    }
+    calcBankInterest();
+    updateBankUI();
+    alert('存入成功！');
+};
+
+document.getElementById('withdrawBtn').onclick = function() {
+    const bank = getBankData();
+    if (bank.current <= 0) return alert('无可取DT币');
+    const numStr = prompt('可取余额：' + bank.current.toFixed(1) + '\n输入取出数量：');
+    const num = parseFloat(numStr);
+    if (isNaN(num) || num <= 0) return alert('输入无效');
+    if (num > bank.current) return alert('超出可取余额');
+
+    localStorage.setItem('bankCurrent', (bank.current - num).toFixed(1));
+    goldCount += num;
+    addGoldLog(num, "银行取出");
+    updateAllGoldUI();
+    calcBankInterest();
+    updateBankUI();
+    alert('取出成功！');
+};
+// ==================== 管理员查询增加银行信息 ====================
+function doAdminImportCheck(){
+    const code = prompt('📥 请粘贴要查询的用户 DT 数据码：');
+    if(!code) return;
+    if(!code.startsWith('DT') || !code.endsWith('CODE')){
+        alert('❌ 数据码格式错误！');
+        return;
+    }
+
+    try {
+        const encrypted = code.slice(2, -4);
+        const json = decrypt(encrypted);
+        const data = JSON.parse(json);
+
+        const logStr = data.dtGoldLog
+          ? JSON.parse(data.dtGoldLog).map(item => `
+时间：${item.time}
+类型：${item.type}
+数量：${item.count} DT币
+原因：${item.reason}
+余额：${item.balance} DT币
+------------------------`).join('')
+          : '无记录';
+
+        const bankFixed = data.bankFixed || '0';
+        const bankFixedEnd = data.bankFixedEnd || '无';
+        const bankCurrent = data.bankCurrent || '0';
+        const bankInterest = data.bankInterestMonth || '0';
+
+        const res = `
+【导出时设备】：${data.exportDevice || '未知'}
+【上次恢复时间】：${localStorage.getItem('lastImportTime') || '无'}
+【账号主体名称】：${data.userName || '无'}
+【占卜总次数】：${data.fortuneTotalCount || 0}
+【宝箱总次数】：${data.chestOpenCount || 0}
+【兑换总次数】：${data.exchangeTotalCount || 0}
+【DT币余额】：${data.dtGold || 0}
+🏦 银行定期：${bankFixed}
+🏦 定期到期：${bankFixedEnd}
+🏦 银行活期：${bankCurrent}
+🏦 本月利息：${bankInterest}
+【DT币消耗明细】：
+${logStr}
+        `.trim();
+
+        document.getElementById('adminCheckResult').innerText = res;
+        sessionStorage.setItem('lastAdminCheckResult', res);
+    }catch(e){
+        alert('❌ 数据解析失败：'+e.message);
+    }
+}
+
+// ==================== 查看上次查询结果 ====================
+function addLastQueryButton() {
+    const btn = document.createElement('button');
+    btn.className = 'popup-btn';
+    btn.innerText = '📄 查看上次查询结果';
+    btn.style.marginTop = '8px';
+    btn.onclick = () => {
+        const last = sessionStorage.getItem('lastAdminCheckResult') || '无上次记录';
+        document.getElementById('adminCheckResult').innerText = last;
+    };
+    const target = document.getElementById('importCheckDataBtn');
+    if (target) target.parentNode.insertBefore(btn, target.nextSibling);
+}
+
+// ==================== 数据码导出增加银行 ====================
+async function exportDataCode() {
+    await promptSetUserName();
+    if (!checkAndUseLimit("data_code_export")) return;
+
+    const data = {
+        userName: getUserName(),
+        dtGold: localStorage.getItem("dtGold") || "0",
+        dtTicket: localStorage.getItem("dtTicket") || "0",
+        petLevel: localStorage.getItem("petLevel") || "0",
+        petFeedCount: localStorage.getItem("petFeedCount") || "0",
+        lastFeedDate: localStorage.getItem("lastFeedDate") || "",
+        todayEggGot: localStorage.getItem("todayEggGot") || "false",
+        superCodeUsed: localStorage.getItem("superCodeUsed") || "false",
+        codeUsed: localStorage.getItem("codeUsed") || "false",
+        resetCodeCount: localStorage.getItem("resetCodeCount") || "0",
+        chestOpenCount: localStorage.getItem("chestOpenCount") || "0",
+        fortuneTotalCount: localStorage.getItem("fortuneTotalCount") || "0",
+        exchangeTotalCount: localStorage.getItem("exchangeTotalCount") || "0",
+        dtLastSign: localStorage.getItem("dtLastSign") || "",
+        hasResetGoldOnce: localStorage.getItem("hasResetGoldOnce") || "false",
+        exportDevice: getDeviceModel(),
+        exportTime: new Date().toLocaleString(),
+        dtGoldLog: localStorage.getItem("dtGoldLog") || "[]",
+        bankFixed: localStorage.getItem("bankFixed") || "0",
+        bankFixedEnd: localStorage.getItem("bankFixedEnd") || "",
+        bankCurrent: localStorage.getItem("bankCurrent") || "0",
+        bankInterestMonth: localStorage.getItem("bankInterestMonth") || "0"
+    };
+
+    const json = JSON.stringify(data);
+    const encrypted = encrypt(json);
+    const code = "DT" + encrypted + "CODE";
+
+    navigator.clipboard.writeText(code).then(() => {
+        alert("✅ 数据码已复制！\n【主体】" + getUserName() + "\n" + code);
+    });
+
+    localStorage.setItem("lastExportTime", new Date().toLocaleString());
+    localStorage.setItem("lastExportDevice", data.exportDevice);
+    refreshDataCodeInfo();
+}
+
+// ==================== 数据码恢复增加银行 ====================
+async function importDataCode() {
+    await promptSetUserName();
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position:fixed; top:0; left:0; width:100%; height:100%;
+        background:rgba(0,0,0,0.95); z-index:999999;
+        display:flex; justify-content:center; align-items:center;
+        flex-direction:column; gap:15px; padding:20px;
+    `;
+
+    const title = document.createElement('div');
+    title.style.color = '#fff';
+    title.style.fontSize = '18px';
+    title.style.textAlign = 'center';
+    title.innerText = '📥 请粘贴你的 DT 数据码';
+
+    const input = document.createElement('input');
+    input.style.cssText = `
+        width:85%; max-width:320px; padding:14px;
+        border:none; border-radius:8px; font-size:16px;
+    `;
+    input.placeholder = '粘贴 DT 开头 CODE 结尾的数据码';
+
+    const btn = document.createElement('button');
+    btn.style.cssText = `
+        padding:12px 30px; border:none; border-radius:8px;
+        background:#64b5f6; color:#fff; font-size:16px; font-weight:bold;
+    `;
+    btn.innerText = '确认恢复';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.style.cssText = `
+        padding:12px 30px; border:none; border-radius:8px;
+        background:#ff4757; color:#fff; font-size:16px; font-weight:bold;
+    `;
+    cancelBtn.innerText = '取消恢复';
+    cancelBtn.onclick = () => {
+        document.body.removeChild(modal);
+    };
+
+    modal.append(title, input, btn, cancelBtn);
+    document.body.appendChild(modal);
+
+    btn.onclick = async () => {
+        const code = input.value.trim();
+        if (!code) {
+            alert('❌ 请输入数据码！');
+            return;
+        }
+        document.body.removeChild(modal);
+
+        if (!code.startsWith("DT") || !code.endsWith("CODE")) {
+            alert("❌ 数据码格式错误！");
+            return;
+        }
+
+        const encrypted = code.slice(2, -4);
+        const json = decrypt(encrypted);
+        if (!json) {
+            alert("❌ 数据码已损坏！");
+            return;
+        }
+
+        try {
+            const data = JSON.parse(json);
+            const dataUserName = data.userName || "未知用户";
+            const localUserName = getUserName();
+
+            localStorage.setItem("lastImportUserName", dataUserName);
+
+            if (dataUserName !== localUserName) {
+                const confirmReplace = confirm(
+                    "⚠️ 数据归属不一致！\n" +
+                    "你的主体：" + localUserName + "\n" +
+                    "数据主体：" + dataUserName + "\n\n" +
+                    "是否强行恢复？（可能覆盖他人数据）"
+                );
+                if (!confirmReplace) {
+                    alert("❌ 已取消恢复");
+                    return;
+                }
+            }
+
+            if (!checkAndUseLimit("data_code_import")) return;
+
+            localStorage.setItem("dtGold", data.dtGold || "0");
+            localStorage.setItem("dtTicket", data.dtTicket || "0");
+            localStorage.setItem("petLevel", data.petLevel || "0");
+            localStorage.setItem("petFeedCount", data.petFeedCount || "0");
+            localStorage.setItem("lastFeedDate", data.lastFeedDate || "");
+            localStorage.setItem("todayEggGot", data.todayEggGot || "false");
+            localStorage.setItem("superCodeUsed", data.superCodeUsed || "false");
+            localStorage.setItem("codeUsed", data.codeUsed || "false");
+            localStorage.setItem("resetCodeCount", data.resetCodeCount || "0");
+            localStorage.setItem("chestOpenCount", data.chestOpenCount || "0");
+            localStorage.setItem("fortuneTotalCount", data.fortuneTotalCount || "0");
+            localStorage.setItem("dtLastSign", data.dtLastSign || "");
+            localStorage.setItem("hasResetGoldOnce", data.hasResetGoldOnce || "false");
+            localStorage.setItem("dtGoldLog", data.dtGoldLog || "[]");
+            localStorage.setItem("bankFixed", data.bankFixed || "0");
+            localStorage.setItem("bankFixedEnd", data.bankFixedEnd || "");
+            localStorage.setItem("bankCurrent", data.bankCurrent || "0");
+            localStorage.setItem("bankInterestMonth", data.bankInterestMonth || "0");
+
+            localStorage.setItem("lastImportTime", new Date().toLocaleString());
+            alert("✅ 数据恢复成功！页面即将刷新");
+            location.reload();
+        } catch (e) {
+            alert("❌ 数据解析失败！");
+        }
+    };
+}
+
+// 页面加载时初始化
+window.addEventListener('DOMContentLoaded', function() {
+    updateMedalUI();
+    refreshDataCodeInfo();
+    initBankData();
+    calcBankInterest();
+    addLastQueryButton();
+
+    const isWeChat = /MicroMessenger/i.test(navigator.userAgent);
+    const wechatTip = document.getElementById('wechatTip');
+    if (!isWeChat) {
+        wechatTip.innerText = '建议使用微信访问';
+        wechatTip.style.display = 'inline-block';
+    }
+});
+
+</script>
+</body>
+</html>
