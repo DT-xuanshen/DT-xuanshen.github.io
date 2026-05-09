@@ -1717,6 +1717,10 @@
     <span class="popup-close" onclick="closeAllPopups()">×</span>
     <h3>📝 DT联盟官网更新日志</h3>
     <div style="font-size:12px; line-height:2; background:#283593; padding:10px; border-radius:6px; margin-top:10px; max-height:300px; overflow-y:auto;">
+        <div><b>2026-05-09</b></div>
+        <div>• 官网新增“联盟银行”系统相关功能</div>
+        <div>• 每日签到奖励改成1.0-3.0个DT币＋15张DT券  答题有奖活动日获取DT券奖励上限调整为80张</div>
+        <br>
         <div><b>2026-05-07</b></div>
         <div>• 新增【官网更新日志】功能</div>
         <div>• 恢复数据码弹窗新增【取消恢复】红色按钮</div>
@@ -2696,8 +2700,8 @@ function exchangeGoods(type) {
             desc = "可用于后续合成完整黄金令牌";
             timeDesc = "自动存入背包";
         }
-        // DT币68：1.5% + 每600次
-        else if (total % 600 === 0 && Math.random() < 0.015) {
+        // DT币68：10% + 每600次
+        else if (total % 600 === 0 && Math.random() < 0.1) {
             title = "DT币68个";
             desc = "DT联盟祝您万事如意！";
             timeDesc = "无需兑换，自动增加";
@@ -2705,8 +2709,8 @@ function exchangeGoods(type) {
             addGoldLog(68, "宝箱奖励");
             updateAllGoldUI();
         }
-        // DT币38：3% + 每400次
-        else if (total % 400 === 0 && Math.random() < 0.03) {
+        // DT币38：50% + 每400次
+        else if (total % 400 === 0 && Math.random() < 0.5) {
             title = "DT币38个";
             desc = "DT联盟祝您万事如意！";
             timeDesc = "无需兑换，自动增加";
@@ -2714,8 +2718,8 @@ function exchangeGoods(type) {
             addGoldLog(38, "宝箱奖励");
             updateAllGoldUI();
         }
-        // DT币18：5% + 每300次
-        else if (total % 300 === 0 && Math.random() < 0.05) {
+        // DT币18：60% + 每300次
+        else if (total % 300 === 0 && Math.random() < 0.6) {
             title = "DT币18个";
             desc = "DT联盟祝您万事如意！";
             timeDesc = "无需兑换，自动增加";
@@ -2723,16 +2727,16 @@ function exchangeGoods(type) {
             addGoldLog(18, "宝箱奖励");
             updateAllGoldUI();
         }
-        // DT券100：10% + 每100次
-        else if (total % 100 === 0 && Math.random() < 0.1) {
+        // DT券100：70% + 每50次
+        else if (total % 50 === 0 && Math.random() < 0.7) {
             title = "DT券100张";
             desc = "DT联盟祝您万事如意！";
             timeDesc = "无需兑换，自动增加";
             ticketCount += 100;
             updateTicketUI();
         }
-        // 安慰奖励：12% + 每30次 + 随机1.2~5.0币
-        else if (total % 30 === 0 && Math.random() < 0.12) {
+        // 安慰奖励：80% + 每30次
+        else if (total % 30 === 0 && Math.random() < 0.8) {
             const add = parseFloat((1.2 + Math.random() * 3.8).toFixed(1));
             title = "安慰奖励 " + add + " DT币";
             desc = "DT联盟祝您万事如意！";
