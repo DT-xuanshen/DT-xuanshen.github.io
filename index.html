@@ -2697,8 +2697,8 @@ function exchangeGoods(type) {
         // 黄金令牌碎片：1% + 每900次
         else if (total % 900 === 0 && Math.random() < 0.01) {
             title = "黄金令牌碎片";
-            desc = "可用于后续合成完整黄金令牌";
-            timeDesc = "自动存入背包";
+            desc = "6张可合成完整黄金令牌";
+            timeDesc = "请务必截图保存";
         }
         // DT币68：10% + 每600次
         else if (total % 600 === 0 && Math.random() < 0.1) {
@@ -2727,13 +2727,28 @@ function exchangeGoods(type) {
             addGoldLog(18, "宝箱奖励");
             updateAllGoldUI();
         }
-        // DT券100：70% + 每50次
-        else if (total % 50 === 0 && Math.random() < 0.7) {
-            title = "DT券100张";
+        // 每开3次宝箱 40%概率获得DT券（按你要求的分段概率）
+        else if (total % 3 === 0 && Math.random() < 0.4) {
+            let rand = Math.random();
+            let ticketNum;
+            if (rand < 0.5) {
+                // 50%：1-9张
+                ticketNum = Math.floor(Math.random() * 9) + 1;
+            } else if (rand < 0.8) {
+                // 30%：10-87张
+                ticketNum = Math.floor(Math.random() * 78) + 10;
+            } else if (rand < 0.95) {
+                // 15%：88-98张
+                ticketNum = Math.floor(Math.random() * 11) + 88;
+            } else {
+                // 5%：99-199张
+                ticketNum = Math.floor(Math.random() * 101) + 99;
+            }
+            ticketCount += ticketNum;
+            updateTicketUI();
+            title = "DT券 " + ticketNum + " 张";
             desc = "DT联盟祝您万事如意！";
             timeDesc = "无需兑换，自动增加";
-            ticketCount += 100;
-            updateTicketUI();
         }
         // 安慰奖励：80% + 每30次
         else if (total % 30 === 0 && Math.random() < 0.8) {
