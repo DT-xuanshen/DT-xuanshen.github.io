@@ -881,12 +881,16 @@
     border-color: #2e7d32;
 }
 .shop-item.red {
-    background: #d32f2f;
-    border-color: #b71c1c;
+    background: #ff9800;
+    border-color: #f57c00;
 }
 .shop-item.gray {
     background: #616161;
     border-color: #424242;
+}
+.shop-item.orange {
+    background: #ff9800;
+    border-color: #f57c00;
 }
 .shop-item .price {
     margin-top: 4px;
@@ -1816,16 +1820,22 @@
 </div>
 <div class="container">
     <div class="carousel-container">
-        <div class="carousel-slide" id="carouselSlide">
-            <div class="carousel-item"><img src="https://s41.ax1x.com/2026/03/29/pe1bpOe.jpg" alt="轩神辅助coc"></div>
-            <div class="carousel-item"><img src="https://s41.ax1x.com/2026/03/29/pe1bSyD.jpg" alt="创作者代码支持"></div>
-            <div class="carousel-item"><img src="https://s41.ax1x.com/2026/03/29/pe1HzQO.jpg" alt="DT联盟欢迎您"></div>
-        </div>
-        <div class="carousel-dots" id="carouselDots">
-            <div class="carousel-dot active" data-index="0"></div>
-            <div class="carousel-dot active" data-index="1"></div>
-            <div class="carousel-dot active" data-index="2"></div>
-        </div>
+<div class="carousel-slide" id="carouselSlide">
+    <div class="carousel-item"><img src="https://s41.ax1x.com/2026/03/29/pe1bpOe.jpg" alt="轩神辅助coc"></div>
+    <div class="carousel-item"><img src="https://s41.ax1x.com/2026/03/29/pe1bSyD.jpg" alt="创作者代码支持"></div>
+    <div class="carousel-item"><img src="https://s41.ax1x.com/2026/03/29/pe1HzQO.jpg" alt="DT联盟欢迎您"></div>
+    <div class="carousel-item"><img src="https://s41.ax1x.com/2026/05/12/peOTll9.jpg" alt="新增轮播图1"></div>
+    <div class="carousel-item"><img src="https://s41.ax1x.com/2026/05/12/peOTuYF.jpg" alt="新增轮播图2"></div>
+    <div class="carousel-item"><img src="https://s41.ax1x.com/2026/05/12/peOTKW4.jpg" alt="新增轮播图3"></div>
+</div>
+<div class="carousel-dots" id="carouselDots">
+    <div class="carousel-dot active" data-index="0"></div>
+    <div class="carousel-dot active" data-index="1"></div>
+    <div class="carousel-dot active" data-index="2"></div>
+    <div class="carousel-dot active" data-index="3"></div>
+    <div class="carousel-dot active" data-index="4"></div>
+    <div class="carousel-dot active" data-index="5"></div>
+</div>
     </div>
 
 <!-- 设备型号展示区域（已移动到轮播和关于板块中间） -->
@@ -2072,17 +2082,17 @@
         <div class="shop-title">DT币兑换中心</div>
         <div class="current-gold" id="currentGoldShop">当前：0币</div>
     </div>
-    <div class="shop-grid">
-        <div class="shop-item green" onclick="exchangeGoods(1)">免处罚卡<span class="price">50币/张</span></div>
-        <div class="shop-item red" onclick="exchangeGoods(2)">黄金令牌<span class="price">1688币/张</span></div>
-        <div class="shop-item red" onclick="exchangeGoods(3)">实物礼品<span class="price">358币/份</span></div>
-        <div class="shop-item red" onclick="exchangeGoods(4)">3元红包<span class="price">188币/个</span></div>
-        <div class="shop-item gray" onclick="exchangeGoods(5)">测试专用<span class="price">0.1币/份</span></div>
-        <div class="shop-item">虚位待发</div>
-        <div class="shop-item">虚位待发</div>
-        <div class="shop-item">虚位待发</div>
-        <div class="shop-item">虚位待发</div>
-    </div>
+<div class="shop-grid">
+    <div class="shop-item green" onclick="exchangeGoods(1)">免处罚卡<span class="price">50币/张</span></div>
+    <div class="shop-item orange" onclick="exchangeGoods(2)">黄金令牌<span class="price">1688币/张</span></div>
+    <div class="shop-item orange" onclick="exchangeGoods(3)">实物礼品<span class="price">358币/份</span></div>
+    <div class="shop-item orange" onclick="exchangeGoods(4)">3元红包<span class="price">188币/个</span></div>
+    <div class="shop-item gray" onclick="exchangeGoods(5)">测试专用<span class="price">0.1币/份</span></div>
+    <div class="shop-item orange" onclick="exchangeGoods(6)">乱斗金券<span class="price">3376币/张</span></div>
+    <div class="shop-item orange" onclick="exchangeGoods(7)">部落周边<span class="price">888币/份</span></div>
+    <div class="shop-item orange" onclick="exchangeGoods(8)">荒野周边<span class="price">888币/份</span></div>
+    <div class="shop-item">虚位待发</div>
+</div>
 
     <!-- 👇 新增：底部图片按钮（不重叠、自适应、居中） -->
     <div style="text-align:center; margin-top:18px;">
@@ -2390,13 +2400,16 @@ function updateAllGoldUI() {
     }
 
 function exchangeGoods(type) {
-    const goods = [
-        { cost: 50, title: "免处罚卡", time: "3天", desc: "有效期3天，过期无效，请务必截图保存" },
-        { cost: 1688, title: "黄金令牌", time: "30天", desc: "有效期30天，过期未兑换成功无效，请务必截图保存" },
-        { cost: 358, title: "实物礼品", time: "30天", desc: "有效期30天，过期未兑换成功无效，请务必截图保存" },
-        { cost: 188, title: "3元红包", time: "15天", desc: "有效期15天，过期未兑换成功无效，请务必截图保存" },
-        { cost: 0.1, title: "测试专用", time: "7天", desc: "有效期7天，过期未兑换成功无效，请务必截图保存" }
-    ];
+const goods = [
+    { cost: 50, title: "免处罚卡", time: "3天", desc: "有效期3天，过期无效，请务必截图保存" },
+    { cost: 1688, title: "黄金令牌", time: "30天", desc: "有效期30天，过期未兑换成功无效，请务必截图保存" },
+    { cost: 358, title: "实物礼品", time: "30天", desc: "有效期30天，过期未兑换成功无效，请务必截图保存" },
+    { cost: 188, title: "3元红包", time: "15天", desc: "有效期15天，过期未兑换成功无效，请务必截图保存" },
+    { cost: 0.1, title: "测试专用", time: "7天", desc: "有效期7天，过期未兑换成功无效，请务必截图保存" },
+    { cost: 3376, title: "乱斗金券", time: "30天", desc: "有效期30天，过期未兑换成功无效，请务必截图保存" },
+    { cost: 888, title: "部落周边", time: "30天", desc: "有效期30天，过期未兑换成功无效，请务必截图保存" },
+    { cost: 888, title: "荒野周边", time: "30天", desc: "有效期30天，过期未兑换成功无效，请务必截图保存" }
+];
     const item = goods[type - 1];
     if (goldCount < item.cost) {
         alert("DT币不足，无法兑换！");
