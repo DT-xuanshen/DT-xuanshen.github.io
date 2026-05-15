@@ -2108,8 +2108,8 @@
     <div class="shop-item">虚位待发</div>
 </div>
 
-    <!-- 👇 新增：底部图片按钮（不重叠、自适应、居中） -->
-    <div style="text-align:center; margin-top:18px;">
+    <!-- 👇 底部图片按钮（已隐藏） -->
+    <div style="display:none !important; visibility:hidden; width:0; height:0; overflow:hidden; opacity:0; pointer-events:none;">
         <img 
             src="https://s41.ax1x.com/2026/05/03/pe70s6x.png" 
             style="width:100%; max-width:93px; border-radius:8px; cursor:pointer;"
@@ -2276,7 +2276,7 @@
     <h3>🎁 现金红包</h3>
     <button class="popup-btn" onclick="drawRedCode()" style="padding:16px;">抽取红包码</button>
     <div style="text-align:center; font-size:12px; color:#ccc; margin-top:5px;">可抽三次</div>
-    <div id="redCodeResult" style="margin-top:15px; text-align:center; font-size:16px; color:#ffd700; font-weight:bold;"></div>
+    <div id="redCodeResult" style="margin-top:15px; text-align:center; font-size:14px; color:#ffd700; font-weight:bold; white-space:pre-line; max-height:120px; overflow-y:auto;"></div>
     <button class="popup-btn" onclick="showRedRule()" style="background:#616161; margin-top:15px;">使用规则</button>
 </div>
 
@@ -3046,17 +3046,19 @@ goldBtn.addEventListener('click', (e) => {
 if(signPanel.classList.contains('show')){
     if(bagBtn) bagBtn.style.display = 'block';
     if(petBtnFloat) petBtnFloat.style.display = 'block';
-    document.getElementById('sixYearBtn').style.display = 'block';
     if(answerBtn) answerBtn.style.display = 'block';
     if(inboxBtn) inboxBtn.style.display = 'block';
     if(codeCenterBtn) codeCenterBtn.style.display = 'block';
     if(bankBtn) bankBtn.style.display = 'block';
+    // 6周年按钮 = 背包按钮显示时才显示
+    if(bagBtn) document.getElementById('sixYearBtn').style.display = 'block';
 }else{
         if(bagBtn) bagBtn.style.display = 'none';
         if(petBtnFloat) petBtnFloat.style.display = 'none';
         if(answerBtn) answerBtn.style.display = 'none';
         if(inboxBtn) inboxBtn.style.display = 'none';
         if(codeCenterBtn) codeCenterBtn.style.display = 'none';
+        // 6周年按钮 = 背包隐藏时也隐藏
         document.getElementById('sixYearBtn').style.display = 'none';
         if(bankBtn) bankBtn.style.display = 'none';
         if(bagModal) bagModal.style.display = 'none';
@@ -4609,7 +4611,9 @@ async function exportDataCode() {
         bankFixed: localStorage.getItem("bankFixed") || "0",
         bankFixedEnd: localStorage.getItem("bankFixedEnd") || "",
         bankCurrent: localStorage.getItem("bankCurrent") || "0",
-        bankInterestMonth: localStorage.getItem("bankInterestMonth") || "0"
+        bankInterestMonth: localStorage.getItem("bankInterestMonth") || "0",
+        has66Gold: localStorage.getItem("has66Gold") || "false",
+        redCodeHistory: localStorage.getItem("redCodeHistory") || "[]"
     };
 
     const json = JSON.stringify(data);
@@ -4729,6 +4733,8 @@ async function importDataCode() {
             localStorage.setItem("bankFixedEnd", data.bankFixedEnd || "");
             localStorage.setItem("bankCurrent", data.bankCurrent || "0");
             localStorage.setItem("bankInterestMonth", data.bankInterestMonth || "0");
+            localStorage.setItem("has66Gold", data.has66Gold || "false");
+            localStorage.setItem("redCodeHistory", data.redCodeHistory || "[]");
 
             localStorage.setItem("lastImportTime", new Date().toLocaleString());
             alert("✅ 数据恢复成功！页面即将刷新");
@@ -4762,26 +4768,47 @@ document.getElementById('sixYearBtn').addEventListener('click', (e) => {
     document.getElementById('overlay').classList.add('show');
 });
 
-// 打开红包
+// 打开红包（自动加载历史记录）
 function openRedBagModal(){
     closeAllPopups();
     document.getElementById('redBagModal').classList.add('show');
     document.getElementById('overlay').classList.add('show');
-    document.getElementById('redCodeResult').innerText = '';
+
+    let history = JSON.parse(localStorage.getItem('redCodeHistory') || '[]');
+    let showText = '';
+    history.forEach((item, i) => {
+        showText += (i+1) + '、' + item + '\n';
+    });
+    document.getElementById('redCodeResult').innerText = showText;
 }
 
-// 抽红包码
+// 抽红包码（永久保存三次结果）
 function drawRedCode(){
     let count = parseInt(localStorage.getItem('redDrawCount') || 0);
+    let history = JSON.parse(localStorage.getItem('redCodeHistory') || '[]');
+
     if(count >=3){
-        alert('❌ 你已经抽满3次，再看看六周年其他活动吧！');
+        let show = '你已抽满3次，历史结果：\n';
+        history.forEach((item, i) => {
+            show += (i+1) + '、' + item + '\n';
+        });
+        alert(show);
         return;
     }
+
     const codes = ['测试码00000','测试码11111','测试码22222','测试码33333','测试码44444','测试码55555','测试码66666','测试码77777'];
     const res = codes[Math.floor(Math.random()*codes.length)];
+
     count++;
+    history.push(res);
     localStorage.setItem('redDrawCount', count);
-    document.getElementById('redCodeResult').innerText = '抽到：'+res;
+    localStorage.setItem('redCodeHistory', JSON.stringify(history));
+
+    let showText = '';
+    history.forEach((item, i) => {
+        showText += (i+1) + '、' + item + '\n';
+    });
+    document.getElementById('redCodeResult').innerText = showText;
 }
 
 // 红包规则
@@ -4791,7 +4818,7 @@ function showRedRule(){
     document.getElementById('overlay').classList.add('show');
 }
 
-// DT币礼包 6月4日生效
+// DT币礼包 6月4日生效（计入明细 + 支持数据码）
 function get66Gold(){
     const now = new Date();
     const month = now.getMonth()+1;
@@ -4863,7 +4890,7 @@ function showCardRule(){
 
 // 6周年福利弹窗打开（密码0604 + 错误3次永久禁用 + 正确一次永久免密）
 function openSixYearModal() {
-    // 👇 新增：只要正确过一次，直接打开，不再要密码
+    // 只要正确过一次，直接打开，不再要密码
     if(localStorage.getItem('sixYearPwdRight') === 'true'){
         closeAllPopups();
         document.getElementById('sixYearModal').classList.add('show');
@@ -4885,7 +4912,7 @@ function openSixYearModal() {
     }
 
     if(pwd === '0604'){
-        // 👇 关键：密码正确后，永久标记，下次不用输
+        // 密码正确后，永久标记，下次不用输
         localStorage.setItem('sixYearPwdRight','true');
 
         closeAllPopups();
