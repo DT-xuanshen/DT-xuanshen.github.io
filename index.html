@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DT联盟官网</title>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://kkgithub.com/extdomains/www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://kkgithub.com/extdomains/www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://kkgithub.com/extdomains/cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <style>
 
     * {
@@ -1855,7 +1855,7 @@
 
     <div class="section" id="about">
         <h2>✨关于DT联盟</h2>
-        <p>DT联盟始于2020年夏，致力于【部落冲突】、【荒野乱斗】、【皇室战争】中的团体社区组织联盟、更新爆料、阵型推荐、辅助服务等，在后面，我们还将加入更多游戏项目……</p>
+        <p>DT联盟始于2020年夏，致力于部落冲突中的部落团队组织联盟、更新爆料、阵型推荐、辅助服务等，在后面，我们还将加入更多游戏项目……</p>
         <a href="https://mp.weixin.qq.com/s/u3vSoq-O5W3cHpAP8WO_dg" class="more-btn" target="_blank">点我查看更多详情</a>
     </div>
 
@@ -2007,6 +2007,20 @@
     display: none;
 ">我的神兽</button>
 
+<div id="sixYearBtn" style="
+    position: fixed;
+    bottom: 115px;
+    left: 100px;
+    width: 70px;
+    height: 70px;
+    cursor: pointer;
+    z-index: 999;
+    transition: all 0.3s ease;
+    display: none;
+" onclick="openSixYearModal()">
+    <img src="https://s41.ax1x.com/2026/05/15/pejOhjS.png"
+         style="width:100%;height:100%;object-fit:contain;border-radius:8px;">
+</div>
 <button class="answer-btn" id="answerBtn" style="
     position: fixed;
     bottom: 70px;
@@ -2204,6 +2218,104 @@
       margin-top:20px;
     ">×</div>
   </div>
+</div>
+<!-- ==================== 6周年福利弹窗 ==================== -->
+<div class="popup-base" id="sixYearModal" style="z-index:9999;">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>🎁DT联盟6周年福利🎁</h3>
+    
+    <div style="margin-bottom:10px;">
+        <div style="
+            font-size:14px;
+            font-weight:bold;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+            background-size: 500% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: colorChange 3s linear infinite;
+            text-align:center;
+        ">【福利一】</div>
+        <button class="popup-btn" onclick="openRedBagModal()">现金红包</button>
+    </div>
+
+    <div style="margin-bottom:10px;">
+        <div style="
+            font-size:14px;
+            font-weight:bold;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+            background-size: 500% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: colorChange 3s linear infinite;
+            text-align:center;
+        ">【福利二】</div>
+        <button class="popup-btn" onclick="get66Gold()">DT币礼包</button>
+    </div>
+
+    <div style="margin-bottom:10px;">
+        <div style="
+            font-size:14px;
+            font-weight:bold;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3, #1dd1a1);
+            background-size: 500% 100%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: colorChange 3s linear infinite;
+            text-align:center;
+        ">【福利三】</div>
+        <button class="popup-btn" onclick="openCardModal()">令牌抽抽抽</button>
+    </div>
+</div>
+
+<!-- 现金红包弹窗 -->
+<div class="popup-base" id="redBagModal" style="z-index:9999;">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>🎁 现金红包</h3>
+    <button class="popup-btn" onclick="drawRedCode()" style="padding:16px;">抽取红包码</button>
+    <div style="text-align:center; font-size:12px; color:#ccc; margin-top:5px;">可抽三次</div>
+    <div id="redCodeResult" style="margin-top:15px; text-align:center; font-size:16px; color:#ffd700; font-weight:bold;"></div>
+    <button class="popup-btn" onclick="showRedRule()" style="background:#616161; margin-top:15px;">使用规则</button>
+</div>
+
+<!-- 规则弹窗 -->
+<div class="popup-base" id="redRuleModal" style="z-index:9999;">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>📜 红包规则</h3>
+    <div style="font-size:14px; line-height:1.8; background:#283593; padding:12px; border-radius:6px;">
+【红包码使用方法】<br>
+打开支付宝-红包功能，在“输口令领红包”页面输入你抽取到的红包码即可领取啦！每人最多可以领取三个红包哦！<br><br>
+共计有10个红包码｜100份红包｜总奖池【￥200】<br><br>
+该活动为DT联盟部落六周年福利<br><br>
+DT联盟因为有我们而更加美好！
+    </div>
+</div>
+
+<!-- 翻牌抽令牌弹窗 -->
+<div class="popup-base" id="cardModal" style="z-index:9999;">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>🎫 翻牌抽黄金令牌</h3>
+    <div style="display:flex; justify-content:center; gap:15px; margin:20px 0;">
+        <button class="card-btn" onclick="flipCard(1)" id="card1" style="width:60px; height:90px; background:#ffd700; color:#000; font-size:22px; font-weight:bold; border:none; border-radius:8px;">翻</button>
+        <button class="card-btn" onclick="flipCard(2)" id="card2" style="width:60px; height:90px; background:#ffd700; color:#000; font-size:22px; font-weight:bold; border:none; border-radius:8px;">翻</button>
+        <button class="card-btn" onclick="flipCard(3)" id="card3" style="width:60px; height:90px; background:#ffd700; color:#000; font-size:22px; font-weight:bold; border:none; border-radius:8px;">翻</button>
+    </div>
+    <button class="popup-btn" onclick="showCardRule()" style="background:#616161;">规则</button>
+</div>
+
+<!-- 翻牌规则 -->
+<div class="popup-base" id="cardRuleModal" style="z-index:9999;">
+    <span class="popup-close" onclick="closeAllPopups()">×</span>
+    <h3>📜 翻牌规则</h3>
+    <div style="font-size:14px; line-height:1.8; background:#283593; padding:12px; border-radius:6px;">
+【翻卡牌玩法规则】<br>
+点击卡牌会随机展示0-9中的一个数字，今年是DT联盟六周年，在这三张卡牌中，任意翻出了一张标注着6的卡牌即可获取价值30元的黄金令牌一份<br><br>
+【黄金令牌兑换途径】<br>
+点击官网内“DT币兑换中心”里的最下方有一个“兑换规则”，请在7天内按照里面的提示进行提交兑换<br><br>
+注：不接受任何形式的加好友发消息或者群里发消息兑换，因为有人会造假……
+    </div>
 </div>
 <script>
     const firebaseConfig = {
@@ -2931,23 +3043,32 @@ goldBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     signPanel.classList.toggle('show');
     
-    if(signPanel.classList.contains('show')){
-        if(bagBtn) bagBtn.style.display = 'block';
-        if(petBtnFloat) petBtnFloat.style.display = 'block';
-        if(answerBtn) answerBtn.style.display = 'block';
-        if(inboxBtn) inboxBtn.style.display = 'block';
-        if(codeCenterBtn) codeCenterBtn.style.display = 'block';
-        if(bankBtn) bankBtn.style.display = 'block'; // 👈 显示银行
-    }else{
+if(signPanel.classList.contains('show')){
+    if(bagBtn) bagBtn.style.display = 'block';
+    if(petBtnFloat) petBtnFloat.style.display = 'block';
+    document.getElementById('sixYearBtn').style.display = 'block';
+    if(answerBtn) answerBtn.style.display = 'block';
+    if(inboxBtn) inboxBtn.style.display = 'block';
+    if(codeCenterBtn) codeCenterBtn.style.display = 'block';
+    if(bankBtn) bankBtn.style.display = 'block';
+}else{
         if(bagBtn) bagBtn.style.display = 'none';
         if(petBtnFloat) petBtnFloat.style.display = 'none';
         if(answerBtn) answerBtn.style.display = 'none';
         if(inboxBtn) inboxBtn.style.display = 'none';
         if(codeCenterBtn) codeCenterBtn.style.display = 'none';
-        if(bankBtn) bankBtn.style.display = 'none'; // 👈 隐藏银行
+        document.getElementById('sixYearBtn').style.display = 'none';
+        if(bankBtn) bankBtn.style.display = 'none';
         if(bagModal) bagModal.style.display = 'none';
     }
 });
+
+// 关闭所有弹窗时，同时隐藏6周年图片按钮
+const oldCloseAllPopups = closeAllPopups;
+closeAllPopups = function(){
+    oldCloseAllPopups();
+    document.getElementById('sixYearBtn').style.display = 'none';
+}
     
 // ✅ 修复：全局点击空白隐藏面板（不阻断按钮）
 document.addEventListener('click', (e) => {
@@ -4633,6 +4754,157 @@ window.addEventListener('DOMContentLoaded', function() {
         wechatTip.style.display = 'inline-block';
     }
 });
+// ==================== 6周年福利功能 ====================
+document.getElementById('sixYearBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeAllPopups();
+    document.getElementById('sixYearModal').classList.add('show');
+    document.getElementById('overlay').classList.add('show');
+});
+
+// 打开红包
+function openRedBagModal(){
+    closeAllPopups();
+    document.getElementById('redBagModal').classList.add('show');
+    document.getElementById('overlay').classList.add('show');
+    document.getElementById('redCodeResult').innerText = '';
+}
+
+// 抽红包码
+function drawRedCode(){
+    let count = parseInt(localStorage.getItem('redDrawCount') || 0);
+    if(count >=3){
+        alert('❌ 你已经抽满3次，再看看六周年其他活动吧！');
+        return;
+    }
+    const codes = ['测试码00000','测试码11111','测试码22222','测试码33333','测试码44444','测试码55555','测试码66666','测试码77777'];
+    const res = codes[Math.floor(Math.random()*codes.length)];
+    count++;
+    localStorage.setItem('redDrawCount', count);
+    document.getElementById('redCodeResult').innerText = '抽到：'+res;
+}
+
+// 红包规则
+function showRedRule(){
+    closeAllPopups();
+    document.getElementById('redRuleModal').classList.add('show');
+    document.getElementById('overlay').classList.add('show');
+}
+
+// DT币礼包 6月4日生效
+function get66Gold(){
+    const now = new Date();
+    const month = now.getMonth()+1;
+    const day = now.getDate();
+    if(!(month===6 && day===4)){
+        alert('⏳ 活动未开始！仅限6月4日当天领取！');
+        return;
+    }
+    if(localStorage.getItem('has66Gold')==='true'){
+        alert('✅ 你已经领取过66DT币啦！');
+        return;
+    }
+    goldCount +=66;
+    addGoldLog(66, '6周年福利礼包');
+    updateAllGoldUI();
+    localStorage.setItem('has66Gold','true');
+    alert('🎉 领取成功！DT币+66！');
+}
+
+// 打开翻牌
+function openCardModal(){
+    closeAllPopups();
+    document.getElementById('cardModal').classList.add('show');
+    document.getElementById('overlay').classList.add('show');
+    
+    // 读取每张牌的状态，永久显示结果
+    for(let i=1;i<=3;i++){
+        const btn = document.getElementById('card'+i);
+        const key = 'hasFlippedCard_'+i;
+        const val = localStorage.getItem('cardValue_'+i);
+        if(val){
+            btn.innerText = val;
+            btn.disabled = true;
+        }else{
+            btn.innerText = '翻';
+            btn.disabled = false;
+        }
+    }
+}
+
+// 翻牌
+function flipCard(index){
+    // 每张牌独立永久限制
+    const key = 'hasFlippedCard_' + index;
+    if(localStorage.getItem(key) === 'true'){
+        alert('❌ 这张牌你已经翻过了！');
+        return;
+    }
+    const nums = [0,1,2,3,4,5,7,8,9];
+    const num = nums[Math.floor(Math.random()*nums.length)];
+    const btn = document.getElementById('card'+index);
+    btn.innerText = num;
+    localStorage.setItem('cardValue_'+index, num); // 保存数字
+    btn.disabled = true;
+    localStorage.setItem(key, 'true'); // 每张牌单独记录
+    if(num===6){
+        setTimeout(()=>{
+            alert('🎉 恭喜你翻出6！获得黄金令牌一份！请7天内按规则兑换！');
+        },300);
+    }
+}
+
+// 翻牌规则
+function showCardRule(){
+    closeAllPopups();
+    document.getElementById('cardRuleModal').classList.add('show');
+    document.getElementById('overlay').classList.add('show');
+}
+
+// 6周年福利弹窗打开（密码0604 + 错误3次永久禁用 + 正确一次永久免密）
+function openSixYearModal() {
+    // 👇 新增：只要正确过一次，直接打开，不再要密码
+    if(localStorage.getItem('sixYearPwdRight') === 'true'){
+        closeAllPopups();
+        document.getElementById('sixYearModal').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+        return;
+    }
+
+    let sixYearBlocked = localStorage.getItem('sixYearBlocked') === 'true';
+    if(sixYearBlocked){
+        alert('❌ 你密码错误3次，永久无法打开6周年福利！');
+        document.getElementById('sixYearBtn').style.display = 'none';
+        return;
+    }
+
+    let pwd = prompt('请输入6周年福利密码：');
+    if(!pwd) {
+        document.getElementById('sixYearBtn').style.display = 'none';
+        return;
+    }
+
+    if(pwd === '0604'){
+        // 👇 关键：密码正确后，永久标记，下次不用输
+        localStorage.setItem('sixYearPwdRight','true');
+
+        closeAllPopups();
+        document.getElementById('sixYearModal').classList.add('show');
+        document.getElementById('overlay').classList.add('show');
+    }else{
+        let failCount = parseInt(localStorage.getItem('sixYearPwdFail') || 0);
+        failCount++;
+        localStorage.setItem('sixYearPwdFail', failCount);
+        if(failCount >=3){
+            localStorage.setItem('sixYearBlocked','true');
+            alert('❌ 密码错误3次，永久禁止访问！');
+            document.getElementById('sixYearBtn').style.display = 'none';
+        }else{
+            alert('❌ 密码错误！已错误 '+failCount+' 次，3次永久禁用！');
+            document.getElementById('sixYearBtn').style.display = 'none';
+        }
+    }
+}
 
 </script>
 </body>
