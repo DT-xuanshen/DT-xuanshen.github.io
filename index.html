@@ -4245,10 +4245,27 @@ function openAdminCheckModal(){
             <span class="popup-close" onclick="closeAllPopups()">×</span>
             <h3>🔒 管理员校验中心</h3>
             <button class="popup-btn" id="importCheckDataBtn">📥 导入查询校验</button>
+            <button class="popup-btn" id="addLimitBtn">➕ 增加【导出/恢复】次数</button>
+            <button class="popup-btn" id="resetLocalBtn">🗑️ 重置本地信息</button>
             <div id="adminCheckResult" style="margin-top:15px; font-size:12px; line-height:1.8; background:#283593; padding:10px; border-radius:6px; max-height:400px; overflow-y:auto;"></div>
         `;
         document.body.appendChild(m);
         document.getElementById('importCheckDataBtn').onclick = doAdminImportCheck;
+document.getElementById('addLimitBtn').onclick = function(){
+    const exportKey = get30DayKey("data_code_export");
+    const importKey = get30DayKey("data_code_import");
+    localStorage.setItem(exportKey, "0");
+    localStorage.setItem(importKey, "0");
+    alert("✅ 成功！本月导出/恢复次数已重置为0，可再用10次！");
+};
+
+document.getElementById('resetLocalBtn').onclick = function(){
+    if(confirm("⚠️ 确定要重置所有本地数据吗？\n所有DT币、券、等级、记录都会清空！无法恢复！")){
+        localStorage.clear();
+        alert("✅ 所有本地数据已清空！页面即将刷新！");
+        location.reload();
+    }
+};
     }
     m.classList.add('show');
     document.getElementById('overlay').classList.add('show');
