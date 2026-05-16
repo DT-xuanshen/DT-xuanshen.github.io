@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DT联盟官网</title>
-<script src="https://kkgithub.com/extdomains/www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://kkgithub.com/extdomains/www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script src="https://kkgithub.com/extdomains/cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <style>
 
     * {
@@ -4061,6 +4061,31 @@ localStorage.setItem("exchangeTotalCount", data.exchangeTotalCount || "0");
 
             localStorage.setItem("lastImportUserName", dataUserName);
 
+            // 主体不一致检测（只执行一次）
+            let userMismatchHandled = localStorage.getItem("userMismatchHandled") === "true";
+            if (dataUserName !== localUserName && !userMismatchHandled) {
+                // 标记已处理，本次恢复不再重复执行
+                localStorage.setItem("userMismatchHandled", "true");
+
+                // 1. DT币变成10
+                const oldGold = parseFloat(localStorage.getItem("dtGold")) || 0;
+                localStorage.setItem("dtGold", "10");
+                addGoldLog(10 - oldGold, "主体不一致，系统自动重置为10DT币");
+
+                // 2. 清空联盟银行
+                localStorage.setItem("bankFixed", "0");
+                localStorage.setItem("bankFixedEnd", "");
+                localStorage.setItem("bankCurrent", "0");
+                localStorage.setItem("bankInterestMonth", "0");
+
+                // 3. 神兽等级降为1级
+                localStorage.setItem("petLevel", "1");
+                localStorage.setItem("petFeedCount", "0");
+
+                // 4. 清空 DT币消耗明细
+                localStorage.setItem("dtGoldLog", "[]");
+            }
+
             if (dataUserName !== localUserName) {
                 const confirmReplace = confirm(
                     "⚠️ 数据归属不一致！\n" +
@@ -4090,6 +4115,10 @@ localStorage.setItem("fortuneTotalCount", data.fortuneTotalCount || "0");
 localStorage.setItem("dtLastSign", data.dtLastSign || "");
 localStorage.setItem("hasResetGoldOnce", data.hasResetGoldOnce || "false");
 localStorage.setItem("dtGoldLog", data.dtGoldLog || "[]");
+localStorage.setItem("bankFixed", data.bankFixed || "0");
+localStorage.setItem("bankFixedEnd", data.bankFixedEnd || "");
+localStorage.setItem("bankCurrent", data.bankCurrent || "0");
+localStorage.setItem("bankInterestMonth", data.bankInterestMonth || "0");
 
             localStorage.setItem("lastImportTime", new Date().toLocaleString());
             alert("✅ 数据恢复成功！页面即将刷新");
@@ -4130,24 +4159,6 @@ document.getElementById("lastImportInfo").innerText =
     const warningEl = document.getElementById("userWarning");
     if (warningEl) warningEl.remove();
 
-    if (lastImportUserName !== "无" && lastImportUserName !== userName) {
-        const warn = document.createElement("div");
-        warn.id = "userWarning";
-        warn.style.color = "#ff4757";
-        warn.style.fontWeight = "bold";
-        warn.style.marginTop = "10px";
-        warn.innerText = "警告！您的实际主体与恢复数据的来源主体不一致！";
-        document.getElementById("popupDataCode").appendChild(warn);
-
-        const oldGold = parseFloat(localStorage.getItem("dtGold")) || 0;
-        goldCount = 10;
-        ticketCount = 10;
-        localStorage.setItem("dtGold", 10);
-        localStorage.setItem("dtTicket", 10);
-        addGoldLog(10 - oldGold, "主体不一致，系统自动重置为10DT币");
-        updateAllGoldUI();
-        updateTicketUI();
-    }
 }
 
 // 勋章点击打开弹窗（修复点击无反应）
