@@ -1859,7 +1859,18 @@
         <a href="https://mp.weixin.qq.com/s/u3vSoq-O5W3cHpAP8WO_dg" class="more-btn" target="_blank">点我查看更多详情</a>
     </div>
 
-    <div class="section" id="tribes">
+    <!-- 新增：联盟游戏团队板块 -->
+    <div class="section" id="gameTeam">
+        <h2>✨联盟游戏团队</h2>
+    <div style="display: flex; flex-direction: column; gap: 15px;">
+        <button class="tribe-button" id="cocBtn">部落冲突<small>（点我查看旗下部落）</small></button>
+        <button class="tribe-button" disabled style="opacity:0.6;cursor:not-allowed;">皇室战争<small>（敬请期待）</small></button>
+        <button class="tribe-button" disabled style="opacity:0.6;cursor:not-allowed;">荒野乱斗<small>（敬请期待）</small></button>
+    </div>
+    </div>
+
+    <!-- 移动过来的旗下部落（默认隐藏，点击部落冲突显示） -->
+    <div class="section" id="tribes" style="display: none;">
         <h2>✨旗下部落</h2>
         <div class="tribe-buttons">
             <button class="tribe-button" id="mainTribeBtn">主力部落<small>（点我查看详情）</small></button>
@@ -2575,6 +2586,17 @@ const goods = [
         updateFortuneDisplay(fortuneTotalCount);
     }
 
+    // 点击部落冲突按钮，显示旗下部落板块
+    document.getElementById('cocBtn').addEventListener('click', function() {
+        const tribesSection = document.getElementById('tribes');
+        // 切换显示/隐藏
+        if(tribesSection.style.display === 'none') {
+            tribesSection.style.display = 'block';
+        } else {
+            tribesSection.style.display = 'none';
+        }
+    });
+
     document.getElementById('mainTribeBtn').addEventListener('click', function() {
         closeAllPopups();
         document.getElementById('popupMainTribe').classList.add('show');
@@ -2624,6 +2646,16 @@ const goods = [
             penBtn.classList.remove('active');
             isBoardVisible = false;
             stopDanmuPlay();
+        }
+
+        // 👇 新增：点击任何非部落冲突/旗下部落区域 → 自动隐藏旗下部落
+        const cocBtn = document.getElementById('cocBtn');
+        const tribesSection = document.getElementById('tribes');
+        const isClickCoc = e.target === cocBtn || cocBtn.contains(e.target);
+        const isClickTribesArea = tribesSection.contains(e.target);
+        
+        if (!isClickCoc && !isClickTribesArea && tribesSection.style.display === 'block') {
+            tribesSection.style.display = 'none';
         }
     });
 
