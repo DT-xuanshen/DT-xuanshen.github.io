@@ -1860,15 +1860,6 @@
     </div>
 
     <!-- 新增：联盟游戏团队板块 -->
-    <div class="section" id="gameTeam">
-        <h2>✨联盟游戏团队</h2>
-    <div style="display: flex; flex-direction: column; gap: 15px;">
-        <button class="tribe-button" id="cocBtn">部落冲突<small>（点我查看旗下部落）</small></button>
-        <button class="tribe-button" disabled style="opacity:0.6;cursor:not-allowed;">皇室战争<small>（敬请期待）</small></button>
-        <button class="tribe-button" disabled style="opacity:0.6;cursor:not-allowed;">荒野乱斗<small>（敬请期待）</small></button>
-    </div>
-    </div>
-
     <!-- 移动过来的旗下部落（默认隐藏，点击部落冲突显示） -->
     <div class="section" id="tribes" style="display: none;">
         <h2>✨旗下部落</h2>
@@ -1878,6 +1869,31 @@
             <button class="tribe-button" id="joinCoopBtn">加盟合作部落<small>（点我查看详情）</small></button>
             <button class="tribe-button" id="funcAssistBtn">辅助型部落<small>（点我查看详情）</small></button>
         </div>
+    </div>
+
+    <!-- 新增：✨旗下皇室（默认隐藏） -->
+    <div class="section" id="crTribes" style="display: none;">
+        <h2>✨旗下皇室</h2>
+        <button class="tribe-button" onclick="window.open('https://docs.qq.com/doc/DUnJPQ1dNRUhJQ29o', '_blank')" style="font-family: 'Source Han Sans CN', '思源黑体', sans-serif; text-align: center; width: 100%;">
+            点击查看皇室部落相关
+        </button>
+    </div>
+
+    <!-- 新增：✨旗下荒野（默认隐藏） -->
+    <div class="section" id="bsTribes" style="display: none;">
+        <h2>✨旗下荒野</h2>
+        <button class="tribe-button" onclick="window.open('https://docs.qq.com/doc/DUmxPbnNDQWNXcmNh', '_blank')" style="font-family: 'Source Han Sans CN', '思源黑体', sans-serif; text-align: center; width: 100%;">
+            点击查看荒野战队相关
+        </button>
+    </div>
+
+    <div class="section" id="gameTeam">
+        <h2>✨联盟游戏团队</h2>
+    <div style="display: flex; flex-direction: column; gap: 15px;">
+        <button class="tribe-button" id="cocBtn">【部落冲突】<small>（点我查看旗下部落）</small></button>
+        <button class="tribe-button" id="crBtn">【皇室战争】<small>（点我查看旗下皇室）</small></button>
+        <button class="tribe-button" id="bsBtn">【荒野乱斗】<small>（点我查看旗下荒野）</small></button>
+    </div>
     </div>
 
     <div class="section" id="fund">
@@ -2597,6 +2613,28 @@ const goods = [
         }
     });
 
+    // 点击皇室战争按钮，显示旗下皇室板块
+    document.getElementById('crBtn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        const crSection = document.getElementById('crTribes');
+        if(crSection.style.display === 'none') {
+            crSection.style.display = 'block';
+        } else {
+            crSection.style.display = 'none';
+        }
+    });
+
+    // 点击荒野乱斗按钮，显示旗下荒野板块
+    document.getElementById('bsBtn').addEventListener('click', function(e) {
+        e.stopPropagation();
+        const bsSection = document.getElementById('bsTribes');
+        if(bsSection.style.display === 'none') {
+            bsSection.style.display = 'block';
+        } else {
+            bsSection.style.display = 'none';
+        }
+    });
+
     document.getElementById('mainTribeBtn').addEventListener('click', function() {
         closeAllPopups();
         document.getElementById('popupMainTribe').classList.add('show');
@@ -2656,6 +2694,26 @@ const goods = [
         
         if (!isClickCoc && !isClickTribesArea && tribesSection.style.display === 'block') {
             tribesSection.style.display = 'none';
+        }
+
+        // 点击空白自动隐藏 ✨旗下皇室 板块
+        const crBtn = document.getElementById('crBtn');
+        const crSection = document.getElementById('crTribes');
+        const isClickCrBtn = e.target === crBtn || crBtn.contains(e.target);
+        const isClickCrArea = crSection.contains(e.target);
+        
+        if (!isClickCrBtn && !isClickCrArea && crSection.style.display === 'block') {
+            crSection.style.display = 'none';
+        }
+
+        // 点击空白自动隐藏 ✨旗下荒野 板块
+        const bsBtn = document.getElementById('bsBtn');
+        const bsSection = document.getElementById('bsTribes');
+        const isClickBsBtn = e.target === bsBtn || bsBtn.contains(e.target);
+        const isClickBsArea = bsSection.contains(e.target);
+        
+        if (!isClickBsBtn && !isClickBsArea && bsSection.style.display === 'block') {
+            bsSection.style.display = 'none';
         }
     });
 
