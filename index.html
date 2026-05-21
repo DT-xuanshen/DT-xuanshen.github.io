@@ -2349,6 +2349,79 @@ DT联盟因为有我们而更加美好！
         appId: "YOUR_APP_ID"
     };
 
+    // ==================== DT币过低自动补助弹窗 ====================
+    function checkLowGoldPopup() {
+        if (goldCount <= 0) {
+            // 今天已经领取次数
+            let today = new Date().toDateString();
+            let helpToday = localStorage.getItem("lowGoldHelpToday") || "";
+            let helpCount = parseInt(localStorage.getItem("lowGoldHelpCount") || 0);
+
+            // 跨天重置
+            if (helpToday !== today) {
+                helpCount = 0;
+                localStorage.setItem("lowGoldHelpToday", today);
+                localStorage.setItem("lowGoldHelpCount", helpCount);
+            }
+
+            // 最多3次
+            if (helpCount >= 3) return;
+
+            // 创建弹窗
+            let lowModal = document.createElement("div");
+            lowModal.style.cssText = `
+                position:fixed; top:0; left:0; width:100%; height:100%;
+                background:rgba(0,0,0,0.95); z-index:999999;
+                display:flex; justify-content:center; align-items:center;
+                flex-direction:column; gap:15px; padding:20px;
+            `;
+            lowModal.innerHTML = `
+                <div style="color:#fff; font-size:18px; text-align:center; line-height:1.6;">
+                    您的DT币数量过低<br>总首领为您送来一次补助！
+                </div>
+                <div style="display:flex; gap:15px;">
+                    <button id="acceptHelpBtn" style="padding:12px 25px; background:#388e3c; color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:bold;">接受</button>
+                    <button id="ignoreHelpBtn" style="padding:12px 25px; background:#ff4757; color:#fff; border:none; border-radius:8px; font-size:16px; font-weight:bold;">忽略</button>
+                </div>
+            `;
+            document.body.appendChild(lowModal);
+
+            // 忽略
+            document.getElementById("ignoreHelpBtn").onclick = () => {
+                document.body.removeChild(lowModal);
+            };
+
+            // 接受
+            document.getElementById("acceptHelpBtn").onclick = () => {
+                goldCount = 6;
+                addGoldLog(6, "DT币过低补助");
+                updateAllGoldUI();
+
+                helpCount++;
+                localStorage.setItem("lowGoldHelpCount", helpCount);
+                document.body.removeChild(lowModal);
+                alert(`✅ 补助成功！DT币已恢复为6！\n今日还可领取：${3 - helpCount} 次`);
+            };
+        }
+    }
+
+    // 监听所有 DT 币变化，实时检查补助弹窗
+    function watchGoldChange() {
+        let lastGold = goldCount;
+        setInterval(() => {
+            if (goldCount !== lastGold) {
+                lastGold = goldCount;
+                checkLowGoldPopup();
+            }
+        }, 300);
+    }
+
+    // 页面加载 + 实时监听
+    window.addEventListener("load", () => {
+        setTimeout(checkLowGoldPopup, 1000);
+        watchGoldChange();
+    });
+
     try {
         firebase.initializeApp(firebaseConfig);
         console.log("Firebase 初始化成功！");
@@ -4865,6 +4938,7 @@ window.addEventListener('DOMContentLoaded', function() {
     initBankData();
     calcBankInterest();
     addLastQueryButton();
+    checkLowGoldPopup();
 
     const isWeChat = /MicroMessenger/i.test(navigator.userAgent);
     const wechatTip = document.getElementById('wechatTip');
